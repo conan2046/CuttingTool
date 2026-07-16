@@ -11,7 +11,7 @@
 → Contact Sheet、严格 QA、运行摘要
 ```
 
-项目制作标准见 [AGENTS.md](AGENTS.md)。
+项目制作标准见 [AGENTS.md](AGENTS.md)，每次正式功能提交见 [CHANGELOG.md](CHANGELOG.md)。
 
 ## 当前能力
 
