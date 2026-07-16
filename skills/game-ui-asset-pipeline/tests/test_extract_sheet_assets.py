@@ -143,6 +143,36 @@ class ExtractSheetAssetsTest(unittest.TestCase):
         self.assertEqual(manifest["assignment_mode"], "global-components-nearest-slot-center")
         self.assertGreater(manifest["assets"][0]["source_bbox"][2], first_slot["right"])
 
+    def test_merges_near_fragments_without_warning(self) -> None:
+        source = Image.new("RGBA", (256, 256), (0, 0, 0, 0))
+        draw = ImageDraw.Draw(source)
+        draw.rectangle((80, 80, 150, 160), fill=(210, 130, 30, 255))
+        draw.rectangle((156, 110, 170, 126), fill=(240, 190, 60, 255))
+        layout = {"slots": [{"slot": {"left": 0, "top": 0, "right": 256, "bottom": 256}}]}
+        request = {"project_id": "fragments", "category": "Icon_Item", "assets": [{"semantic_name": "Hammer"}]}
+        with tempfile.TemporaryDirectory() as temporary_directory:
+            manifest, report = EXTRACT.extract_assets(source, layout, request, Path(temporary_directory))
+        self.assertTrue(report["ok"], report)
+        self.assertEqual(report["warning_count"], 0)
+        self.assertEqual(manifest["assets"][0]["merged_component_count"], 2)
+        self.assertEqual(manifest["assets"][0]["detached_component_count"], 0)
+
+    def test_reports_far_and_major_detached_components(self) -> None:
+        source = Image.new("RGBA", (256, 256), (0, 0, 0, 0))
+        draw = ImageDraw.Draw(source)
+        draw.rectangle((40, 80, 100, 160), fill=(210, 130, 30, 255))
+        draw.rectangle((170, 85, 225, 155), fill=(40, 90, 210, 255))
+        layout = {"slots": [{"slot": {"left": 0, "top": 0, "right": 256, "bottom": 256}}]}
+        request = {"project_id": "fragments", "category": "Icon_Item", "assets": [{"semantic_name": "TwoItems"}]}
+        with tempfile.TemporaryDirectory() as temporary_directory:
+            manifest, report = EXTRACT.extract_assets(source, layout, request, Path(temporary_directory))
+        codes = {issue["code"] for issue in report["issues"]}
+        self.assertTrue(report["ok"], report)
+        self.assertIn("detached-components", codes)
+        self.assertIn("multiple-major-components", codes)
+        self.assertEqual(manifest["assets"][0]["qa"], "warning")
+        self.assertEqual(manifest["assets"][0]["major_detached_count"], 1)
+
 
 if __name__ == "__main__":
     unittest.main()

@@ -21,8 +21,10 @@
 - 生成确定性 Layout Guide 和 JSON 槽位坐标。
 - 生成 GPT Image 2 资源 Sheet 提示词。
 - 纯色色键转真实 Alpha。
+- 根据边框色差分布自适应诊断并安全采用色键阈值。
 - 软 Alpha 边缘和色键污染清理。
 - 在已知布局槽位内独立检测和切割资源。
+- 智能合并近邻碎片，区分远离碎片和显著第二主体。
 - 保留面板、边框和图标内部透明孔洞。
 - 自动识别空槽、槽位边缘接触和额外组件。
 - 按目标尺寸、留白和对齐方式归一化。
@@ -32,6 +34,7 @@
 - 诊断没有布局信息的未知整图，识别真实 Alpha、纯色背景、假棋盘格和无法解析的混合背景。
 - 输出可编辑 bbox JSON 和标注预览，不依赖桌面 GUI 完成人工校正。
 - 使用批准后的 bbox 直接生成透明资源包、Manifest、Contact Sheet 和 QA。
+- 九类标准资源均有静态 eval 和真实 Codex 新任务触发验收。
 
 暂未实现：
 
@@ -43,8 +46,8 @@
 ## 路线优先级
 
 1. 完善 Codex 自然语言一键编排和稳定交付。
-2. 完善色键诊断、失败降级、碎片合并、测试矩阵和全类别验收。
-3. 根据真实生产任务继续优化 JSON 修正、bbox 标注预览和 Contact Sheet。
+2. 根据真实生产任务继续优化色键诊断、碎片合并、JSON 修正、bbox 标注预览和 Contact Sheet。
+3. 扩充复杂失败样本和跨风格回归矩阵。
 4. 桌面 GUI：长期最低优先级。只有前述流程稳定完成，且高频人工操作无法通过现有轻量方式解决时才重新评估。
 
 桌面 GUI 不是当前待开发功能，也不会作为核心流水线完成条件。
@@ -169,8 +172,11 @@ generated/<sheet>.png
   --input .\output\dark-fantasy-ui\generated\icon-item-sheet-01.png `
   --output .\output\dark-fantasy-ui\extracted\icon-item-sheet-01-alpha.png `
   --chroma-key '#00FF00' `
+  --adaptive-thresholds `
   --json-out .\output\dark-fantasy-ui\qa\chroma.json
 ```
+
+统一 Runner 默认自动诊断阈值；低置信度或近色主体风险会阻止自动处理。只有人工已确认固定阈值时才使用 `--fixed-chroma-thresholds`。
 
 ### 4. 按槽位切割
 
@@ -226,3 +232,5 @@ D:\CuttingTool\output\synthetic-e2e
 ```
 
 该样本验证4个资源完整通过：透明化、切割、128×128归一化、命名、Manifest、Contact Sheet和严格QA。
+
+金色、白色、深色抗锯齿矩阵，以及偏移色键、近色主体、污染边框失败矩阵由 `test_chroma_antialias_matrix.py` 固定回归。九类 Skill 触发覆盖由 `evals/evals.json` 和 `test_skill_evals.py` 校验。

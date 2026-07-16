@@ -5,12 +5,13 @@ from __future__ import annotations
 
 import argparse
 import json
+import math
 import re
 from pathlib import Path
 from typing import Any
 
 import numpy as np
-from PIL import Image
+from PIL import Image, ImageFilter
 
 
 def parse_hex_color(value: str) -> tuple[int, int, int]:
@@ -41,6 +42,113 @@ def sample_border_key(rgb: np.ndarray, border_width: int = 8) -> tuple[int, int,
     return tuple(int(round(value)) for value in median)
 
 
+def border_pixels(rgb: np.ndarray, border_width: int = 8) -> np.ndarray:
+    height, width, _ = rgb.shape
+    border_width = max(1, min(border_width, max(1, min(height, width) // 4)))
+    return np.concatenate(
+        [
+            rgb[:border_width, :, :].reshape(-1, 3),
+            rgb[-border_width:, :, :].reshape(-1, 3),
+            rgb[:, :border_width, :].reshape(-1, 3),
+            rgb[:, -border_width:, :].reshape(-1, 3),
+        ],
+        axis=0,
+    )
+
+
+def recommend_chroma_thresholds(
+    source: Image.Image,
+    key: tuple[int, int, int],
+    border_width: int = 8,
+) -> dict[str, Any]:
+    rgb = np.asarray(source.convert("RGB"), dtype=np.float32)
+    samples = border_pixels(rgb, border_width)
+    key_array = np.asarray(key, dtype=np.float32).reshape(1, 3)
+    distances = np.linalg.norm(samples - key_array, axis=1)
+    percentiles = {
+        "p50": float(np.percentile(distances, 50)),
+        "p90": float(np.percentile(distances, 90)),
+        "p95": float(np.percentile(distances, 95)),
+        "p99": float(np.percentile(distances, 99)),
+        "p99_5": float(np.percentile(distances, 99.5)),
+        "max": float(np.max(distances)),
+    }
+    spread = percentiles["p99_5"] - percentiles["p50"]
+    transparent = float(max(12, math.ceil(percentiles["p99_5"] + 4.0)))
+    opaque = float(max(96, math.ceil(max(transparent + 48.0, transparent * 2.0))))
+    opaque = min(255.0, opaque)
+    if opaque <= transparent:
+        opaque = transparent + 1.0
+
+    if percentiles["p99_5"] <= 32.0 and spread <= 20.0 and percentiles["max"] <= 80.0:
+        confidence = "high"
+    elif percentiles["p99_5"] <= 96.0 and spread <= 56.0 and percentiles["max"] <= 160.0:
+        confidence = "medium"
+    else:
+        confidence = "low"
+    full_distance = np.linalg.norm(rgb - key_array.reshape(1, 1, 3), axis=2)
+    margin_y = max(border_width * 2, int(round(rgb.shape[0] * 0.08)))
+    margin_x = max(border_width * 2, int(round(rgb.shape[1] * 0.08)))
+    if margin_y * 2 < rgb.shape[0] and margin_x * 2 < rgb.shape[1]:
+        interior_distance = full_distance[margin_y:-margin_y, margin_x:-margin_x]
+    else:
+        interior_distance = full_distance
+    transition_count = int(np.count_nonzero((interior_distance > transparent) & (interior_distance < opaque)))
+    definite_foreground_count = int(np.count_nonzero(interior_distance >= opaque))
+    transition_fraction = transition_count / max(1, interior_distance.size)
+    transition_to_foreground_ratio = transition_count / max(1, definite_foreground_count)
+    near_key_subject_risk = bool(
+        transition_fraction >= 0.01
+        and transition_count >= 64
+        and transition_to_foreground_ratio >= 0.5
+    )
+    auto_apply = confidence in {"high", "medium"} and transparent < 160.0 and not near_key_subject_risk
+    issues: list[dict[str, Any]] = []
+    if confidence == "medium":
+        issues.append(
+            {
+                "severity": "warning",
+                "code": "variable-chroma-border",
+                "message": "Border chroma varies; adaptive thresholds are usable but require final residue QA.",
+            }
+        )
+    if not auto_apply:
+        issues.append(
+            {
+                "severity": "fail",
+                "code": "unsafe-adaptive-thresholds",
+                "message": "Border variation is too large for automatic threshold widening.",
+            }
+        )
+    if near_key_subject_risk:
+        issues.append(
+            {
+                "severity": "fail",
+                "code": "near-key-subject-risk",
+                "message": "A large interior region falls inside the soft matte band and may be damaged by chroma removal.",
+            }
+        )
+    return {
+        "schema_version": 1,
+        "algorithm": "border-distance-percentile-recommendation",
+        "chroma_key": format_hex(key),
+        "border_width": border_width,
+        "sample_count": int(distances.size),
+        "distance_percentiles": {key: round(value, 4) for key, value in percentiles.items()},
+        "distance_spread_p99_5_p50": round(spread, 4),
+        "suggested_transparent_threshold": transparent,
+        "suggested_opaque_threshold": opaque,
+        "confidence": confidence,
+        "interior_transition_pixels": transition_count,
+        "interior_definite_foreground_pixels": definite_foreground_count,
+        "interior_transition_fraction": round(transition_fraction, 6),
+        "transition_to_foreground_ratio": round(transition_to_foreground_ratio, 6),
+        "near_key_subject_risk": near_key_subject_risk,
+        "auto_apply": auto_apply,
+        "issues": issues,
+    }
+
+
 def remove_chroma(
     source: Image.Image,
     key: tuple[int, int, int],
@@ -68,11 +176,40 @@ def remove_chroma(
 
     cleaned_rgb = rgb.copy()
     if despill:
-        recoverable = (alpha > 1.0 / 255.0) & (alpha < 0.999)
-        alpha_safe = np.maximum(alpha[:, :, None], 1.0 / 255.0)
-        estimated_foreground = (rgb - (1.0 - alpha[:, :, None]) * key_array) / alpha_safe
-        estimated_foreground = np.clip(estimated_foreground, 0.0, 255.0)
-        cleaned_rgb[recoverable] = estimated_foreground[recoverable]
+        foreground_distances = distance[distance >= opaque_threshold]
+        high_distance = float(np.percentile(foreground_distances, 99)) if foreground_distances.size else opaque_threshold
+        seed_threshold = max(opaque_threshold + 48.0, opaque_threshold * 1.5, high_distance * 0.85)
+        stable_foreground = (distance >= seed_threshold) & (original_alpha >= 0.999)
+        radius = max(2, min(16, int(round(min(source.size) / 128.0))))
+        mask_image = Image.fromarray((stable_foreground.astype(np.uint8) * 255), mode="L")
+        blurred_mask = np.asarray(mask_image.filter(ImageFilter.BoxBlur(radius)), dtype=np.float32) / 255.0
+        estimated_foreground = np.zeros_like(rgb)
+        for channel in range(3):
+            weighted = np.where(stable_foreground, rgb[:, :, channel], 0.0).astype(np.uint8)
+            blurred = np.asarray(
+                Image.fromarray(weighted, mode="L").filter(ImageFilter.BoxBlur(radius)),
+                dtype=np.float32,
+            )
+            estimated_foreground[:, :, channel] = np.divide(
+                blurred,
+                blurred_mask,
+                out=np.zeros_like(blurred),
+                where=blurred_mask > 1.0 / 255.0,
+            )
+        foreground_vector = estimated_foreground - key_array
+        source_vector = rgb - key_array
+        denominator = np.sum(foreground_vector * foreground_vector, axis=2)
+        projected_alpha = np.divide(
+            np.sum(source_vector * foreground_vector, axis=2),
+            denominator,
+            out=matte.copy(),
+            where=denominator > 1.0,
+        )
+        has_foreground_estimate = blurred_mask > 1.0 / 255.0
+        projected_alpha = np.clip(projected_alpha, 0.0, 1.0)
+        alpha = original_alpha * np.where(has_foreground_estimate, projected_alpha, matte)
+        recoverable = has_foreground_estimate & (alpha > 1.0 / 255.0) & (alpha < 0.999)
+        cleaned_rgb[recoverable] = np.clip(estimated_foreground[recoverable], 0.0, 255.0)
 
     transparent = alpha <= 1.0 / 255.0
     cleaned_rgb[transparent] = 0.0
@@ -87,7 +224,7 @@ def remove_chroma(
     report = {
         "schema_version": 1,
         "ok": int(np.count_nonzero(near_key_visible)) == 0,
-        "algorithm": "rgb-distance-soft-matte-with-foreground-recovery",
+        "algorithm": "adaptive-soft-matte-with-local-foreground-projection",
         "chroma_key": format_hex(key),
         "transparent_threshold": transparent_threshold,
         "opaque_threshold": opaque_threshold,
@@ -119,6 +256,7 @@ def main() -> None:
     parser.add_argument("--border-width", type=int, default=8)
     parser.add_argument("--transparent-threshold", type=float, default=12.0)
     parser.add_argument("--opaque-threshold", type=float, default=96.0)
+    parser.add_argument("--adaptive-thresholds", action="store_true")
     parser.add_argument("--no-despill", action="store_true")
     args = parser.parse_args()
 
@@ -132,20 +270,40 @@ def main() -> None:
         key = sample_border_key(np.asarray(source.convert("RGB"), dtype=np.float32), args.border_width)
     assert key is not None
 
+    diagnostics = recommend_chroma_thresholds(source, key, args.border_width)
+    transparent_threshold = args.transparent_threshold
+    opaque_threshold = args.opaque_threshold
+    if args.adaptive_thresholds and diagnostics["auto_apply"]:
+        transparent_threshold = float(diagnostics["suggested_transparent_threshold"])
+        opaque_threshold = float(diagnostics["suggested_opaque_threshold"])
+
     output, report = remove_chroma(
         source,
         key,
-        transparent_threshold=args.transparent_threshold,
-        opaque_threshold=args.opaque_threshold,
+        transparent_threshold=transparent_threshold,
+        opaque_threshold=opaque_threshold,
         despill=not args.no_despill,
     )
     output_path = args.output.expanduser().resolve()
     output_path.parent.mkdir(parents=True, exist_ok=True)
     output.save(output_path, format="PNG")
-    report.update({"input": str(input_path), "output": str(output_path)})
+    report.update(
+        {
+            "input": str(input_path),
+            "output": str(output_path),
+            "adaptive_thresholds_requested": args.adaptive_thresholds,
+            "adaptive_thresholds_applied": bool(args.adaptive_thresholds and diagnostics["auto_apply"]),
+            "threshold_diagnostics": diagnostics,
+        }
+    )
+    if args.adaptive_thresholds and not diagnostics["auto_apply"]:
+        report["ok"] = False
+        report.setdefault("issues", []).extend(diagnostics["issues"])
     if args.json_out:
         write_json(args.json_out, report)
     print(json.dumps(report, ensure_ascii=False))
+    if not report["ok"]:
+        raise SystemExit(2)
 
 
 if __name__ == "__main__":

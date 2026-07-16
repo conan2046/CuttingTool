@@ -3,20 +3,99 @@
   "evals": [
     {
       "id": 1,
-      "prompt": "参考这张暗黑幻想UI图，帮我生成16个可自动切割的背包道具图标，并最终导出128x128透明PNG。",
-      "expected_output": "先建立或确认风格基准，生成4x4纯色色键资源Sheet，再执行透明切割、归一化、命名、Manifest和QA。",
+      "kind": "category-trigger",
+      "category": "Panel",
+      "prompt": "做4块仙侠手游主界面面板，必须是后续能自动切割的透明UI资源。",
+      "expected_skill": "game-ui-asset-pipeline",
+      "expected_first_action": "确认或建立风格基准并准备2x2布局引导图。",
+      "expected_output": "触发 game-ui-asset-pipeline，识别为 Panel，先确认风格基准和2x2生产Sheet，再执行透明化、切割与QA。",
       "files": []
     },
     {
       "id": 2,
-      "prompt": "把这张UI资源整图切成独立透明PNG，里面有按钮、面板和图标。",
-      "expected_output": "先运行未知整图诊断，输出背景分类、bbox修正JSON和标注预览；真实Alpha或安全纯色背景经批准后导出，假棋盘格和未解析背景必须阻止透明资源交付。",
+      "kind": "category-trigger",
+      "category": "Button",
+      "prompt": "制作4组暗黑手游按钮，每组Normal、Pressed、Disabled三态，不带文字，输出可切割Sheet。",
+      "expected_skill": "game-ui-asset-pipeline",
+      "expected_first_action": "按状态组规划3列x4行布局并锁定同组轮廓。",
+      "expected_output": "触发 game-ui-asset-pipeline，识别为 Button，先准备3列x4行状态Sheet和风格基准，再完成状态命名与QA。",
       "files": []
     },
     {
       "id": 3,
-      "prompt": "做一套4组暗黑手游按钮，每组Normal、Pressed、Disabled三种状态，按钮上不要文字。",
-      "expected_output": "生成3列x4行状态Sheet，锁定同组轮廓和尺寸，使用纯色色键背景，并准备后续透明化和状态命名。",
+      "kind": "category-trigger",
+      "category": "Icon_Nav",
+      "prompt": "生成首页、背包、角色、任务等16个手游底部导航图标，导出128x128透明PNG。",
+      "expected_skill": "game-ui-asset-pipeline",
+      "expected_first_action": "建立4x4导航图标生产Sheet和顺序清单。",
+      "expected_output": "触发 game-ui-asset-pipeline，识别为 Icon_Nav，先锁定风格和4x4顺序，再切割归一化为透明PNG。",
+      "files": []
+    },
+    {
+      "id": 4,
+      "kind": "category-trigger",
+      "category": "Icon_Status",
+      "prompt": "做中毒、眩晕、灼烧、冰冻等12个战斗状态图标，统一风格并能批量透明导出。",
+      "expected_skill": "game-ui-asset-pipeline",
+      "expected_first_action": "规划状态语义、顺序和4x4以内生产Sheet。",
+      "expected_output": "触发 game-ui-asset-pipeline，识别为 Icon_Status，先建立状态清单、风格基准和安全布局，再完成透明化与QA。",
+      "files": []
+    },
+    {
+      "id": 5,
+      "kind": "category-trigger",
+      "category": "Icon_General",
+      "prompt": "制作设置、邮件、帮助、关闭等通用UI图标资源包，需要独立透明PNG和清单。",
+      "expected_skill": "game-ui-asset-pipeline",
+      "expected_first_action": "整理通用图标语义并建立4x4以内布局引导图。",
+      "expected_output": "触发 game-ui-asset-pipeline，识别为 Icon_General，先锁定语义、风格和槽位，再导出透明PNG、Manifest与QA。",
+      "files": []
+    },
+    {
+      "id": 6,
+      "kind": "category-trigger",
+      "category": "Icon_Item",
+      "prompt": "参考暗黑幻想UI，生成16个背包道具图标，自动切割并最终导出128x128透明PNG。",
+      "expected_skill": "game-ui-asset-pipeline",
+      "expected_first_action": "确认风格基准并建立4x4道具图标生产Sheet。",
+      "expected_output": "触发 game-ui-asset-pipeline，识别为 Icon_Item，先确认风格和4x4纯色色键Sheet，再执行切割、命名、Manifest和QA。",
+      "files": []
+    },
+    {
+      "id": 7,
+      "kind": "category-trigger",
+      "category": "Icon_Equip",
+      "prompt": "生成剑、甲、头盔、戒指等16个装备图标，做成Unity可用的透明资源包。",
+      "expected_skill": "game-ui-asset-pipeline",
+      "expected_first_action": "按装备部位规划4x4生产Sheet并锁定稀有度表现规则。",
+      "expected_output": "触发 game-ui-asset-pipeline，识别为 Icon_Equip，先确定部位顺序、风格基准和4x4布局，再透明导出与验收。",
+      "files": []
+    },
+    {
+      "id": 8,
+      "kind": "category-trigger",
+      "category": "Icon_Skill",
+      "prompt": "做16个火冰雷系技能图标，要求可切割Sheet、透明PNG和缩小可辨识检查。",
+      "expected_skill": "game-ui-asset-pipeline",
+      "expected_first_action": "规划技能系别、语义顺序和4x4生产Sheet。",
+      "expected_output": "触发 game-ui-asset-pipeline，识别为 Icon_Skill，先锁定系别风格和4x4槽位，再做透明化及目标尺寸辨识QA。",
+      "files": []
+    },
+    {
+      "id": 9,
+      "kind": "category-trigger",
+      "category": "Icon_Effect",
+      "prompt": "生成12个点击闪光、升级爆点、奖励光圈等简单UI特效贴图，独立透明导出。",
+      "expected_skill": "game-ui-asset-pipeline",
+      "expected_first_action": "确认仅含简单静态特效并规划4x3小批次生产Sheet。",
+      "expected_output": "触发 game-ui-asset-pipeline，识别为 Icon_Effect，先确认V1静态特效边界和4x3布局，再执行透明化与半透明边缘QA。",
+      "files": []
+    },
+    {
+      "id": 10,
+      "kind": "unknown-sheet",
+      "prompt": "把这张混合按钮、面板和图标的UI资源整图切成独立透明PNG。",
+      "expected_output": "先运行未知整图诊断，输出背景分类、bbox修正JSON和标注预览；真实Alpha或安全纯色背景经批准后导出，假棋盘格和未解析背景必须阻止交付。",
       "files": []
     }
   ]

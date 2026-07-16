@@ -5,6 +5,7 @@ from __future__ import annotations
 
 import argparse
 import json
+import math
 import re
 from pathlib import Path
 from typing import Any
@@ -132,6 +133,54 @@ def touches_boundary(bbox: tuple[int, int, int, int], width: int, height: int, t
     return left <= tolerance or top <= tolerance or right >= width - tolerance or bottom >= height - tolerance
 
 
+def component_gap(left: dict[str, int], right: dict[str, int]) -> float:
+    horizontal = max(0, max(left["left"], right["left"]) - min(left["right"], right["right"]))
+    vertical = max(0, max(left["top"], right["top"]) - min(left["bottom"], right["bottom"]))
+    return math.hypot(horizontal, vertical)
+
+
+def classify_components(
+    components: list[dict[str, int]],
+    merge_distance: float = 12.0,
+    merge_distance_ratio: float = 0.15,
+    major_component_ratio: float = 0.35,
+) -> dict[str, Any]:
+    if not components:
+        return {"anchor": None, "merged": [], "detached": [], "major_detached": []}
+    ordered = sorted(components, key=lambda component: component["pixels"], reverse=True)
+    merged = [ordered[0]]
+    remaining = ordered[1:]
+    changed = True
+    while changed and remaining:
+        changed = False
+        group_left = min(component["left"] for component in merged)
+        group_top = min(component["top"] for component in merged)
+        group_right = max(component["right"] for component in merged)
+        group_bottom = max(component["bottom"] for component in merged)
+        diagonal = math.hypot(group_right - group_left, group_bottom - group_top)
+        allowed_gap = max(merge_distance, diagonal * merge_distance_ratio)
+        next_remaining: list[dict[str, int]] = []
+        for component in remaining:
+            nearest_gap = min(component_gap(component, member) for member in merged)
+            if nearest_gap <= allowed_gap:
+                merged.append(component)
+                changed = True
+            else:
+                next_remaining.append(component)
+        remaining = next_remaining
+    major_detached = [
+        component
+        for component in remaining
+        if component["pixels"] >= ordered[0]["pixels"] * major_component_ratio
+    ]
+    return {
+        "anchor": ordered[0],
+        "merged": merged,
+        "detached": remaining,
+        "major_detached": major_detached,
+    }
+
+
 def extract_assets(
     source: Image.Image,
     layout: dict[str, Any],
@@ -140,6 +189,9 @@ def extract_assets(
     alpha_threshold: int = 8,
     minimum_component_pixels: int = 16,
     trim_padding: int = 2,
+    fragment_merge_distance: float = 12.0,
+    fragment_merge_distance_ratio: float = 0.15,
+    major_component_ratio: float = 0.35,
 ) -> tuple[dict[str, Any], dict[str, Any]]:
     source = source.convert("RGBA")
     slots = layout.get("slots", [])
@@ -198,6 +250,13 @@ def extract_assets(
             issues.append({"severity": "fail", "code": "empty-slot", "source_index": visual_index})
             continue
 
+        component_groups = classify_components(
+            components,
+            merge_distance=fragment_merge_distance,
+            merge_distance_ratio=fragment_merge_distance_ratio,
+            major_component_ratio=major_component_ratio,
+        )
+
         bbox = combined_bbox(components, trim_padding, source.width, source.height)
         if touches_boundary(bbox, source.width, source.height):
             issues.append(
@@ -208,13 +267,24 @@ def extract_assets(
                     "bbox": list(bbox),
                 }
             )
-        if len(components) > 1:
+        if component_groups["detached"]:
             issues.append(
                 {
                     "severity": "warning",
-                    "code": "multiple-components",
+                    "code": "detached-components",
                     "source_index": visual_index,
                     "component_count": len(components),
+                    "merged_component_count": len(component_groups["merged"]),
+                    "detached_component_count": len(component_groups["detached"]),
+                }
+            )
+        if component_groups["major_detached"]:
+            issues.append(
+                {
+                    "severity": "warning",
+                    "code": "multiple-major-components",
+                    "source_index": visual_index,
+                    "major_detached_count": len(component_groups["major_detached"]),
                 }
             )
 
@@ -240,8 +310,11 @@ def extract_assets(
                 "width": extracted.width,
                 "height": extracted.height,
                 "component_count": len(components),
+                "merged_component_count": len(component_groups["merged"]),
+                "detached_component_count": len(component_groups["detached"]),
+                "major_detached_count": len(component_groups["major_detached"]),
                 "foreground_pixels": int(sum(component["pixels"] for component in components)),
-                "qa": "warning" if len(components) > 1 else "pass",
+                "qa": "warning" if component_groups["detached"] else "pass",
             }
         )
 
@@ -281,6 +354,9 @@ def main() -> None:
     parser.add_argument("--alpha-threshold", type=int, default=8)
     parser.add_argument("--minimum-component-pixels", type=int, default=16)
     parser.add_argument("--trim-padding", type=int, default=2)
+    parser.add_argument("--fragment-merge-distance", type=float, default=12.0)
+    parser.add_argument("--fragment-merge-distance-ratio", type=float, default=0.15)
+    parser.add_argument("--major-component-ratio", type=float, default=0.35)
     args = parser.parse_args()
 
     with Image.open(args.input.expanduser().resolve()) as image:
@@ -295,6 +371,9 @@ def main() -> None:
         alpha_threshold=args.alpha_threshold,
         minimum_component_pixels=args.minimum_component_pixels,
         trim_padding=args.trim_padding,
+        fragment_merge_distance=args.fragment_merge_distance,
+        fragment_merge_distance_ratio=args.fragment_merge_distance_ratio,
+        major_component_ratio=args.major_component_ratio,
     )
     run_root = args.request.expanduser().resolve().parent
     resolved_input = args.input.expanduser().resolve()

@@ -28,6 +28,8 @@ description: 生成、拆分、透明化、校验并打包游戏 UI 位图资源
 - Icon_Skill
 - Icon_Effect 中可通过色键稳定提取的简单硬边特效
 
+以上九项是运行配置和验收 JSON 使用的内部类别名，必须原样返回。`01_Panel` 到 `09_Icon_Effect` 只用于文件名前缀；不要把 `09_Icon_Effect` 当成内部 `category`。
+
 不要把以下任务强行纳入当前流程：
 
 - 角色或宠物动画 Sprite Sheet
@@ -48,6 +50,7 @@ description: 生成、拆分、透明化、校验并打包游戏 UI 位图资源
 - 导出文件和 Manifest 时，读取 `references/naming-contract.md`。
 - 同一任务包含多个分类或需要自动拆分多张 Sheet 时，读取 `references/batch-request-contract.md`。
 - 输入是未知整图、假棋盘格或需要人工修正 bbox 时，读取 `references/unknown-sheet-contract.md`。
+- 色键背景存在色差、阈值需要自适应或组件出现碎片时，读取 `references/chroma-fragment-contract.md`。
 
 不要一次加载无关参考文件。
 
@@ -219,8 +222,11 @@ Runner 自动识别原生 Alpha 或色键背景，必要时将生成图单次缩
   --input generated/<sheet>.png \
   --output extracted/<sheet>-alpha.png \
   --chroma-key "#00FF00" \
+  --adaptive-thresholds \
   --json-out qa/<sheet>-chroma.json
 ```
+
+统一 Runner 默认启用自适应诊断。它根据边框色差分布给出透明/不透明阈值、置信度和近色主体风险；只有 `auto_apply=true` 才采用建议值。低置信度、近色主体风险或不安全阈值必须失败并转人工检查。只在复现旧行为或人工已经确认固定阈值时使用 `run_ui_pipeline.py --fixed-chroma-thresholds`。
 
 运行图片脚本前先调用工作区依赖定位工具，并使用返回的精确 Python 路径。不要假设裸 `python` 指向正确环境。
 
@@ -236,7 +242,7 @@ Runner 自动识别原生 Alpha 或色键背景，必要时将生成图单次缩
   --qa-out qa/<sheet>-extract.json
 ```
 
-切割脚本先在整张 Alpha Sheet 上检测连通域，再按最近槽位中心稳定归属。Layout Guide 的槽位用于排序和归属，不作为硬裁切边界；这样可保留伸入槽间纯背景留白、但没有与相邻资源接触的完整轮廓。空槽、主体合并、画布边缘接触和数量不符属于失败；多个显著组件先记录警告，不静默删除。
+切割脚本先在整张 Alpha Sheet 上检测连通域，再按最近槽位中心稳定归属。Layout Guide 的槽位用于排序和归属，不作为硬裁切边界；这样可保留伸入槽间纯背景留白、但没有与相邻资源接触的完整轮廓。距离主体足够近的小碎片合并到同一资源；远离碎片记录 `detached-components`，远离且面积显著的第二主体追加 `multiple-major-components`。空槽、主体跨槽合并、画布边缘接触和数量不符属于失败；不要静默删除无法解释的组件。
 
 如果色键转换后所有槽位同时出现边缘接触或大量多组件警告，先检查背景色差分布。图片模型可能把指定色键生成成近似纯色而非逐像素完全一致；在确认主体不使用该色键后，提高 `--transparent-threshold` 并同步提高 `--opaque-threshold`，直到背景连通噪声消失，再重新切割。不要用放宽槽位裁切或忽略失败来绕过色键残留。
 

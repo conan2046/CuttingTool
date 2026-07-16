@@ -1,0 +1,80 @@
+{
+  "schema_version": 1,
+  "date": "2026-07-16",
+  "environment": "Codex desktop independent project tasks",
+  "skill": "game-ui-asset-pipeline",
+  "summary": {
+    "expected": 9,
+    "passed": 9,
+    "failed": 0
+  },
+  "cases": [
+    {
+      "category": "Panel",
+      "thread_id": "019f69f4-901f-7651-872f-047666300ffd",
+      "selected_skill": "game-ui-asset-pipeline",
+      "first_action": "创建并确认Canonical UI Style Reference",
+      "result": "pass"
+    },
+    {
+      "category": "Button",
+      "thread_id": "019f69f5-64cc-7003-8e3a-67cbe2da46c2",
+      "selected_skill": "game-ui-asset-pipeline",
+      "first_action": "检查并确认已批准的Canonical UI Style Reference",
+      "result": "pass"
+    },
+    {
+      "category": "Icon_Nav",
+      "thread_id": "019f69f6-467b-78e1-b78c-a8cfd872e9dd",
+      "selected_skill": "game-ui-asset-pipeline",
+      "first_action": "确认已批准的风格基准图与16个导航图标语义清单",
+      "result": "pass"
+    },
+    {
+      "category": "Icon_Status",
+      "thread_id": "019f69f6-722b-7da3-8874-f5dcfc552750",
+      "selected_skill": "game-ui-asset-pipeline",
+      "first_action": "确认或生成统一的Canonical UI Style Reference",
+      "result": "pass"
+    },
+    {
+      "category": "Icon_General",
+      "thread_id": "019f69f7-94bd-7661-9afd-ebfb00e49f4c",
+      "selected_skill": "game-ui-asset-pipeline",
+      "first_action": "检查已批准的UI风格基准图与资源需求",
+      "result": "pass"
+    },
+    {
+      "category": "Icon_Item",
+      "thread_id": "019f69f7-d667-7f20-854c-05b799df34bb",
+      "selected_skill": "game-ui-asset-pipeline",
+      "first_action": "创建并确认暗黑幻想Canonical UI Style Reference",
+      "result": "pass"
+    },
+    {
+      "category": "Icon_Equip",
+      "thread_id": "019f69f8-a621-7c81-8a25-f33b7372b945",
+      "selected_skill": "game-ui-asset-pipeline",
+      "first_action": "建立并确认Canonical UI Style Reference",
+      "result": "pass"
+    },
+    {
+      "category": "Icon_Skill",
+      "thread_id": "019f69f8-d577-7a53-98b1-4cfcf04f9c06",
+      "selected_skill": "game-ui-asset-pipeline",
+      "first_action": "检查并锁定已批准的Canonical UI Style Reference",
+      "result": "pass"
+    },
+    {
+      "category": "Icon_Effect",
+      "thread_id": "019f69fc-734b-71d1-b1f6-358f3e723f0c",
+      "selected_skill": "game-ui-asset-pipeline",
+      "first_action": "读取需求并建立包含12个独立简单UI特效的生产Job与布局规划",
+      "result": "pass"
+    }
+  ],
+  "notes": [
+    "首次特效验收返回文件名前缀09_Icon_Effect；补充内部类别规则并同步安装副本后，复验严格返回Icon_Effect。",
+    "验收任务只读取 Skill 并返回分类结果，没有生成图片、执行命令或修改项目文件。"
+  ]
+}

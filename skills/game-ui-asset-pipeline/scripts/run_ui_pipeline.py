@@ -15,7 +15,7 @@ from PIL import Image
 from extract_sheet_assets import extract_assets
 from make_contact_sheet import make_contact_sheet
 from normalize_assets import normalize_manifest_assets
-from remove_chroma_key import parse_hex_color, remove_chroma
+from remove_chroma_key import parse_hex_color, recommend_chroma_thresholds, remove_chroma
 from validate_asset_pack import validate_pack
 
 
@@ -54,6 +54,7 @@ def run_pipeline(
     run_dir: Path,
     transparent_threshold: float = 12.0,
     opaque_threshold: float = 96.0,
+    adaptive_chroma: bool = True,
     force: bool = False,
 ) -> dict[str, Any]:
     run_dir = run_dir.expanduser().resolve()
@@ -94,12 +95,28 @@ def run_pipeline(
             background_mode = "existing-alpha"
         else:
             key = parse_hex_color(str(job_request["chroma_key"]))
+            diagnostics = recommend_chroma_thresholds(source, key)
+            selected_transparent = transparent_threshold
+            selected_opaque = opaque_threshold
+            adaptive_applied = bool(adaptive_chroma and diagnostics["auto_apply"])
+            if adaptive_applied:
+                selected_transparent = float(diagnostics["suggested_transparent_threshold"])
+                selected_opaque = float(diagnostics["suggested_opaque_threshold"])
             alpha_sheet, background_report = remove_chroma(
                 source,
                 key,
-                transparent_threshold=transparent_threshold,
-                opaque_threshold=opaque_threshold,
+                transparent_threshold=selected_transparent,
+                opaque_threshold=selected_opaque,
             )
+            background_report.update(
+                {
+                    "adaptive_thresholds_requested": adaptive_chroma,
+                    "adaptive_thresholds_applied": adaptive_applied,
+                    "threshold_diagnostics": diagnostics,
+                }
+            )
+            if adaptive_chroma and not diagnostics["auto_apply"]:
+                background_report["ok"] = False
             background_mode = "chroma-key"
         alpha_path = run_dir / "extracted" / f"{job_id}-alpha.png"
         alpha_path.parent.mkdir(parents=True, exist_ok=True)
@@ -158,7 +175,12 @@ def run_pipeline(
             if isinstance(source_index, int) and source_index in entries_by_source_index:
                 enriched["asset_id"] = entries_by_source_index[source_index]["id"]
             job_issues.append(enriched)
-        if not background_report.get("ok", False):
+        threshold_issues = background_report.get("threshold_diagnostics", {}).get("issues", [])
+        for issue in threshold_issues:
+            job_issues.append({"job_id": job_id, **issue})
+        if not background_report.get("ok", False) and not any(
+            issue.get("severity") == "fail" for issue in threshold_issues
+        ):
             job_issues.append({"job_id": job_id, "severity": "fail", "code": "background-cleanup-failed"})
         all_issues.extend(job_issues)
         job_ok = bool(background_report.get("ok", False) and extraction_report.get("ok", False))
@@ -247,6 +269,7 @@ def main() -> None:
     parser.add_argument("--run-dir", required=True, type=Path)
     parser.add_argument("--transparent-threshold", type=float, default=12.0)
     parser.add_argument("--opaque-threshold", type=float, default=96.0)
+    parser.add_argument("--fixed-chroma-thresholds", action="store_true")
     parser.add_argument("--force", action="store_true")
     args = parser.parse_args()
     if args.opaque_threshold <= args.transparent_threshold:
@@ -255,6 +278,7 @@ def main() -> None:
         args.run_dir,
         transparent_threshold=args.transparent_threshold,
         opaque_threshold=args.opaque_threshold,
+        adaptive_chroma=not args.fixed_chroma_thresholds,
         force=args.force,
     )
     print(json.dumps(result, ensure_ascii=False))

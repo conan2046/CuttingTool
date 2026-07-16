@@ -13,7 +13,7 @@ from PIL import Image, ImageDraw, ImageFont
 
 from extract_sheet_assets import CATEGORY_PREFIX, connected_components
 from prepare_ui_run import CATEGORY_DEFAULTS
-from remove_chroma_key import format_hex
+from remove_chroma_key import format_hex, recommend_chroma_thresholds
 
 
 def write_json(path: Path, payload: dict[str, Any]) -> None:
@@ -211,16 +211,20 @@ def diagnose_sheet(
             foreground = distance > background_threshold
             if border_coverage >= 0.85 and background_coverage >= 0.20:
                 classification = "flat-background-sheet"
+                threshold_diagnostics = recommend_chroma_thresholds(rgba, key)
+                export_supported = bool(threshold_diagnostics["auto_apply"])
                 background = {
                     "mode": "flat-color",
-                    "export_supported": True,
+                    "export_supported": export_supported,
                     "color": format_hex(key),
                     "threshold": background_threshold,
-                    "transparent_threshold": background_threshold,
-                    "opaque_threshold": max(96.0, background_threshold + 64.0),
+                    "transparent_threshold": threshold_diagnostics["suggested_transparent_threshold"],
+                    "opaque_threshold": threshold_diagnostics["suggested_opaque_threshold"],
                     "coverage": round(background_coverage, 6),
                     "border_coverage": round(border_coverage, 6),
+                    "threshold_diagnostics": threshold_diagnostics,
                 }
+                issues.extend(threshold_diagnostics["issues"])
             else:
                 classification = "opaque-mixed-image"
                 background = {
