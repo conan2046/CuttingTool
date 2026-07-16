@@ -119,7 +119,32 @@ class DeliveryQaTest(unittest.TestCase):
             rgba.save(path)
             report = VALIDATE.validate_pack(manifest, root, {"chroma_key": "#FF00FF"})
             self.assertFalse(report["ok"])
-            self.assertIn("visible-chroma-spill", {issue["code"] for issue in report["issues"]})
+        self.assertIn("visible-chroma-spill", {issue["code"] for issue in report["issues"]})
+
+    def test_visible_internal_chroma_spill_fails_even_away_from_transparency(self) -> None:
+        with tempfile.TemporaryDirectory() as temporary_directory:
+            root = Path(temporary_directory)
+            filename = "06_Icon_Item_InternalSpill_Default_001.png"
+            image = Image.new("RGBA", (64, 64), (120, 90, 40, 255))
+            draw = ImageDraw.Draw(image)
+            draw.rectangle((24, 24, 39, 39), fill=(15, 180, 20, 255))
+            image.save(root / filename)
+            manifest = {
+                "expected_count": 1,
+                "assets": [
+                    {
+                        "category": "Icon_Item",
+                        "category_index": 1,
+                        "output": filename,
+                        "width": 64,
+                        "height": 64,
+                        "chroma_key": "#00FF00",
+                    }
+                ],
+            }
+            report = VALIDATE.validate_pack(manifest, root)
+        self.assertFalse(report["ok"], report)
+        self.assertIn("visible-chroma-spill", {issue["code"] for issue in report["issues"]})
 
     def test_non_continuous_category_indices_fail(self) -> None:
         with tempfile.TemporaryDirectory() as temporary_directory:

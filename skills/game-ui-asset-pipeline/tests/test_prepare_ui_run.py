@@ -45,7 +45,14 @@ class PrepareUiRunTest(unittest.TestCase):
             prompt = (run_dir / "prompts" / "button-sheet-01.md").read_text(encoding="utf-8")
             self.assertEqual(request["project_id"], "dark-fantasy-ui")
             self.assertEqual(len(request["assets"]), 3)
+            self.assertEqual(request["schema_version"], 2)
+            self.assertEqual(request["expected_count"], 3)
+            self.assertEqual(jobs["schema_version"], 2)
             self.assertEqual(jobs["jobs"][0]["expected_count"], 3)
+            self.assertEqual(
+                jobs["jobs"][0]["layout_json"],
+                "references/layout-guides/button-sheet-01.json",
+            )
             self.assertIn("Exact asset count: 3", prompt)
             guide = run_dir / "references" / "layout-guides" / "button-sheet-01.png"
             with Image.open(guide) as image:

@@ -255,7 +255,7 @@ def extract_assets(
     layout: dict[str, Any],
     request: dict[str, Any],
     output_dir: Path,
-    alpha_threshold: int = 8,
+    alpha_threshold: int = 16,
     minimum_component_pixels: int = 16,
     trim_padding: int = 2,
     fragment_merge_distance: float | None = None,
@@ -304,6 +304,22 @@ def extract_assets(
             )
         )
     for component in global_components:
+        spanned_slots = [
+            index + 1
+            for index, (center_x, center_y) in enumerate(slot_centers)
+            if component["left"] <= center_x < component["right"]
+            and component["top"] <= center_y < component["bottom"]
+        ]
+        if len(spanned_slots) > 1:
+            issues.append(
+                {
+                    "severity": "fail",
+                    "code": "cross-slot-connected-component",
+                    "source_indices": spanned_slots,
+                    "bbox": [component["left"], component["top"], component["right"], component["bottom"]],
+                    "pixels": component["pixels"],
+                }
+            )
         component_center = (
             (component["left"] + component["right"]) / 2.0,
             (component["top"] + component["bottom"]) / 2.0,
@@ -459,7 +475,7 @@ def main() -> None:
     parser.add_argument("--output-dir", required=True, type=Path)
     parser.add_argument("--manifest-out", required=True, type=Path)
     parser.add_argument("--qa-out", required=True, type=Path)
-    parser.add_argument("--alpha-threshold", type=int, default=8)
+    parser.add_argument("--alpha-threshold", type=int, default=16)
     parser.add_argument("--minimum-component-pixels", type=int, default=16)
     parser.add_argument("--trim-padding", type=int, default=2)
     parser.add_argument("--fragment-merge-distance", type=float)

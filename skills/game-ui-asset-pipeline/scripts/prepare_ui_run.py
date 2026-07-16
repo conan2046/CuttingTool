@@ -222,7 +222,7 @@ def create_run(args: argparse.Namespace) -> Path:
     prompt_path.write_text(prompt, encoding="utf-8")
 
     request_payload = {
-        "schema_version": 1,
+        "schema_version": 2,
         "project_id": project_id,
         "created_at": datetime.now(timezone.utc).isoformat(),
         "category": category,
@@ -235,13 +235,15 @@ def create_run(args: argparse.Namespace) -> Path:
         "padding": args.padding,
         "allow_attached_glow": args.allow_attached_glow,
         "assets": [asdict(asset) for asset in assets],
+        "expected_count": len(assets),
         "references": reference_records,
     }
     write_json(run_dir / "request.json", request_payload)
 
     output_name = f"{sheet_slug}-sheet-01.png"
     job_payload = {
-        "schema_version": 1,
+        "schema_version": 2,
+        "created_at": request_payload["created_at"],
         "jobs": [
             {
                 "id": f"{sheet_slug}-sheet-01",
@@ -251,6 +253,7 @@ def create_run(args: argparse.Namespace) -> Path:
                 "expected_count": len(assets),
                 "prompt_file": str(prompt_path.relative_to(run_dir)).replace("\\", "/"),
                 "layout_guide": str(guide_path.relative_to(run_dir)).replace("\\", "/"),
+                "layout_json": str(guide_json.relative_to(run_dir)).replace("\\", "/"),
                 "input_images": reference_records
                 + [{"path": str(guide_path.relative_to(run_dir)).replace("\\", "/"), "role": "layout-guide-only"}],
                 "generated_output": f"generated/{output_name}",

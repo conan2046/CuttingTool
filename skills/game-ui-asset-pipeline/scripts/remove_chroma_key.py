@@ -108,10 +108,14 @@ def recommend_chroma_thresholds(
     definite_foreground_count = int(np.count_nonzero(interior_distance >= opaque))
     transition_fraction = transition_count / max(1, interior_distance.size)
     transition_to_foreground_ratio = transition_count / max(1, definite_foreground_count)
+    stable_core_support_ratio = definite_foreground_count / max(1, transition_count)
     near_key_subject_risk = bool(
         transition_fraction >= 0.01
         and transition_count >= 64
-        and transition_to_foreground_ratio >= 0.5
+        # A hard-edged partial-opacity band is recoverable when it surrounds a
+        # larger stable opaque core. Near-key subjects lack that supporting core
+        # and remain dominated by ambiguous soft-matte pixels.
+        and transition_to_foreground_ratio >= 1.0
     )
     auto_apply = confidence in {"high", "medium"} and transparent < 160.0 and not near_key_subject_risk
     issues: list[dict[str, Any]] = []
@@ -154,6 +158,7 @@ def recommend_chroma_thresholds(
         "interior_definite_foreground_pixels": definite_foreground_count,
         "interior_transition_fraction": round(transition_fraction, 6),
         "transition_to_foreground_ratio": round(transition_to_foreground_ratio, 6),
+        "stable_core_support_ratio": round(stable_core_support_ratio, 6),
         "near_key_subject_risk": near_key_subject_risk,
         "auto_apply": auto_apply,
         "issues": issues,
@@ -196,7 +201,11 @@ def remove_chroma(
             & (source_spill_score < 16.0)
             & (original_alpha >= 0.999)
         )
-        radius = max(2, min(16, int(round(min(source.size) / 128.0))))
+        # Large generated sheets frequently contain a 10-20px reflected chroma
+        # band after model rendering and production upscaling. Search far enough
+        # to reach a stable foreground seed without projecting into definite
+        # interior pixels.
+        radius = max(8, min(32, int(round(min(source.size) / 6.0))))
         mask_image = Image.fromarray((stable_foreground.astype(np.uint8) * 255), mode="L")
         blurred_mask = np.asarray(mask_image.filter(ImageFilter.BoxBlur(radius)), dtype=np.float32) / 255.0
         estimated_foreground = np.zeros_like(rgb)
@@ -255,12 +264,22 @@ def remove_chroma(
 
     cleaned_distance = np.linalg.norm(cleaned_rgb - key_array, axis=2)
     cleaned_spill_score = chroma_spill_score(cleaned_rgb, key)
+    opaque_chroma_spill = (
+        near_background
+        & (alpha >= 0.999)
+        & (cleaned_spill_score >= 16.0)
+    ) if despill else np.zeros(alpha.shape, dtype=bool)
     unresolved_chroma_edge = (
         (alpha > 1.0 / 255.0)
-        & (alpha < 0.999)
         & (
-            (cleaned_distance <= opaque_threshold)
-            | (cleaned_spill_score >= 16.0)
+            (
+                (alpha < 0.999)
+                & (
+                    (cleaned_distance <= opaque_threshold)
+                    | (cleaned_spill_score >= 16.0)
+                )
+            )
+            | opaque_chroma_spill
         )
     )
     alpha[unresolved_chroma_edge] = 0.0
@@ -291,6 +310,7 @@ def remove_chroma(
         "opaque_pixels": int(np.count_nonzero(output_array[:, :, 3] == 255)),
         "visible_near_key_pixels": int(np.count_nonzero(near_key_visible)),
         "discarded_unresolved_chroma_edge_pixels": int(np.count_nonzero(unresolved_chroma_edge)),
+        "discarded_opaque_chroma_spill_pixels": int(np.count_nonzero(opaque_chroma_spill)),
         "fitted_chroma_mix_pixels": int(np.count_nonzero(projection_mask & fitted_chroma_mix)) if despill else 0,
         "spill_chroma_mix_pixels": int(np.count_nonzero(projection_mask & spill_chroma_mix)) if despill else 0,
     }

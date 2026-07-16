@@ -370,6 +370,8 @@ GPT Image 2 不提供原生透明背景时，默认使用：
 
 检测顺序必须稳定：从上到下、从左到右。
 
+连通域默认最低可见 Alpha 阈值为 `16`。单一组件同时跨过两个或更多槽位中心时必须报告 `cross-slot-connected-component` 并失败；合法主体伸入 gutter 但未覆盖相邻槽位中心时继续允许。
+
 ### 3. Alpha 和净边
 
 输出必须为 RGBA PNG。验证：
@@ -379,6 +381,7 @@ GPT Image 2 不提供原生透明背景时，默认使用：
 - 无明显绿边、品红边或色键污染。
 - QA 统计可见色键残留时使用最低可见 Alpha 阈值；缩放插值产生的 `alpha < 16` 亚可见像素不判残色，`alpha >= 16` 的近色键像素仍判失败。
 - QA 不得只检查近纯色键距离；透明边缘形成连续色键通道优势时必须报告 `visible-chroma-spill`。色偏分数、最低可见 Alpha 和允许像素数量必须参数化。
+- `visible-chroma-spill` 必须检查全部最低可见 Alpha 像素，不限于透明边缘。模型把色键反射画进主体内部时必须拒绝源图并重生成；禁止用全图强制去色或投影覆盖确定前景。
 - 不截断描边、尖角和允许保留的紧贴光效。
 - 不生成意外的内部透明条带或孔洞。
 - 不使用多次反复羽化破坏清晰边缘。
@@ -386,6 +389,8 @@ GPT Image 2 不提供原生透明背景时，默认使用：
 每次流水线只安排一个明确的最终净边阶段，避免重复处理导致轮廓缩水。
 
 邻近稳定前景投影默认作用于色键软遮罩过渡带；背景邻域中符合“色键—局部前景”线性混合模型或具有明显色键通道优势的像素允许继续重建，以处理互补色边缘。稳定前景种子必须排除色键偏色像素，并覆盖蓝、白、金、绿等合法前景。远离背景的确定前景必须保留原始 RGB 和 Alpha，禁止用局部估算颜色覆盖主体内部纹理。无法安全重建且仍接近色键或具有色键偏色的部分 Alpha 像素，在近色主体风险检查通过后应透明化，并把数量写入 `discarded_unresolved_chroma_edge_pixels`。
+
+硬边部分透明光带只有在稳定不透明核心不少于含糊过渡像素时允许自动重建，并记录稳定核心支持比例。大画布局部搜索半径最多可扩大到 `32px`；背景邻域内仍不透明的强色键溢色可以清理并计数，但不得把同一规则扩展到远离背景的确定前景。
 
 图片模型生成的纯色色键可能存在轻微逐像素色差。若转换后所有槽位同时误报边缘接触或出现大面积背景连通域，应先统计边框色差分布，在确认主体不含近似色键后成对提高透明阈值和不透明阈值并重新验证；不得直接忽略边缘失败。
 
@@ -464,6 +469,8 @@ output/<project-id>-<timestamp>/
 ```
 
 多分类或多 Sheet 任务先运行 `prepare_ui_batch.py` 生成 Job、独立请求、Prompt 和 Layout Guide。所有 `generated_output` 就绪后运行 `run_ui_pipeline.py --run-dir <run-dir>`；Runner 负责原生 Alpha/色键分流、单次生产尺寸归一、逐 Job 切割、分类连续编号、总 Manifest、Contact Sheet、严格 QA 和 `run-summary.json`。Runner 不调用图片 API，缺少任何生成 Sheet 时必须在写入正式输出前失败。
+
+`prepare_ui_run.py` 与 `prepare_ui_batch.py` 生成的 `jobs.json` 统一使用 schema v2。每个 Job 至少包含 `layout_json`、`layout_guide`、`generated_output` 和 `expected_count`；请求必须包含总 `expected_count`。单分类任务也必须能直接交给统一 Runner，不得保留只可分步调试的旧 Job schema。
 
 未知整图先运行 `diagnose_ui_sheet.py`，输出 `input-diagnosis.json`、`bbox-corrections.json` 和 `bbox-preview.png`。修正确认后运行 `apply_bbox_corrections.py`；脚本必须在正式导出前拒绝未批准修正、假棋盘格、未解析背景、bbox 越界、bbox 重叠、bbox 可见前景裁断和非连续编号。预检失败只允许写结构化错误报告、失败摘要和 `bbox-diff-preview.png`，不得创建正式 Manifest；成功时也保留差异预览用于视觉验收。裁断默认以 `alpha >= 16` 为可见阈值，避免低 Alpha 清理残留误报。
 

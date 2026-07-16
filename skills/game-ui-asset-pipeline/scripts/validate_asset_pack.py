@@ -158,16 +158,10 @@ def validate_pack(
                         "pixels": near_key_count,
                     }
                 )
-            transparent_mask = Image.fromarray(((alpha == 0).astype(np.uint8) * 255), mode="L")
-            near_transparent = np.asarray(
-                transparent_mask.filter(ImageFilter.MaxFilter(5)),
-                dtype=np.uint8,
-            ) > 0
             spill_score = chroma_spill_score(array[:, :, :3].astype(np.float32), entry_chroma_key)
             spill_count = int(
                 np.count_nonzero(
                     visible
-                    & near_transparent
                     & (spill_score >= chroma_spill_threshold)
                 )
             )
