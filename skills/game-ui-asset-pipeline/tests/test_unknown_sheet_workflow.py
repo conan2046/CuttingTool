@@ -1,4 +1,5 @@
 import importlib.util
+import json
 import subprocess
 import sys
 import tempfile
@@ -93,6 +94,27 @@ class UnknownSheetWorkflowTest(unittest.TestCase):
             self.assertTrue(result["ok"], result)
             self.assertEqual(result["exported"], 2)
             self.assertTrue((run_dir / "qa" / "contact-sheet.png").is_file())
+            diff_path = run_dir / "qa" / "bbox-diff-preview.png"
+            self.assertTrue(diff_path.is_file())
+            with Image.open(diff_path) as preview:
+                self.assertEqual(preview.size, (source.width * 2, source.height + 32))
+
+    def test_diagnosis_template_has_numbered_review_metadata_and_threshold_guidance(self) -> None:
+        diagnosis, corrections, source = DIAGNOSE.diagnose_sheet(
+            self.flat_sheet(), "flat.png", "Icon_Item", minimum_component_pixels=20
+        )
+        self.assertEqual(diagnosis["schema_version"], 2)
+        self.assertEqual(corrections["schema_version"], 2)
+        first = corrections["assets"][0]
+        self.assertEqual(first["detected_bbox"], first["bbox"])
+        self.assertIn(first["review"]["severity"], {"info", "warning", "fail"})
+        suggestions = corrections["review_guidance"]["threshold_suggestions"]
+        self.assertEqual(suggestions["minimum_component_pixels"]["current"], 20)
+        self.assertIsNotNone(suggestions["background_threshold"]["suggested_transparent_threshold"])
+        with tempfile.TemporaryDirectory() as temporary_directory:
+            preview_path = Path(temporary_directory) / "preview.png"
+            DIAGNOSE.render_overlay(source, corrections["assets"], preview_path, diagnosis["status"])
+            self.assertTrue(preview_path.is_file())
 
     def test_flat_background_diagnosis_and_correction_export(self) -> None:
         diagnosis, corrections, source = DIAGNOSE.diagnose_sheet(
@@ -155,6 +177,60 @@ class UnknownSheetWorkflowTest(unittest.TestCase):
             )
             self.assertFalse(result["ok"])
             self.assertGreater(result["fail"], 0)
+            run_dir = Path(temporary_directory) / "run"
+            report = json.loads((run_dir / "qa" / "correction-validation.json").read_text(encoding="utf-8"))
+            overlap = next(issue for issue in report["issues"] if issue["code"] == "overlapping-corrections")
+            self.assertIn("assets[0].bbox", overlap["location"])
+            self.assertIn("suggestion", overlap)
+            self.assertFalse((run_dir / "final" / "manifest.json").exists())
+
+    def test_out_of_bounds_bbox_reports_exact_json_location_and_recommendation(self) -> None:
+        _, corrections, source = DIAGNOSE.diagnose_sheet(
+            self.alpha_sheet(), "alpha.png", "Icon_Item", minimum_component_pixels=20
+        )
+        corrections = self.approve(corrections)
+        corrections["assets"][0]["bbox"] = [-5, 10, 60, 70]
+        with tempfile.TemporaryDirectory() as temporary_directory:
+            run_dir = Path(temporary_directory) / "run"
+            result = APPLY.apply_corrections(source, corrections, run_dir, "bounds-test", "generated/alpha.png")
+            self.assertFalse(result["ok"])
+            report = json.loads((run_dir / "qa" / "correction-validation.json").read_text(encoding="utf-8"))
+            item = next(issue for issue in report["issues"] if issue["code"] == "bbox-out-of-bounds")
+            self.assertEqual(item["location"], "assets[0].bbox")
+            self.assertEqual(item["recommended_bbox"][0], 0)
+
+    def test_bbox_cut_reports_touched_edge_and_safety_margin(self) -> None:
+        _, corrections, source = DIAGNOSE.diagnose_sheet(
+            self.alpha_sheet(), "alpha.png", "Icon_Item", minimum_component_pixels=20
+        )
+        corrections = self.approve(corrections)
+        left, top, right, bottom = corrections["assets"][0]["bbox"]
+        corrections["assets"][0]["bbox"] = [left + 5, top, right, bottom]
+        with tempfile.TemporaryDirectory() as temporary_directory:
+            run_dir = Path(temporary_directory) / "run"
+            result = APPLY.apply_corrections(source, corrections, run_dir, "cut-test", "generated/alpha.png")
+            self.assertFalse(result["ok"])
+            report = json.loads((run_dir / "qa" / "correction-validation.json").read_text(encoding="utf-8"))
+            item = next(issue for issue in report["issues"] if issue["code"] == "bbox-cuts-foreground")
+            self.assertEqual(item["location"], "assets[0].bbox")
+            self.assertIn("left", item["touched_edges"])
+            self.assertEqual(item["suggested_safety_margin"], 4)
+
+    def test_non_continuous_category_numbering_is_blocked_before_export(self) -> None:
+        _, corrections, source = DIAGNOSE.diagnose_sheet(
+            self.alpha_sheet(), "alpha.png", "Icon_Item", minimum_component_pixels=20
+        )
+        corrections = self.approve(corrections)
+        corrections["assets"][1]["category_index"] = 3
+        with tempfile.TemporaryDirectory() as temporary_directory:
+            run_dir = Path(temporary_directory) / "run"
+            result = APPLY.apply_corrections(source, corrections, run_dir, "number-test", "generated/alpha.png")
+            self.assertFalse(result["ok"])
+            report = json.loads((run_dir / "qa" / "correction-validation.json").read_text(encoding="utf-8"))
+            numbering = [issue for issue in report["issues"] if issue["code"] == "non-continuous-category-index"]
+            self.assertEqual(len(numbering), 2)
+            self.assertEqual(numbering[1]["location"], "assets[1].category_index")
+            self.assertFalse((run_dir / "final" / "manifest.json").exists())
 
     def test_retained_failure_sample_cannot_pass_without_correction(self) -> None:
         sample_path = SAMPLES_DIR / "failure-overlap-crop-residue.png"

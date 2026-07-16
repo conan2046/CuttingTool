@@ -16,6 +16,38 @@ from prepare_ui_run import CATEGORY_DEFAULTS
 from remove_chroma_key import format_hex, recommend_chroma_thresholds
 
 
+SEVERITY_RANK = {"info": 0, "warning": 1, "fail": 2}
+
+
+def issue(
+    severity: str,
+    code: str,
+    message: str,
+    location: str,
+    suggestion: str,
+    **details: Any,
+) -> dict[str, Any]:
+    return {
+        "severity": severity,
+        "code": code,
+        "message": message,
+        "location": location,
+        "suggestion": suggestion,
+        **details,
+    }
+
+
+def enrich_issue(item: dict[str, Any]) -> dict[str, Any]:
+    enriched = dict(item)
+    enriched.setdefault("location", "background.threshold_diagnostics")
+    enriched.setdefault("message", enriched.get("code", "background threshold review required"))
+    enriched.setdefault(
+        "suggestion",
+        "Review the sampled border color and suggested transparent/opaque thresholds before approval.",
+    )
+    return enriched
+
+
 def write_json(path: Path, payload: dict[str, Any]) -> None:
     path = path.expanduser().resolve()
     path.parent.mkdir(parents=True, exist_ok=True)
@@ -148,21 +180,52 @@ def row_major(components: list[dict[str, int]]) -> list[dict[str, int]]:
     )
 
 
-def render_overlay(source: Image.Image, assets: list[dict[str, Any]], output: Path, status: str) -> None:
+def preview_font(width: int) -> ImageFont.ImageFont | ImageFont.FreeTypeFont:
+    size = max(12, min(24, width // 80))
+    try:
+        return ImageFont.truetype("arial.ttf", size)
+    except OSError:
+        return ImageFont.load_default()
+
+
+def render_overlay(
+    source: Image.Image,
+    assets: list[dict[str, Any]],
+    output: Path,
+    status: str,
+    issues: list[dict[str, Any]] | None = None,
+) -> None:
     preview = source.convert("RGB")
     draw = ImageDraw.Draw(preview)
-    font = ImageFont.load_default()
+    font = preview_font(preview.width)
     for asset in assets:
         left, top, right, bottom = asset["bbox"]
-        color = "#22C55E" if asset["enabled"] else "#EF4444"
+        review = asset.get("review", {})
+        severity = str(review.get("severity", "info"))
+        color = {"info": "#22C55E", "warning": "#F59E0B", "fail": "#EF4444"}.get(severity, "#60A5FA")
+        if not asset["enabled"]:
+            color = "#6B7280"
         draw.rectangle((left, top, max(left, right - 1), max(top, bottom - 1)), outline=color, width=3)
-        label = f"{asset['source_index']:03d} {asset['semantic_name']}"
+        issue_codes = review.get("issue_codes", [])
+        issue_label = ",".join(issue_codes) if issue_codes else "candidate"
+        label = f"#{asset['source_index']:03d} [{severity.upper()}] {issue_label}"
         text_box = draw.textbbox((left, top), label, font=font)
         label_height = text_box[3] - text_box[1] + 4
         draw.rectangle((left, max(0, top - label_height), left + text_box[2] - text_box[0] + 4, top), fill="#111827")
         draw.text((left + 2, max(0, top - label_height + 2)), label, fill="#FFFFFF", font=font)
-    draw.rectangle((0, 0, preview.width - 1, 24), fill="#111827")
-    draw.text((8, 7), f"diagnosis={status} candidates={len(assets)}", fill="#FFFFFF", font=font)
+    draw.rectangle((0, 0, preview.width - 1, 28), fill="#111827")
+    global_failures = [item for item in issues or [] if item.get("source_index") is None]
+    global_label = ""
+    if global_failures:
+        global_label = " global=" + ",".join(
+            f"{str(item.get('severity', 'info')).upper()}:{item.get('code', 'issue')}" for item in global_failures[:2]
+        )
+    draw.text(
+        (8, 8),
+        f"diagnosis={status} candidates={len(assets)}{global_label}  green=info amber=warning red=fail gray=disabled",
+        fill="#FFFFFF",
+        font=font,
+    )
     output = output.expanduser().resolve()
     output.parent.mkdir(parents=True, exist_ok=True)
     preview.save(output, format="PNG")
@@ -196,11 +259,13 @@ def diagnose_sheet(
             foreground = ~checker.pop("background_mask")
             background = {"mode": "checkerboard", "export_supported": False, **checker}
             issues.append(
-                {
-                    "severity": "fail",
-                    "code": "fake-checkerboard-background",
-                    "message": "Checkerboard pixels are baked into RGB and cannot be treated as real transparency.",
-                }
+                issue(
+                    "fail",
+                    "fake-checkerboard-background",
+                    "Checkerboard pixels are baked into RGB and cannot be treated as real transparency.",
+                    "background.mode",
+                    "Regenerate on a flat chroma key or provide a PNG with real Alpha.",
+                )
             )
         else:
             key = border_color(rgb)
@@ -224,7 +289,7 @@ def diagnose_sheet(
                     "border_coverage": round(border_coverage, 6),
                     "threshold_diagnostics": threshold_diagnostics,
                 }
-                issues.extend(threshold_diagnostics["issues"])
+                issues.extend(enrich_issue(item) for item in threshold_diagnostics["issues"])
             else:
                 classification = "opaque-mixed-image"
                 background = {
@@ -235,11 +300,13 @@ def diagnose_sheet(
                     "border_coverage": round(border_coverage, 6),
                 }
                 issues.append(
-                    {
-                        "severity": "fail",
-                        "code": "unresolved-opaque-background",
-                        "message": "No reliable Alpha, flat background, or checkerboard pattern was found.",
-                    }
+                    issue(
+                        "fail",
+                        "unresolved-opaque-background",
+                        "No reliable Alpha, flat background, or checkerboard pattern was found.",
+                        "background.mode",
+                        "Provide real Alpha or regenerate with a stable flat chroma background.",
+                    )
                 )
 
     components = row_major(connected_components(foreground, minimum_component_pixels))
@@ -247,28 +314,59 @@ def diagnose_sheet(
     for index, component in enumerate(components, start=1):
         bbox = padded_bbox(component, bbox_padding, rgba.width, rgba.height)
         touches_canvas = bbox[0] == 0 or bbox[1] == 0 or bbox[2] == rgba.width or bbox[3] == rgba.height
+        asset_issues: list[dict[str, Any]] = []
         if touches_canvas:
-            issues.append({"severity": "warning", "code": "candidate-touches-canvas", "source_index": index, "bbox": bbox})
+            candidate_issue = issue(
+                "warning",
+                "candidate-touches-canvas",
+                "Candidate bbox reaches the image boundary and may contain cropped foreground.",
+                f"assets[{index - 1}].bbox",
+                "Inspect the marked edge; provide a less-cropped source if foreground already reaches the canvas.",
+                source_index=index,
+                bbox=bbox,
+            )
+            issues.append(candidate_issue)
+            asset_issues.append(candidate_issue)
+        asset_severity = max(
+            (str(item["severity"]) for item in asset_issues),
+            key=lambda value: SEVERITY_RANK.get(value, 0),
+            default="info",
+        )
         assets.append(
             {
                 "source_index": index,
                 "enabled": True,
                 "bbox": bbox,
+                "detected_bbox": list(bbox),
                 "semantic_name": f"Asset{index:03d}",
                 "category": category,
                 "state": "Default",
                 "category_index": index,
                 "notes": "",
+                "review": {
+                    "severity": asset_severity,
+                    "issue_codes": [str(item["code"]) for item in asset_issues],
+                    "locations": [str(item["location"]) for item in asset_issues],
+                    "suggestions": [str(item["suggestion"]) for item in asset_issues],
+                },
             }
         )
     if not assets:
-        issues.append({"severity": "fail", "code": "no-candidates", "message": "No extractable candidate was detected."})
+        issues.append(
+            issue(
+                "fail",
+                "no-candidates",
+                "No extractable candidate was detected.",
+                "assets",
+                "Lower minimum_component_pixels only if the expected assets are genuinely small, or replace the input.",
+            )
+        )
 
     failures = [issue for issue in issues if issue["severity"] == "fail"]
     warnings = [issue for issue in issues if issue["severity"] == "warning"]
     status = "ready-for-review" if not failures else "manual-review-required"
     diagnosis = {
-        "schema_version": 1,
+        "schema_version": 2,
         "status": status,
         "classification": classification,
         "source_image": source_name,
@@ -280,12 +378,39 @@ def diagnose_sheet(
         "issues": issues,
     }
     corrections = {
-        "schema_version": 1,
+        "schema_version": 2,
         "approved": False,
         "source_image": source_name,
         "image_size": [rgba.width, rgba.height],
         "classification": classification,
         "background": background,
+        "review_guidance": {
+            "bbox_format": "[left, top, right, bottom], right/bottom exclusive",
+            "error_locations": "JSON paths point directly to the field that requires review.",
+            "severity_levels": {"info": "review", "warning": "manual confirmation required", "fail": "approval blocked"},
+            "threshold_suggestions": {
+                "minimum_component_pixels": {
+                    "current": minimum_component_pixels,
+                    "lower_when": "Expected small assets are missing.",
+                    "raise_when": "Noise produces many tiny candidates.",
+                },
+                "bbox_padding": {
+                    "current": bbox_padding,
+                    "suggested_range": [4, 12],
+                    "raise_when": "A candidate outline or glow touches its bbox.",
+                },
+                "background_threshold": {
+                    "current": background_threshold,
+                    "suggested_transparent_threshold": background.get("transparent_threshold"),
+                    "suggested_opaque_threshold": background.get("opaque_threshold"),
+                    "auto_apply": background.get("threshold_diagnostics", {}).get("auto_apply"),
+                },
+                "bbox_visible_alpha": {
+                    "current": 16,
+                    "reason": "Ignore sub-visible cleanup residue while still blocking visibly cropped foreground.",
+                },
+            },
+        },
         "normalization": {
             "target_size": CATEGORY_DEFAULTS[category]["target_size"],
             "padding": 8,
@@ -323,7 +448,7 @@ def main() -> None:
     )
     write_json(args.json_out, diagnosis)
     write_json(args.corrections_out, corrections)
-    render_overlay(source, corrections["assets"], args.preview_out, diagnosis["status"])
+    render_overlay(source, corrections["assets"], args.preview_out, diagnosis["status"], diagnosis["issues"])
     print(json.dumps(diagnosis, ensure_ascii=False))
     if diagnosis["status"] == "manual-review-required":
         raise SystemExit(2)

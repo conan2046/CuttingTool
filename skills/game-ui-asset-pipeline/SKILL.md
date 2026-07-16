@@ -95,7 +95,7 @@ ${CODEX_HOME:-$HOME/.codex}/skills/.system/imagegen/SKILL.md
   --preview-out output/run/qa/bbox-preview.png
 ```
 
-查看标注预览并编辑修正 JSON。只有背景可安全透明化、bbox 完整且语义命名确认后，才设置 `approved=true`，然后运行：
+标注预览必须显示候选编号、问题类型和严重级别。修正 JSON 的候选项包含原始检测框、字段级错误位置和阈值建议；查看预览并编辑语义、bbox、启用状态和编号。只有背景可安全透明化、bbox 完整且语义命名确认后，才设置 `approved=true`，然后运行：
 
 ```bash
 "$PYTHON" scripts/apply_bbox_corrections.py \
@@ -106,6 +106,8 @@ ${CODEX_HOME:-$HOME/.codex}/skills/.system/imagegen/SKILL.md
 ```
 
 假棋盘格是烘焙进 RGB 的展示背景，不是真实 Alpha。允许输出诊断和候选框，但禁止把它直接转换成正式透明资源；要求重新生成纯色色键图或提供真实 Alpha。
+
+应用修正前必须完成结构化预检。越界、重叠、可见前景裁断和分类编号不连续时，写出 `qa/correction-validation.json` 与 `qa/bbox-diff-preview.png`，但不得写正式 Manifest。裁断检查默认只统计 `alpha >= 16` 的可见像素，避免亚可见色键清理残留误报；修正成功时同样保留修正前后差异图，供视觉验收。
 
 ## 默认工作流
 

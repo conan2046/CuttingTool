@@ -11,13 +11,21 @@ from pathlib import Path
 from typing import Any
 
 import numpy as np
-from PIL import Image
+from PIL import Image, ImageDraw, ImageFont
 
 from extract_sheet_assets import CATEGORY_PREFIX, pascal_case
 from make_contact_sheet import make_contact_sheet
 from normalize_assets import normalize_image
 from remove_chroma_key import parse_hex_color, remove_chroma
 from validate_asset_pack import validate_pack
+
+
+def preview_font(width: int) -> ImageFont.ImageFont | ImageFont.FreeTypeFont:
+    size = max(12, min(24, width // 80))
+    try:
+        return ImageFont.truetype("arial.ttf", size)
+    except OSError:
+        return ImageFont.load_default()
 
 
 def read_json(path: Path) -> dict[str, Any]:
@@ -64,6 +72,312 @@ def boxes_overlap(left: list[int], right: list[int]) -> bool:
     return max(left[0], right[0]) < min(left[2], right[2]) and max(left[1], right[1]) < min(left[3], right[3])
 
 
+def correction_issue(
+    code: str,
+    message: str,
+    location: str,
+    suggestion: str,
+    **details: Any,
+) -> dict[str, Any]:
+    return {
+        "severity": "fail",
+        "code": code,
+        "message": message,
+        "location": location,
+        "suggestion": suggestion,
+        **details,
+    }
+
+
+def manual_action_required(issues: list[dict[str, Any]]) -> list[str]:
+    references: set[str] = set()
+    for item in issues:
+        if item.get("source_index") is not None:
+            references.add(str(item["source_index"]))
+        for source_index in item.get("source_indices", []):
+            references.add(str(source_index))
+        if item.get("location"):
+            references.add(str(item["location"]))
+        elif item.get("file"):
+            references.add(str(item["file"]))
+        elif item.get("code"):
+            references.add(str(item["code"]))
+    return sorted(references)
+
+
+def validate_correction_assets(
+    alpha_source: Image.Image,
+    corrections: dict[str, Any],
+) -> tuple[list[dict[str, Any]], list[dict[str, Any]]]:
+    visible_alpha_threshold = int(
+        corrections.get("review_guidance", {})
+        .get("threshold_suggestions", {})
+        .get("bbox_visible_alpha", {})
+        .get("current", 16)
+    )
+    enabled_with_positions = [
+        (position, asset)
+        for position, asset in enumerate(corrections.get("assets", []))
+        if asset.get("enabled", True)
+    ]
+    issues: list[dict[str, Any]] = []
+    valid_boxes: dict[int, list[int]] = {}
+    seen_source_indices: dict[int, int] = {}
+    category_indices: dict[str, list[tuple[int, int]]] = {}
+    for position, asset in enabled_with_positions:
+        location = f"assets[{position}]"
+        try:
+            source_index = int(asset.get("source_index", position + 1))
+        except (TypeError, ValueError):
+            source_index = position + 1
+            issues.append(
+                correction_issue(
+                    "invalid-source-index",
+                    "source_index must be an integer.",
+                    f"{location}.source_index",
+                    f"Set source_index to {position + 1}.",
+                )
+            )
+        if source_index in seen_source_indices:
+            issues.append(
+                correction_issue(
+                    "duplicate-source-index",
+                    f"source_index {source_index} is used by more than one enabled asset.",
+                    f"{location}.source_index",
+                    "Assign a unique source_index to every enabled candidate.",
+                    source_index=source_index,
+                    conflicting_location=f"assets[{seen_source_indices[source_index]}].source_index",
+                )
+            )
+        else:
+            seen_source_indices[source_index] = position
+
+        raw_bbox = asset.get("bbox", [])
+        try:
+            bbox = [int(value) for value in raw_bbox]
+        except (TypeError, ValueError):
+            bbox = []
+        if len(bbox) != 4:
+            issues.append(
+                correction_issue(
+                    "invalid-bbox-shape",
+                    "bbox must contain exactly four integer coordinates.",
+                    f"{location}.bbox",
+                    "Use [left, top, right, bottom] with right/bottom exclusive.",
+                    source_index=source_index,
+                    bbox=raw_bbox,
+                )
+            )
+            continue
+        clamped = [
+            max(0, min(alpha_source.width, bbox[0])),
+            max(0, min(alpha_source.height, bbox[1])),
+            max(0, min(alpha_source.width, bbox[2])),
+            max(0, min(alpha_source.height, bbox[3])),
+        ]
+        if bbox[0] < 0 or bbox[1] < 0 or bbox[2] > alpha_source.width or bbox[3] > alpha_source.height:
+            issues.append(
+                correction_issue(
+                    "bbox-out-of-bounds",
+                    f"bbox {bbox} exceeds image bounds {[alpha_source.width, alpha_source.height]}.",
+                    f"{location}.bbox",
+                    f"Clamp to {clamped}, then verify the candidate is still complete.",
+                    source_index=source_index,
+                    bbox=bbox,
+                    recommended_bbox=clamped,
+                )
+            )
+            continue
+        if bbox[0] >= bbox[2] or bbox[1] >= bbox[3]:
+            issues.append(
+                correction_issue(
+                    "empty-bbox",
+                    f"bbox {bbox} has zero or negative area.",
+                    f"{location}.bbox",
+                    "Set right > left and bottom > top around one visible asset.",
+                    source_index=source_index,
+                    bbox=bbox,
+                )
+            )
+            continue
+        valid_boxes[position] = bbox
+
+        category = str(asset.get("category", ""))
+        if category not in CATEGORY_PREFIX:
+            issues.append(
+                correction_issue(
+                    "unsupported-category",
+                    f"Unsupported internal category: {category!r}.",
+                    f"{location}.category",
+                    "Use one of: " + ", ".join(sorted(CATEGORY_PREFIX)),
+                    source_index=source_index,
+                )
+            )
+        try:
+            category_index = int(asset.get("category_index"))
+            category_indices.setdefault(category, []).append((position, category_index))
+        except (TypeError, ValueError):
+            issues.append(
+                correction_issue(
+                    "invalid-category-index",
+                    "category_index must be an integer.",
+                    f"{location}.category_index",
+                    "Assign continuous category indices starting at 1.",
+                    source_index=source_index,
+                )
+            )
+
+    for left_offset, (left_position, left_asset) in enumerate(enabled_with_positions):
+        left_bbox = valid_boxes.get(left_position)
+        if left_bbox is None:
+            continue
+        for right_position, right_asset in enabled_with_positions[left_offset + 1 :]:
+            right_bbox = valid_boxes.get(right_position)
+            if right_bbox is not None and boxes_overlap(left_bbox, right_bbox):
+                issues.append(
+                    correction_issue(
+                        "overlapping-corrections",
+                        "Two enabled bboxes overlap.",
+                        f"assets[{left_position}].bbox <-> assets[{right_position}].bbox",
+                        "Move or shrink the boxes so each visible resource belongs to exactly one candidate.",
+                        source_indices=[left_asset.get("source_index"), right_asset.get("source_index")],
+                        bboxes=[left_bbox, right_bbox],
+                    )
+                )
+
+    for category, values in category_indices.items():
+        if category not in CATEGORY_PREFIX:
+            continue
+        actual = sorted(value for _, value in values)
+        expected = list(range(1, len(values) + 1))
+        if actual != expected:
+            for position, value in values:
+                issues.append(
+                    correction_issue(
+                        "non-continuous-category-index",
+                        f"Category {category} indices are {actual}; expected {expected}.",
+                        f"assets[{position}].category_index",
+                        "Renumber enabled assets continuously from 1 in reading order.",
+                        source_index=corrections["assets"][position].get("source_index"),
+                        actual=value,
+                        expected=expected,
+                    )
+                )
+
+    for position, asset in enabled_with_positions:
+        bbox = valid_boxes.get(position)
+        if bbox is None:
+            continue
+        crop = alpha_source.crop(tuple(bbox))
+        alpha = np.asarray(crop.getchannel("A"), dtype=np.uint8)
+        visible = alpha >= visible_alpha_threshold
+        visible_image = Image.fromarray((visible.astype(np.uint8) * 255), mode="L")
+        alpha_bbox = visible_image.getbbox()
+        source_index = int(asset.get("source_index", position + 1))
+        if alpha_bbox is None:
+            issues.append(
+                correction_issue(
+                    "empty-correction",
+                    "The bbox contains no visible foreground after background cleanup.",
+                    f"assets[{position}].bbox",
+                    "Move the bbox onto the marked candidate or disable this asset.",
+                    source_index=source_index,
+                    bbox=bbox,
+                )
+            )
+            continue
+        touches = [
+            side
+            for side, value in zip(
+                ("left", "top", "right", "bottom"),
+                (alpha_bbox[0] == 0, alpha_bbox[1] == 0, alpha_bbox[2] == crop.width, alpha_bbox[3] == crop.height),
+            )
+            if value
+        ]
+        if touches:
+            margin = 4
+            recommended = [
+                max(0, bbox[0] - (margin if "left" in touches else 0)),
+                max(0, bbox[1] - (margin if "top" in touches else 0)),
+                min(alpha_source.width, bbox[2] + (margin if "right" in touches else 0)),
+                min(alpha_source.height, bbox[3] + (margin if "bottom" in touches else 0)),
+            ]
+            issues.append(
+                correction_issue(
+                    "bbox-cuts-foreground",
+                    "Visible foreground touches bbox edge(s): " + ", ".join(touches) + ".",
+                    f"assets[{position}].bbox",
+                    f"Expand toward the marked edge(s), starting with {recommended}; if already at canvas edge, replace the cropped source.",
+                    source_index=source_index,
+                    bbox=bbox,
+                    touched_edges=touches,
+                    recommended_bbox=recommended,
+                    suggested_safety_margin=margin,
+                    visible_alpha_threshold=visible_alpha_threshold,
+                )
+            )
+    return [asset for _, asset in enabled_with_positions], issues
+
+
+def render_correction_diff(
+    source: Image.Image,
+    corrections: dict[str, Any],
+    issues: list[dict[str, Any]],
+    output: Path,
+) -> None:
+    base = source.convert("RGB")
+    header = 32
+    preview = Image.new("RGB", (base.width * 2, base.height + header), "#111827")
+    preview.paste(base, (0, header))
+    preview.paste(base, (base.width, header))
+    draw = ImageDraw.Draw(preview)
+    font = preview_font(base.width)
+    draw.text((8, 10), "BEFORE: detected bbox", fill="#93C5FD", font=font)
+    draw.text((base.width + 8, 10), "AFTER: approved correction", fill="#86EFAC", font=font)
+    failing_indices = {
+        str(value)
+        for item in issues
+        for value in ([item.get("source_index")] + list(item.get("source_indices", [])))
+        if value is not None
+    }
+    for position, asset in enumerate(corrections.get("assets", [])):
+        if not asset.get("enabled", True):
+            continue
+        source_index = asset.get("source_index", position + 1)
+        original = asset.get("detected_bbox", asset.get("bbox", []))
+        corrected = asset.get("bbox", [])
+        if len(original) == 4:
+            draw.rectangle(
+                (original[0], original[1] + header, max(original[0], original[2] - 1), max(original[1] + header, original[3] + header - 1)),
+                outline="#60A5FA",
+                width=3,
+            )
+            draw.text((original[0] + 2, original[1] + header + 2), f"#{int(source_index):03d}", fill="#FFFFFF", font=font)
+        if len(corrected) == 4:
+            offset = base.width
+            color = "#EF4444" if str(source_index) in failing_indices else "#22C55E"
+            draw.rectangle(
+                (
+                    corrected[0] + offset,
+                    corrected[1] + header,
+                    max(corrected[0] + offset, corrected[2] + offset - 1),
+                    max(corrected[1] + header, corrected[3] + header - 1),
+                ),
+                outline=color,
+                width=3,
+            )
+            changed = " changed" if list(original) != list(corrected) else " unchanged"
+            draw.text(
+                (corrected[0] + offset + 2, corrected[1] + header + 2),
+                f"#{int(source_index):03d}{changed}",
+                fill="#FFFFFF",
+                font=font,
+            )
+    output = output.expanduser().resolve()
+    output.parent.mkdir(parents=True, exist_ok=True)
+    preview.save(output, format="PNG")
+
+
 def apply_corrections(
     source: Image.Image,
     corrections: dict[str, Any],
@@ -83,26 +397,66 @@ def apply_corrections(
         raise ValueError(f"source size {source.size} does not match correction image_size {image_size}")
     alpha_source, background_report = prepare_transparency(source, corrections.get("background", {}))
 
-    enabled_assets = [asset for asset in corrections.get("assets", []) if asset.get("enabled", True)]
+    enabled_assets, preflight_issues = validate_correction_assets(alpha_source, corrections)
     if not enabled_assets:
         raise ValueError("correction file contains no enabled assets")
+    qa_dir = run_dir / "qa"
+    diff_path = qa_dir / "bbox-diff-preview.png"
+    render_correction_diff(source, corrections, preflight_issues, diff_path)
+    correction_validation_path = qa_dir / "correction-validation.json"
+    correction_validation = {
+        "schema_version": 2,
+        "ok": not preflight_issues,
+        "error_count": len(preflight_issues),
+        "issues": preflight_issues,
+        "threshold_suggestions": corrections.get("review_guidance", {}).get("threshold_suggestions", {}),
+        "difference_preview": relative(diff_path, run_dir),
+    }
+    write_json(correction_validation_path, correction_validation)
+    if preflight_issues:
+        actions = manual_action_required(preflight_issues)
+        qa_report = {
+            "schema_version": 2,
+            "ok": False,
+            "expected_count": len(enabled_assets),
+            "manifest_count": 0,
+            "valid_assets": 0,
+            "pass_count": 0,
+            "warning_count": 0,
+            "fail_count": len(preflight_issues),
+            "issues": preflight_issues,
+            "manual_action_required": actions,
+            "correction_validation": relative(correction_validation_path, run_dir),
+            "difference_preview": relative(diff_path, run_dir),
+        }
+        qa_path = qa_dir / "qa-report.json"
+        write_json(qa_path, qa_report)
+        summary = {
+            "schema_version": 2,
+            "project_id": project_id,
+            "status": "failed",
+            "source_mode": "bbox-corrections",
+            "pipeline": {
+                "manifest": None,
+                "contact_sheet": None,
+                "qa_report": relative(qa_path, run_dir),
+                "correction_validation": relative(correction_validation_path, run_dir),
+                "bbox_difference_preview": relative(diff_path, run_dir),
+            },
+            "results": {
+                "expected": len(enabled_assets),
+                "exported": 0,
+                "pass": 0,
+                "warning": 0,
+                "fail": len(preflight_issues),
+                "manual_action_required": actions,
+            },
+            "completed_at": datetime.now(timezone.utc).isoformat(),
+        }
+        write_json(qa_dir / "run-summary.json", summary)
+        return {"ok": False, "run_dir": str(run_dir), **summary["results"]}
+
     issues: list[dict[str, Any]] = []
-    for index, asset in enumerate(enabled_assets):
-        bbox = [int(value) for value in asset.get("bbox", [])]
-        if len(bbox) != 4 or bbox[0] < 0 or bbox[1] < 0 or bbox[2] > source.width or bbox[3] > source.height:
-            raise ValueError(f"invalid bbox for source_index={asset.get('source_index')}: {bbox}")
-        if bbox[0] >= bbox[2] or bbox[1] >= bbox[3]:
-            raise ValueError(f"empty bbox for source_index={asset.get('source_index')}: {bbox}")
-        for other in enabled_assets[index + 1 :]:
-            other_bbox = [int(value) for value in other.get("bbox", [])]
-            if len(other_bbox) == 4 and boxes_overlap(bbox, other_bbox):
-                issues.append(
-                    {
-                        "severity": "fail",
-                        "code": "overlapping-corrections",
-                        "source_indices": [asset.get("source_index"), other.get("source_index")],
-                    }
-                )
 
     normalization = corrections.get("normalization", {})
     entries: list[dict[str, Any]] = []
@@ -121,9 +475,7 @@ def apply_corrections(
         if alpha_bbox is None:
             issues.append({"severity": "fail", "code": "empty-correction", "source_index": source_index})
             continue
-        cuts_foreground = alpha_bbox[0] == 0 or alpha_bbox[1] == 0 or alpha_bbox[2] == crop.width or alpha_bbox[3] == crop.height
-        if cuts_foreground:
-            issues.append({"severity": "fail", "code": "bbox-cuts-foreground", "source_index": source_index, "bbox": bbox})
+        cuts_foreground = False
 
         target_value = asset.get("target_size", normalization.get("target_size"))
         target_size = tuple(int(value) for value in target_value) if target_value else None
@@ -194,9 +546,9 @@ def apply_corrections(
         "warning_count": len(warnings),
         "fail_count": len(failures),
         "issues": issues,
-        "manual_action_required": sorted(
-            {str(issue.get("source_index") or issue.get("file") or issue.get("code")) for issue in failures}
-        ),
+        "manual_action_required": manual_action_required(failures),
+        "correction_validation": relative(correction_validation_path, run_dir),
+        "difference_preview": relative(diff_path, run_dir),
     }
     qa_path = run_dir / "qa" / "qa-report.json"
     write_json(qa_path, qa_report)
@@ -210,6 +562,8 @@ def apply_corrections(
             "manifest": relative(final_manifest_path, run_dir),
             "contact_sheet": relative(contact_path, run_dir),
             "qa_report": relative(qa_path, run_dir),
+            "correction_validation": relative(correction_validation_path, run_dir),
+            "bbox_difference_preview": relative(diff_path, run_dir),
         },
         "results": {
             "expected": len(enabled_assets),

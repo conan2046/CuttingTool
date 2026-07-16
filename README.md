@@ -34,8 +34,9 @@
 - QA 同时检查近纯色键残留和连续色键通道偏色，避免只靠欧氏距离漏掉肉眼可见的绿边、品红边或青边。
 - 一键处理所有已生成 Sheet，自动输出总 Manifest 和 `run-summary.json`。
 - 诊断没有布局信息的未知整图，识别真实 Alpha、纯色背景、假棋盘格和无法解析的混合背景。
-- 输出可编辑 bbox JSON 和标注预览，不依赖桌面 GUI 完成人工校正。
+- 输出可编辑 bbox JSON 和标注预览；候选框带编号、问题类型和严重级别，JSON 带字段级错误路径和阈值建议。
 - 使用批准后的 bbox 直接生成透明资源包、Manifest、Contact Sheet 和 QA。
+- 应用前拦截越界、重叠、可见前景裁断和编号错误；失败不写正式 Manifest，并生成修正前后差异预览。
 - 九类标准资源均有静态 eval 和真实 Codex 新任务触发验收。
 
 碎片策略真实校准样本位于 `output/p2-fragment-calibration`：面板、按钮、装备、技能共 16 件，包含尖角、链条、悬挂件、独立符文和硬边火花。
@@ -120,7 +121,7 @@ qa/run-summary.json
   --preview-out .\output\unknown-ui\qa\bbox-preview.png
 ```
 
-检查预览，修改语义名、分类、状态、bbox 和启用状态；确认后设置 `approved=true`：
+检查候选编号、问题类型、严重级别和 JSON 中的字段定位/阈值建议，修改语义名、分类、状态、bbox 和启用状态；确认后设置 `approved=true`：
 
 ```powershell
 & $PYTHON .\skills\game-ui-asset-pipeline\scripts\apply_bbox_corrections.py `
@@ -131,6 +132,15 @@ qa/run-summary.json
 ```
 
 详细规则见 [unknown-sheet-contract.md](skills/game-ui-asset-pipeline/references/unknown-sheet-contract.md)。假棋盘格只允许诊断，不允许冒充真实透明资源导出。
+
+应用后额外输出：
+
+```text
+qa/correction-validation.json
+qa/bbox-diff-preview.png
+```
+
+真实未知整图验收样本位于 `output/p3-unknown-sheet-real`：以一张没有 Layout Guide 的 12 件品红色键道具整图完成诊断、人工语义/bbox 修正、差异预览、透明导出和视觉 QA。
 
 ## 单分类调试流程
 

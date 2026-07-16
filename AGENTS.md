@@ -350,7 +350,7 @@ GPT Image 2 不提供原生透明背景时，默认使用：
 
 未知整图必须分类为 `alpha-sheet`、`flat-background-sheet`、`checkerboard-presentation` 或 `opaque-mixed-image`。只有前两类允许进入 bbox 修正导出；假棋盘格和未解析背景必须返回失败并说明需要重新生成或提供真实 Alpha。
 
-候选 bbox 首次输出时 `approved` 必须为 `false`。Codex 查看标注预览并确认数量、边界、语义、分类、状态、启用项和连续编号后，才能改为 `true`。修正文件是当前无 GUI 工作流的正式人工介入点。
+候选 bbox 首次输出时 `approved` 必须为 `false`。标注预览必须显示候选编号、问题类型和严重级别；修正 JSON 必须保存原始检测框、候选级问题、字段级错误路径及组件、留白、背景和最低可见 Alpha 阈值建议。Codex 查看标注预览并确认数量、边界、语义、分类、状态、启用项和连续编号后，才能改为 `true`。修正文件是当前无 GUI 工作流的正式人工介入点。
 
 ### 2. 连通域处理
 
@@ -465,7 +465,7 @@ output/<project-id>-<timestamp>/
 
 多分类或多 Sheet 任务先运行 `prepare_ui_batch.py` 生成 Job、独立请求、Prompt 和 Layout Guide。所有 `generated_output` 就绪后运行 `run_ui_pipeline.py --run-dir <run-dir>`；Runner 负责原生 Alpha/色键分流、单次生产尺寸归一、逐 Job 切割、分类连续编号、总 Manifest、Contact Sheet、严格 QA 和 `run-summary.json`。Runner 不调用图片 API，缺少任何生成 Sheet 时必须在写入正式输出前失败。
 
-未知整图先运行 `diagnose_ui_sheet.py`，输出 `input-diagnosis.json`、`bbox-corrections.json` 和 `bbox-preview.png`。修正确认后运行 `apply_bbox_corrections.py`；脚本必须拒绝未批准修正、假棋盘格、未解析背景、bbox 越界、bbox 重叠、bbox 切断前景和非连续编号。
+未知整图先运行 `diagnose_ui_sheet.py`，输出 `input-diagnosis.json`、`bbox-corrections.json` 和 `bbox-preview.png`。修正确认后运行 `apply_bbox_corrections.py`；脚本必须在正式导出前拒绝未批准修正、假棋盘格、未解析背景、bbox 越界、bbox 重叠、bbox 可见前景裁断和非连续编号。预检失败只允许写结构化错误报告、失败摘要和 `bbox-diff-preview.png`，不得创建正式 Manifest；成功时也保留差异预览用于视觉验收。裁断默认以 `alpha >= 16` 为可见阈值，避免低 Alpha 清理残留误报。
 
 只有在输出已经复制到项目运行目录、完成验证后，才能清理生成目录中的临时副本。
 
@@ -595,6 +595,8 @@ fail     禁止进入正式输出
 - 偏移色键背景可安全自适应、近色主体阻断自动采用、重污染边框降为低置信度的失败矩阵。
 - 文件重名。
 - Manifest 与文件不一致。
+- bbox 修正的越界、重叠、可见裁断、非连续编号、字段级错误定位和建议值。
+- 修正前后差异预览必须标明 detected/approved 及 changed/unchanged，并完成视觉检查。
 
 至少保留三类端到端样本：
 

@@ -4,7 +4,7 @@
 > 工作目录：`D:\CuttingTool`  
 > 仓库：`https://github.com/conan2046/CuttingTool.git`  
 > 分支：`main`  
-> 已完成功能基线：v0.5.0 P2 碎片策略真实校准
+> 已完成功能基线：v0.6.0 P3 轻量人工校正体验
 
 ## 1. 新会话先做什么
 
@@ -132,6 +132,15 @@ game-ui-asset-pipeline
 - P2 真实回归 16 pass / 0 warning / 0 fail；旧三风格回归 36 pass / 0 warning / 0 fail。
 - 产物：`output/p2-fragment-calibration`。
 
+### 3.8 v0.6.0：P3 轻量人工校正体验
+
+- bbox 预览显示候选编号、问题类型、严重级别和全局背景失败原因。
+- 修正 JSON 保存 `detected_bbox`、候选级 review、字段级错误路径和组件/留白/背景/最低可见 Alpha 阈值建议。
+- 应用前结构化拦截越界、重叠、可见前景裁断和非连续编号；失败不写正式 Manifest。
+- 成功和失败均生成 `correction-validation.json` 与 `bbox-diff-preview.png`。
+- 使用真实 12 件品红色键未知整图完成诊断、人工修正、透明导出和视觉验收：12 pass / 0 warning / 0 fail。
+- 源码测试：49/49 通过；真实验收产物：`output/p3-unknown-sheet-real`。
+
 ## 4. 当前卡在哪
 
 没有代码阻塞、测试阻塞或 Git 阻塞。当前是阶段完成后的会话收口点。
@@ -160,11 +169,11 @@ game-ui-asset-pipeline
 
 - 已完成真实资源、分类参数、远离小碎片策略、测试、契约和文档同步。
 
-### P3：轻量人工校正体验
+### P3：轻量人工校正体验（已完成）
 
-1. 继续增强 JSON bbox 修正、标注预览和 Contact Sheet。
-2. 可增加更明确的问题定位、候选框编号、阈值建议和修正前后差异预览。
-3. 优先做 Codex 可操作的轻量方式，不开发桌面 GUI。
+1. 已完成 JSON bbox 修正、标注预览、结构化预检和差异预览。
+2. 已补齐越界、重叠、裁断、编号错误矩阵。
+3. 保持 Codex 可操作的轻量方式，未开发桌面 GUI。
 
 ### P4：扩充失败矩阵
 
@@ -310,6 +319,6 @@ $PYTHON = 'C:\Users\Admin\.cache\codex-runtimes\codex-primary-runtime\dependenci
 ## 8. 最终状态
 
 - `c8666b8` 已推送至 `origin/main`。
-- v0.5.0 P2 碎片策略真实校准已完成；最终测试与安装态数量以 CHANGELOG 最新记录为准。
-- 下一阶段直接进入 P3 轻量人工校正体验，不重做 P1/P2 样本。
+- v0.6.0 P3 轻量人工校正体验已完成；最终测试与安装态数量以 CHANGELOG 最新记录为准。
+- 下一阶段直接进入 P4 失败矩阵扩充，不重做 P1/P2/P3 样本。
 - GUI 继续保持最低优先级。
