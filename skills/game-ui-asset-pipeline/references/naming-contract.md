@@ -66,6 +66,7 @@ button-sheet-01.png
       "state": "Default",
       "source_sheet": "generated/icon-item-sheet-01.png",
       "source_index": 1,
+      "category_index": 1,
       "source_bbox": [80, 96, 440, 460],
       "output": "final/Icon_Item/06_Icon_Item_HealthPotion_Default_001.png",
       "width": 128,
@@ -73,6 +74,7 @@ button-sheet-01.png
       "padding": 8,
       "alignment": "center",
       "pivot": [0.5, 0.5],
+      "chroma_key": "#00FF00",
       "qa": "pass"
     }
   ]
@@ -85,7 +87,10 @@ button-sheet-01.png
 - 使用相对运行目录的路径。
 - 字段顺序保持稳定，便于版本比较。
 - `source_index` 使用从 1 开始的视觉顺序。
+- `category_index` 在同一分类内跨 Sheet 连续，决定文件名末尾编号。
 - `source_bbox` 使用 `[left, top, right, bottom]`。
+- `source_sheet` 和 `output` 使用相对于运行目录的路径。
+- 原生 Alpha 输入的 `chroma_key` 为 `null`；色键输入记录实际使用的色键。
 - 每个 Manifest 条目必须对应一个实际文件。
 - 每个实际正式输出文件必须存在一个 Manifest 条目。
 - `qa` 只能为 `pass`、`warning` 或 `fail`。

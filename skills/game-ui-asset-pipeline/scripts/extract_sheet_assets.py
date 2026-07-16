@@ -190,6 +190,9 @@ def extract_assets(
 
     for visual_index, asset in enumerate(assets, start=1):
         components = assigned_components[visual_index - 1]
+        category_index = int(asset.get("category_index", visual_index))
+        if category_index <= 0:
+            raise ValueError("asset category_index must be positive")
 
         if not components:
             issues.append({"severity": "fail", "code": "empty-slot", "source_index": visual_index})
@@ -218,7 +221,7 @@ def extract_assets(
         semantic_name = pascal_case(str(asset.get("semantic_name", "")), f"Asset{visual_index:03d}")
         state = pascal_case(str(asset.get("state", "Default")), "Default")
         filename = (
-            f"{CATEGORY_PREFIX[category]}_{category}_{semantic_name}_{state}_{visual_index:03d}.png"
+            f"{CATEGORY_PREFIX[category]}_{category}_{semantic_name}_{state}_{category_index:03d}.png"
         )
         extracted = source.crop(bbox)
         output_path = output_dir / filename
@@ -231,6 +234,7 @@ def extract_assets(
                 "semantic_name": semantic_name,
                 "state": state,
                 "source_index": visual_index,
+                "category_index": category_index,
                 "source_bbox": source_bbox,
                 "output": output_path.name,
                 "width": extracted.width,

@@ -46,6 +46,7 @@ description: 生成、拆分、透明化、校验并打包游戏 UI 位图资源
 - 构建 GPT Image 提示词时，读取 `references/generation-contract.md`。
 - 生成布局引导图或确定槽位时，读取 `references/sheet-layout-contract.md`。
 - 导出文件和 Manifest 时，读取 `references/naming-contract.md`。
+- 同一任务包含多个分类或需要自动拆分多张 Sheet 时，读取 `references/batch-request-contract.md`。
 
 不要一次加载无关参考文件。
 
@@ -120,6 +121,16 @@ ${CODEX_HOME:-$HOME/.codex}/skills/.system/imagegen/SKILL.md
 
 按钮状态应作为同组任务生成，以保持轮廓一致。图标本体和品质框默认分开生成，以便运行时组合。
 
+多分类或超出单张容量时，先建立批量请求 JSON，再运行：
+
+```bash
+"$PYTHON" scripts/prepare_ui_batch.py \
+  --request batch-request.json \
+  --output-dir output/<project-id>
+```
+
+批量准备器按分类容量自动拆成多个 Job，并保持同一语义名的按钮状态组不跨 Sheet。逐个使用 `$imagegen` 生成 `jobs.json` 指定的 `generated_output`；不要改写 Job 文件名或布局关系。
+
 ### 4. 生成布局引导图
 
 为每个 Sheet 建立确定性 Layout Guide。它只表达：
@@ -143,6 +154,17 @@ ${CODEX_HOME:-$HOME/.codex}/skills/.system/imagegen/SKILL.md
 要求模型输出准确数量、互不接触、完整居中、纯色色键背景的资源。生成后立即检查数量、分离度、边缘裁切、网格污染和风格一致性。
 
 ### 6. 确定性后处理
+
+批量运行目录中的所有生成图就绪后，优先使用统一 Runner：
+
+```bash
+"$PYTHON" scripts/run_ui_pipeline.py \
+  --run-dir output/<project-id>
+```
+
+Runner 自动识别原生 Alpha 或色键背景，必要时将生成图单次缩放到生产画布，依次完成背景清理、切割、归一化、正式 Manifest、Contact Sheet、严格 QA 和 `run-summary.json`。默认拒绝覆盖已有正式 Manifest；明确重跑时使用 `--force`。
+
+以下分步命令保留用于单 Sheet 调试和人工校正：
 
 按输入条件选择：
 
@@ -266,6 +288,7 @@ output/<project-id>-<timestamp>/
 ├─ request.json
 ├─ jobs.json
 ├─ references/
+├─ requests/
 ├─ prompts/
 ├─ generated/
 ├─ extracted/

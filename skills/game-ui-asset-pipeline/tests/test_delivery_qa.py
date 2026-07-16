@@ -107,6 +107,16 @@ class DeliveryQaTest(unittest.TestCase):
             self.assertFalse(report["ok"])
             self.assertIn("visible-chroma-residue", {issue["code"] for issue in report["issues"]})
 
+    def test_non_continuous_category_indices_fail(self) -> None:
+        with tempfile.TemporaryDirectory() as temporary_directory:
+            root = Path(temporary_directory)
+            manifest = self.create_pack(root)
+            manifest["assets"][0]["category_index"] = 1
+            manifest["assets"][1]["category_index"] = 3
+            report = VALIDATE.validate_pack(manifest, root, {"chroma_key": "#00FF00"})
+            self.assertFalse(report["ok"])
+            self.assertIn("non-continuous-category-indices", {issue["code"] for issue in report["issues"]})
+
 
 if __name__ == "__main__":
     unittest.main()
