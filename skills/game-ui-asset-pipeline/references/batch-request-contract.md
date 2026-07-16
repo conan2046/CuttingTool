@@ -56,6 +56,9 @@
 | `chroma_key` | 否 | `auto` 或 `#RRGGBB` |
 | `subject_uses_green` | 否 | `true` 时自动使用品红色键 |
 | `allow_attached_glow` | 否 | 是否允许紧贴主体的硬边光效 |
+| `fragment_policy` | 否 | 碎片策略覆盖；默认使用分类级校准参数 |
+
+`fragment_policy` 可配置 `merge_distance`、`merge_distance_ratio`、`merge_distance_max`、`major_component_ratio`。远离小组件默认 warning；只有明确设置 `detached_action: "allow-small"`，并同时提供正数 `small_detached_max_pixels` 和 `small_detached_max_anchor_ratio`，才允许保留该组件但不产生 warning。此模式不会删除组件，Manifest 仍记录接受数量。
 
 ## 拆 Sheet 规则
 

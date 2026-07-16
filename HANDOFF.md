@@ -4,7 +4,7 @@
 > 工作目录：`D:\CuttingTool`  
 > 仓库：`https://github.com/conan2046/CuttingTool.git`  
 > 分支：`main`  
-> 已完成功能基线：v0.4.0 三风格真实生产回归与跨色键净边修复
+> 已完成功能基线：v0.5.0 P2 碎片策略真实校准
 
 ## 1. 新会话先做什么
 
@@ -122,6 +122,16 @@ game-ui-asset-pipeline
 - 三组回归合计：36 pass、0 warning、0 fail；三份 Contact Sheet 已人工检查。
 - 回归产物：`output/dark-metal-regression-a`、`output/bright-cartoon-regression-b`、`output/lowlight-dark-regression-c`。
 
+### 3.7 v0.5.0：P2 碎片策略真实校准
+
+- 使用内置 `imagegen` 生成 Panel、Button、Icon_Equip、Icon_Skill 共 4 张真实校准 Sheet、16 件资源。
+- 样本覆盖尖角、链条、悬挂件、独立符文和硬边火花。
+- 统一 `15%` 合并比例改为分类级比例与像素上限，避免大面板按比例放宽到约 170–195px。
+- Panel `0.06/64px`、Button `0.06/48px`、常规128图标 `0.12/48px`、Skill `0.15/96px`、Effect `0.18/128px`。
+- 远离组件默认继续 warning；显式 `allow-small` 只接受绝对像素与锚点面积比例双重限制内的小组件，保留像素并记录，不接受显著第二主体。
+- P2 真实回归 16 pass / 0 warning / 0 fail；旧三风格回归 36 pass / 0 warning / 0 fail。
+- 产物：`output/p2-fragment-calibration`。
+
 ## 4. 当前卡在哪
 
 没有代码阻塞、测试阻塞或 Git 阻塞。当前是阶段完成后的会话收口点。
@@ -146,12 +156,9 @@ game-ui-asset-pipeline
 - 绿色、品红、青色第三色键均完成 Runner、Manifest、Contact Sheet、QA 和阈值诊断。
 - 真实发现的漂白、缩放残色和互补色边缘偏色均已转成持久测试。
 
-### P2：碎片策略真实校准
+### P2：碎片策略真实校准（已完成）
 
-1. 用装备尖角、链条、按钮装饰、技能硬边火花等真实资源验证合并距离。
-2. 检查大面板和 128×128 图标是否需要分类级默认参数。
-3. 评估远离小碎片应保持 warning，还是在明确配置下允许忽略。
-4. 如果修改阈值，必须同时更新测试、参考契约、README、AGENTS 和 CHANGELOG。
+- 已完成真实资源、分类参数、远离小碎片策略、测试、契约和文档同步。
 
 ### P3：轻量人工校正体验
 
@@ -303,6 +310,6 @@ $PYTHON = 'C:\Users\Admin\.cache\codex-runtimes\codex-primary-runtime\dependenci
 ## 8. 最终状态
 
 - `c8666b8` 已推送至 `origin/main`。
-- v0.4.0 三风格真实生产回归已完成；源码/安装态 41/41 通过，Skill 33 个正式文件哈希一致。
-- 下一阶段直接进入 P2 碎片策略真实校准，不重做 P1 三套样本。
+- v0.5.0 P2 碎片策略真实校准已完成；最终测试与安装态数量以 CHANGELOG 最新记录为准。
+- 下一阶段直接进入 P3 轻量人工校正体验，不重做 P1/P2 样本。
 - GUI 继续保持最低优先级。

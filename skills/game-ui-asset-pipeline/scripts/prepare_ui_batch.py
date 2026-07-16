@@ -149,8 +149,11 @@ def prepare_batch(spec: dict[str, Any], run_dir: Path, force: bool = False) -> P
             "padding": int(category_spec.get("padding", 8)),
             "chroma_key": chroma_key,
             "allow_attached_glow": bool(category_spec.get("allow_attached_glow", False)),
+            "fragment_policy": category_spec.get("fragment_policy"),
             "assets": assets,
         }
+        if category_request["fragment_policy"] is None:
+            del category_request["fragment_policy"]
         normalized_categories.append(category_request)
 
         chunks = split_assets(assets, capacity)

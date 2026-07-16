@@ -42,6 +42,11 @@ class BatchPipelineTest(unittest.TestCase):
                     "outer_margin": 16,
                     "gutter": 8,
                     "safe_padding": 12,
+                    "fragment_policy": {
+                        "detached_action": "allow-small",
+                        "small_detached_max_pixels": 20,
+                        "small_detached_max_anchor_ratio": 0.01,
+                    },
                     "assets": [f"Item{index}" for index in range(1, 6)],
                 },
                 {
@@ -93,6 +98,8 @@ class BatchPipelineTest(unittest.TestCase):
                 "button-sheet-01",
             ])
             self.assertEqual([job["expected_count"] for job in jobs], [4, 1, 3])
+            first_job_request = json.loads((run_dir / jobs[0]["request_file"]).read_text(encoding="utf-8"))
+            self.assertEqual(first_job_request["fragment_policy"]["detached_action"], "allow-small")
             self.create_generated_sheets(run_dir)
 
             result = RUNNER.run_pipeline(run_dir)
@@ -100,6 +107,7 @@ class BatchPipelineTest(unittest.TestCase):
             self.assertEqual(result["expected"], 8)
             manifest = json.loads((run_dir / "final" / "manifest.json").read_text(encoding="utf-8"))
             self.assertEqual(manifest["exported_count"], 8)
+            self.assertEqual(manifest["fragment_policies"]["Icon_Item"]["detached_action"], "allow-small")
             item_entries = [entry for entry in manifest["assets"] if entry["category"] == "Icon_Item"]
             self.assertEqual([entry["category_index"] for entry in item_entries], [1, 2, 3, 4, 5])
             required = {"source_sheet", "source_index", "source_bbox", "output", "padding", "alignment", "pivot"}

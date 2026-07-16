@@ -44,4 +44,18 @@
 - `detached_component_count`：未达到合并条件的远离组件数量。
 - `major_detached_count`：面积达到主组件比例阈值的远离组件数量。
 
-近邻碎片可随主体导出且不产生警告。远离碎片产生 `detached-components`；存在显著第二主体时追加 `multiple-major-components`。这些警告必须进入 Manifest 和 QA，不能静默删除。
+分类默认合并参数：
+
+| 类别 | 比例 | 像素上限 |
+|---|---:|---:|
+| `Panel` | `0.06` | `64` |
+| `Button` | `0.06` | `48` |
+| `Icon_Nav` / `Icon_Status` / `Icon_General` / `Icon_Item` / `Icon_Equip` | `0.12` | `48` |
+| `Icon_Skill` | `0.15` | `96` |
+| `Icon_Effect` | `0.18` | `128` |
+
+绝对最小合并距离默认 `12px`。实际允许间距为 `min(max(12, 对角线×比例), 像素上限)`，避免大面板按比例无限放宽，同时保留技能硬边火花等合法碎片。
+
+近邻碎片可随主体导出且不产生警告。远离碎片默认产生 `detached-components`；存在显著第二主体时追加 `multiple-major-components`。请求可用 `fragment_policy` 覆盖分类参数。
+
+`detached_action=allow-small` 只允许在同时设置正数 `small_detached_max_pixels` 与 `small_detached_max_anchor_ratio` 时使用。满足两项限制的小组件继续保留在导出图中，记录 `accepted_detached_count` 和 info，不产生 warning；不满足限制的组件仍 warning，显著第二主体永不因该配置放行。不得静默删除组件。

@@ -27,6 +27,72 @@ CATEGORY_PREFIX = {
 }
 
 
+FRAGMENT_POLICY_DEFAULTS: dict[str, dict[str, float | int | str]] = {
+    "Panel": {"merge_distance": 12.0, "merge_distance_ratio": 0.06, "merge_distance_max": 64.0},
+    "Button": {"merge_distance": 12.0, "merge_distance_ratio": 0.06, "merge_distance_max": 48.0},
+    "Icon_Nav": {"merge_distance": 12.0, "merge_distance_ratio": 0.12, "merge_distance_max": 48.0},
+    "Icon_Status": {"merge_distance": 12.0, "merge_distance_ratio": 0.12, "merge_distance_max": 48.0},
+    "Icon_General": {"merge_distance": 12.0, "merge_distance_ratio": 0.12, "merge_distance_max": 48.0},
+    "Icon_Item": {"merge_distance": 12.0, "merge_distance_ratio": 0.12, "merge_distance_max": 48.0},
+    "Icon_Equip": {"merge_distance": 12.0, "merge_distance_ratio": 0.12, "merge_distance_max": 48.0},
+    "Icon_Skill": {"merge_distance": 12.0, "merge_distance_ratio": 0.15, "merge_distance_max": 96.0},
+    "Icon_Effect": {"merge_distance": 12.0, "merge_distance_ratio": 0.18, "merge_distance_max": 128.0},
+}
+
+
+def resolve_fragment_policy(
+    category: str,
+    request_policy: Any = None,
+    merge_distance: float | None = None,
+    merge_distance_ratio: float | None = None,
+    merge_distance_max: float | None = None,
+    major_component_ratio: float | None = None,
+) -> dict[str, float | int | str]:
+    policy = {
+        **FRAGMENT_POLICY_DEFAULTS[category],
+        "major_component_ratio": 0.35,
+        "detached_action": "warning",
+        "small_detached_max_pixels": 0,
+        "small_detached_max_anchor_ratio": 0.0,
+    }
+    if request_policy is not None:
+        if not isinstance(request_policy, dict):
+            raise ValueError("fragment_policy must be an object")
+        unknown = set(request_policy) - set(policy)
+        if unknown:
+            raise ValueError("unsupported fragment_policy fields: " + ", ".join(sorted(unknown)))
+        policy.update(request_policy)
+    direct_overrides = {
+        "merge_distance": merge_distance,
+        "merge_distance_ratio": merge_distance_ratio,
+        "merge_distance_max": merge_distance_max,
+        "major_component_ratio": major_component_ratio,
+    }
+    policy.update({key: value for key, value in direct_overrides.items() if value is not None})
+    for key in ("merge_distance", "merge_distance_ratio", "merge_distance_max", "major_component_ratio"):
+        policy[key] = float(policy[key])
+        if float(policy[key]) < 0:
+            raise ValueError(f"fragment_policy.{key} must be non-negative")
+    policy["small_detached_max_pixels"] = int(policy["small_detached_max_pixels"])
+    policy["small_detached_max_anchor_ratio"] = float(policy["small_detached_max_anchor_ratio"])
+    if float(policy["merge_distance_max"]) < float(policy["merge_distance"]):
+        raise ValueError("fragment_policy.merge_distance_max must be >= merge_distance")
+    if not 0 <= float(policy["major_component_ratio"]) <= 1:
+        raise ValueError("fragment_policy.major_component_ratio must be between 0 and 1")
+    if int(policy["small_detached_max_pixels"]) < 0 or not 0 <= float(
+        policy["small_detached_max_anchor_ratio"]
+    ) <= 1:
+        raise ValueError("fragment_policy detached size limits must be non-negative and ratio <= 1")
+    if policy["detached_action"] not in {"warning", "allow-small"}:
+        raise ValueError("fragment_policy.detached_action must be warning or allow-small")
+    if policy["detached_action"] == "allow-small" and (
+        int(policy["small_detached_max_pixels"]) <= 0
+        or float(policy["small_detached_max_anchor_ratio"]) <= 0
+    ):
+        raise ValueError("allow-small requires positive detached size limits")
+    return policy
+
+
 def read_json(path: Path) -> dict[str, Any]:
     return json.loads(path.expanduser().resolve().read_text(encoding="utf-8"))
 
@@ -143,6 +209,7 @@ def classify_components(
     components: list[dict[str, int]],
     merge_distance: float = 12.0,
     merge_distance_ratio: float = 0.15,
+    merge_distance_max: float | None = None,
     major_component_ratio: float = 0.35,
 ) -> dict[str, Any]:
     if not components:
@@ -159,6 +226,8 @@ def classify_components(
         group_bottom = max(component["bottom"] for component in merged)
         diagonal = math.hypot(group_right - group_left, group_bottom - group_top)
         allowed_gap = max(merge_distance, diagonal * merge_distance_ratio)
+        if merge_distance_max is not None:
+            allowed_gap = min(allowed_gap, merge_distance_max)
         next_remaining: list[dict[str, int]] = []
         for component in remaining:
             nearest_gap = min(component_gap(component, member) for member in merged)
@@ -189,9 +258,10 @@ def extract_assets(
     alpha_threshold: int = 8,
     minimum_component_pixels: int = 16,
     trim_padding: int = 2,
-    fragment_merge_distance: float = 12.0,
-    fragment_merge_distance_ratio: float = 0.15,
-    major_component_ratio: float = 0.35,
+    fragment_merge_distance: float | None = None,
+    fragment_merge_distance_ratio: float | None = None,
+    fragment_merge_distance_max: float | None = None,
+    major_component_ratio: float | None = None,
 ) -> tuple[dict[str, Any], dict[str, Any]]:
     source = source.convert("RGBA")
     slots = layout.get("slots", [])
@@ -199,6 +269,14 @@ def extract_assets(
     category = request.get("category")
     if category not in CATEGORY_PREFIX:
         raise ValueError(f"unsupported category: {category}")
+    fragment_policy = resolve_fragment_policy(
+        category,
+        request.get("fragment_policy"),
+        merge_distance=fragment_merge_distance,
+        merge_distance_ratio=fragment_merge_distance_ratio,
+        merge_distance_max=fragment_merge_distance_max,
+        major_component_ratio=major_component_ratio,
+    )
     if len(assets) > len(slots):
         raise ValueError(f"request contains {len(assets)} assets but layout has only {len(slots)} slots")
 
@@ -252,10 +330,29 @@ def extract_assets(
 
         component_groups = classify_components(
             components,
-            merge_distance=fragment_merge_distance,
-            merge_distance_ratio=fragment_merge_distance_ratio,
-            major_component_ratio=major_component_ratio,
+            merge_distance=float(fragment_policy["merge_distance"]),
+            merge_distance_ratio=float(fragment_policy["merge_distance_ratio"]),
+            merge_distance_max=float(fragment_policy["merge_distance_max"]),
+            major_component_ratio=float(fragment_policy["major_component_ratio"]),
         )
+
+        accepted_detached = []
+        warning_detached = list(component_groups["detached"])
+        if fragment_policy["detached_action"] == "allow-small":
+            anchor_pixels = max(1, int(component_groups["anchor"]["pixels"]))
+            major_ids = {id(component) for component in component_groups["major_detached"]}
+            accepted_detached = [
+                component
+                for component in component_groups["detached"]
+                if id(component) not in major_ids
+                and component["pixels"] <= int(fragment_policy["small_detached_max_pixels"])
+                and component["pixels"] / anchor_pixels
+                <= float(fragment_policy["small_detached_max_anchor_ratio"])
+            ]
+            accepted_ids = {id(component) for component in accepted_detached}
+            warning_detached = [
+                component for component in component_groups["detached"] if id(component) not in accepted_ids
+            ]
 
         bbox = combined_bbox(components, trim_padding, source.width, source.height)
         if touches_boundary(bbox, source.width, source.height):
@@ -267,7 +364,16 @@ def extract_assets(
                     "bbox": list(bbox),
                 }
             )
-        if component_groups["detached"]:
+        if accepted_detached:
+            issues.append(
+                {
+                    "severity": "info",
+                    "code": "accepted-small-detached-components",
+                    "source_index": visual_index,
+                    "accepted_detached_count": len(accepted_detached),
+                }
+            )
+        if warning_detached:
             issues.append(
                 {
                     "severity": "warning",
@@ -275,7 +381,7 @@ def extract_assets(
                     "source_index": visual_index,
                     "component_count": len(components),
                     "merged_component_count": len(component_groups["merged"]),
-                    "detached_component_count": len(component_groups["detached"]),
+                    "detached_component_count": len(warning_detached),
                 }
             )
         if component_groups["major_detached"]:
@@ -312,9 +418,10 @@ def extract_assets(
                 "component_count": len(components),
                 "merged_component_count": len(component_groups["merged"]),
                 "detached_component_count": len(component_groups["detached"]),
+                "accepted_detached_count": len(accepted_detached),
                 "major_detached_count": len(component_groups["major_detached"]),
                 "foreground_pixels": int(sum(component["pixels"] for component in components)),
-                "qa": "warning" if component_groups["detached"] else "pass",
+                "qa": "warning" if warning_detached else "pass",
             }
         )
 
@@ -326,6 +433,7 @@ def extract_assets(
         "category": category,
         "source_image_size": [source.width, source.height],
         "assignment_mode": "global-components-nearest-slot-center",
+        "fragment_policy": fragment_policy,
         "expected_count": len(assets),
         "exported_count": len(entries),
         "assets": entries,
@@ -354,9 +462,10 @@ def main() -> None:
     parser.add_argument("--alpha-threshold", type=int, default=8)
     parser.add_argument("--minimum-component-pixels", type=int, default=16)
     parser.add_argument("--trim-padding", type=int, default=2)
-    parser.add_argument("--fragment-merge-distance", type=float, default=12.0)
-    parser.add_argument("--fragment-merge-distance-ratio", type=float, default=0.15)
-    parser.add_argument("--major-component-ratio", type=float, default=0.35)
+    parser.add_argument("--fragment-merge-distance", type=float)
+    parser.add_argument("--fragment-merge-distance-ratio", type=float)
+    parser.add_argument("--fragment-merge-distance-max", type=float)
+    parser.add_argument("--major-component-ratio", type=float)
     args = parser.parse_args()
 
     with Image.open(args.input.expanduser().resolve()) as image:
@@ -373,6 +482,7 @@ def main() -> None:
         trim_padding=args.trim_padding,
         fragment_merge_distance=args.fragment_merge_distance,
         fragment_merge_distance_ratio=args.fragment_merge_distance_ratio,
+        fragment_merge_distance_max=args.fragment_merge_distance_max,
         major_component_ratio=args.major_component_ratio,
     )
     run_root = args.request.expanduser().resolve().parent

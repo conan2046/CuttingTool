@@ -173,6 +173,84 @@ class ExtractSheetAssetsTest(unittest.TestCase):
         self.assertEqual(manifest["assets"][0]["qa"], "warning")
         self.assertEqual(manifest["assets"][0]["major_detached_count"], 1)
 
+    def test_panel_profile_caps_ratio_based_merge_distance(self) -> None:
+        source = Image.new("RGBA", (1200, 700), (0, 0, 0, 0))
+        draw = ImageDraw.Draw(source)
+        draw.rectangle((100, 120, 900, 520), fill=(70, 70, 80, 255))
+        draw.rectangle((981, 260, 1000, 279), fill=(210, 130, 30, 255))
+        layout = {"slots": [{"slot": {"left": 0, "top": 0, "right": 1200, "bottom": 700}}]}
+        request = {"project_id": "panel-cap", "category": "Panel", "assets": [{"semantic_name": "BossPanel"}]}
+        with tempfile.TemporaryDirectory() as temporary_directory:
+            manifest, report = EXTRACT.extract_assets(source, layout, request, Path(temporary_directory))
+        self.assertTrue(report["ok"], report)
+        self.assertEqual(manifest["fragment_policy"]["merge_distance_max"], 64.0)
+        self.assertEqual(manifest["assets"][0]["detached_component_count"], 1)
+        self.assertIn("detached-components", {issue["code"] for issue in report["issues"]})
+
+    def test_skill_profile_preserves_realistic_hard_edge_fragment_gap(self) -> None:
+        source = Image.new("RGBA", (900, 700), (0, 0, 0, 0))
+        draw = ImageDraw.Draw(source)
+        draw.rectangle((100, 120, 600, 420), fill=(120, 20, 20, 255))
+        draw.polygon(((681, 250), (710, 230), (700, 280)), fill=(240, 100, 20, 255))
+        layout = {"slots": [{"slot": {"left": 0, "top": 0, "right": 900, "bottom": 700}}]}
+        request = {"project_id": "skill-gap", "category": "Icon_Skill", "assets": [{"semantic_name": "MeteorShard"}]}
+        with tempfile.TemporaryDirectory() as temporary_directory:
+            manifest, report = EXTRACT.extract_assets(source, layout, request, Path(temporary_directory))
+        self.assertTrue(report["ok"], report)
+        self.assertEqual(manifest["fragment_policy"]["merge_distance_max"], 96.0)
+        self.assertEqual(manifest["assets"][0]["merged_component_count"], 2)
+        self.assertEqual(report["warning_count"], 0)
+
+    def test_explicit_allow_small_retains_component_without_warning(self) -> None:
+        source = Image.new("RGBA", (256, 256), (0, 0, 0, 0))
+        draw = ImageDraw.Draw(source)
+        draw.rectangle((40, 70, 100, 150), fill=(210, 130, 30, 255))
+        draw.rectangle((190, 80, 193, 83), fill=(240, 190, 60, 255))
+        layout = {"slots": [{"slot": {"left": 0, "top": 0, "right": 256, "bottom": 256}}]}
+        request = {
+            "project_id": "allow-small",
+            "category": "Icon_Item",
+            "fragment_policy": {
+                "detached_action": "allow-small",
+                "small_detached_max_pixels": 20,
+                "small_detached_max_anchor_ratio": 0.01,
+            },
+            "assets": [{"semantic_name": "PotionWithSpark"}],
+        }
+        with tempfile.TemporaryDirectory() as temporary_directory:
+            manifest, report = EXTRACT.extract_assets(source, layout, request, Path(temporary_directory))
+        self.assertTrue(report["ok"], report)
+        self.assertEqual(report["warning_count"], 0)
+        self.assertEqual(manifest["assets"][0]["detached_component_count"], 1)
+        self.assertEqual(manifest["assets"][0]["accepted_detached_count"], 1)
+        self.assertIn(
+            "accepted-small-detached-components",
+            {issue["code"] for issue in report["issues"]},
+        )
+
+    def test_allow_small_never_accepts_major_detached_component(self) -> None:
+        source = Image.new("RGBA", (256, 256), (0, 0, 0, 0))
+        draw = ImageDraw.Draw(source)
+        draw.rectangle((30, 70, 100, 150), fill=(210, 130, 30, 255))
+        draw.rectangle((170, 75, 225, 145), fill=(40, 90, 210, 255))
+        layout = {"slots": [{"slot": {"left": 0, "top": 0, "right": 256, "bottom": 256}}]}
+        request = {
+            "project_id": "major-stays-warning",
+            "category": "Icon_Item",
+            "fragment_policy": {
+                "detached_action": "allow-small",
+                "small_detached_max_pixels": 10000,
+                "small_detached_max_anchor_ratio": 1.0,
+            },
+            "assets": [{"semantic_name": "TwoItems"}],
+        }
+        with tempfile.TemporaryDirectory() as temporary_directory:
+            manifest, report = EXTRACT.extract_assets(source, layout, request, Path(temporary_directory))
+        self.assertTrue(report["ok"], report)
+        self.assertGreater(report["warning_count"], 0)
+        self.assertEqual(manifest["assets"][0]["accepted_detached_count"], 0)
+        self.assertEqual(manifest["assets"][0]["major_detached_count"], 1)
+
 
 if __name__ == "__main__":
     unittest.main()

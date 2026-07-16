@@ -76,6 +76,7 @@ def run_pipeline(
     all_entries: list[dict[str, Any]] = []
     all_issues: list[dict[str, Any]] = []
     job_results: list[dict[str, Any]] = []
+    fragment_policies: dict[str, dict[str, Any]] = {}
     for job in jobs:
         job_id = str(job["id"])
         job_request = read_json(run_dir / job.get("request_file", "request.json"))
@@ -142,6 +143,7 @@ def run_pipeline(
             extracted_dir,
         )
         extracted_manifest["source_sheet"] = relative(generated_path, run_dir)
+        fragment_policies[str(job["category"])] = dict(extracted_manifest["fragment_policy"])
         extracted_manifest_path = run_dir / "extracted" / f"{job_id}-manifest.json"
         extraction_report_path = run_dir / "qa" / f"{job_id}-extract.json"
         write_json(extracted_manifest_path, extracted_manifest)
@@ -206,6 +208,7 @@ def run_pipeline(
         "stage": "final",
         "expected_count": int(request.get("expected_count", len(all_entries))),
         "exported_count": len(all_entries),
+        "fragment_policies": fragment_policies,
         "assets": all_entries,
     }
     write_json(final_manifest_path, final_manifest)
