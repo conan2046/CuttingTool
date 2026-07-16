@@ -29,8 +29,8 @@
 诊断输出：
 
 - `input-diagnosis.json`：背景类型、候选数量、问题和是否可导出。
-- `bbox-corrections.json`：Codex 可直接编辑的修正模板。
-- `bbox-preview.png`：候选编号和边界标注图。
+- `bbox-corrections.json`：Codex 可直接编辑的修正模板；包含 `detected_bbox`、候选级 `review`、字段级错误路径和阈值建议。
+- `bbox-preview.png`：候选编号、问题类型、严重级别和边界标注图；绿色为 info、黄色为 warning、红色为 fail、灰色为 disabled。
 
 ## 修正文件规则
 
@@ -55,6 +55,15 @@
 }
 ```
 
+`review_guidance.threshold_suggestions` 至少记录：
+
+- 当前最小组件像素阈值及升降条件。
+- 当前 bbox 留白及建议范围。
+- 背景阈值、建议透明/不透明阈值和是否可安全自动采用。
+- bbox 裁断检查的最低可见 Alpha，默认 `16`；低于此值的亚可见清理残留不判裁断。
+
+每个错误必须提供 `code`、`severity`、`message`、`location` 和 `suggestion`。`location` 使用可直接定位的 JSON 路径，例如 `assets[3].bbox`；可计算修正值时同时提供 `recommended_bbox`、触碰边或安全留白建议。
+
 ## 应用修正
 
 ```powershell
@@ -66,5 +75,7 @@
 ```
 
 脚本必须拒绝：未批准修正、假棋盘格、未解析背景、bbox 越界或重叠、bbox 切断前景、空资源、文件重名、分类编号不连续、Manifest 不一致和可见色键残留。
+
+应用阶段先预检、后导出。预检失败时只写 `qa/correction-validation.json`、`qa/bbox-diff-preview.png`、失败 QA 和运行摘要，不得创建正式 Manifest 或 PNG。成功时也必须保留差异预览：左侧为 `detected_bbox`，右侧为批准后的 `bbox`，并标记 changed/unchanged。
 
 通过后输出正式透明 PNG、`final/manifest.json`、Contact Sheet、QA 报告和运行摘要。该流程使用 JSON 和标注图完成修正，不依赖桌面 GUI。
