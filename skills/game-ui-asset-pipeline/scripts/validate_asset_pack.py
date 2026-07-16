@@ -1,0 +1,181 @@
+#!/usr/bin/env python3
+"""Validate a normalized transparent game UI asset pack against its manifest."""
+
+from __future__ import annotations
+
+import argparse
+import json
+import re
+from pathlib import Path
+from typing import Any
+
+import numpy as np
+from PIL import Image
+
+
+FILENAME_PATTERN = re.compile(
+    r"^(0[1-9])_(Panel|Button|Icon_Nav|Icon_Status|Icon_General|Icon_Item|Icon_Equip|Icon_Skill|Icon_Effect)_[A-Za-z0-9]+_[A-Za-z0-9]+_\d{3}\.png$"
+)
+
+
+def read_json(path: Path) -> dict[str, Any]:
+    return json.loads(path.expanduser().resolve().read_text(encoding="utf-8"))
+
+
+def write_json(path: Path, payload: dict[str, Any]) -> None:
+    path = path.expanduser().resolve()
+    path.parent.mkdir(parents=True, exist_ok=True)
+    path.write_text(json.dumps(payload, ensure_ascii=False, indent=2) + "\n", encoding="utf-8")
+
+
+def parse_key(value: str | None) -> np.ndarray | None:
+    if not value:
+        return None
+    match = re.fullmatch(r"#([0-9A-Fa-f]{6})", value)
+    if not match:
+        raise ValueError(f"invalid chroma key in request: {value}")
+    encoded = match.group(1)
+    return np.asarray([int(encoded[index : index + 2], 16) for index in (0, 2, 4)], dtype=np.float32)
+
+
+def validate_pack(
+    manifest: dict[str, Any],
+    asset_root: Path,
+    request: dict[str, Any] | None = None,
+    chroma_distance_threshold: float = 12.0,
+    minimum_visible_alpha: int = 16,
+    strict_files: bool = False,
+) -> dict[str, Any]:
+    asset_root = asset_root.expanduser().resolve()
+    issues: list[dict[str, Any]] = []
+    entries = manifest.get("assets", [])
+    expected_count = int(manifest.get("expected_count", len(entries)))
+    seen_names: set[str] = set()
+    referenced_files: set[str] = set()
+    chroma_key = parse_key(request.get("chroma_key") if request else None)
+
+    if len(entries) != expected_count:
+        issues.append(
+            {
+                "severity": "fail",
+                "code": "count-mismatch",
+                "expected": expected_count,
+                "actual": len(entries),
+            }
+        )
+
+    valid_assets = 0
+    for entry in entries:
+        filename = str(entry.get("output", ""))
+        if filename in seen_names:
+            issues.append({"severity": "fail", "code": "duplicate-output", "file": filename})
+            continue
+        seen_names.add(filename)
+        referenced_files.add(filename.replace("\\", "/"))
+        if not FILENAME_PATTERN.fullmatch(Path(filename).name):
+            issues.append({"severity": "fail", "code": "invalid-filename", "file": filename})
+        path = asset_root / filename
+        if not path.is_file():
+            issues.append({"severity": "fail", "code": "missing-file", "file": filename})
+            continue
+
+        with Image.open(path) as image:
+            if image.mode != "RGBA":
+                issues.append({"severity": "fail", "code": "not-rgba", "file": filename, "mode": image.mode})
+                rgba = image.convert("RGBA")
+            else:
+                rgba = image.copy()
+        array = np.asarray(rgba, dtype=np.uint8)
+        alpha = array[:, :, 3]
+        if not np.any(alpha > 0):
+            issues.append({"severity": "fail", "code": "empty-alpha", "file": filename})
+            continue
+        if not np.any(alpha == 0):
+            issues.append({"severity": "warning", "code": "no-transparent-padding", "file": filename})
+        hidden_rgb = array[:, :, :3][alpha == 0]
+        if hidden_rgb.size and np.any(hidden_rgb != 0):
+            issues.append({"severity": "fail", "code": "hidden-rgb-under-zero-alpha", "file": filename})
+        if [rgba.width, rgba.height] != [int(entry.get("width", rgba.width)), int(entry.get("height", rgba.height))]:
+            issues.append(
+                {
+                    "severity": "fail",
+                    "code": "dimension-mismatch",
+                    "file": filename,
+                    "manifest": [entry.get("width"), entry.get("height")],
+                    "actual": [rgba.width, rgba.height],
+                }
+            )
+        if chroma_key is not None:
+            # Resampling RGBA art can create a few alpha=1..15 edge pixels
+            # whose straight RGB remains close to the removed key. They are
+            # mathematically non-zero but not visibly contaminating the edge.
+            # Keep the threshold low so genuinely visible key residue still
+            # fails while avoiding false failures from sub-visible coverage.
+            visible = alpha >= minimum_visible_alpha
+            distance = np.linalg.norm(array[:, :, :3].astype(np.float32) - chroma_key.reshape(1, 1, 3), axis=2)
+            near_key_count = int(np.count_nonzero(visible & (distance <= chroma_distance_threshold)))
+            if near_key_count:
+                issues.append(
+                    {
+                        "severity": "fail",
+                        "code": "visible-chroma-residue",
+                        "file": filename,
+                        "pixels": near_key_count,
+                    }
+                )
+        valid_assets += 1
+
+    actual_files = {
+        str(path.relative_to(asset_root)).replace("\\", "/") for path in asset_root.rglob("*.png") if path.is_file()
+    }
+    unexpected = sorted(actual_files - referenced_files)
+    if unexpected:
+        issues.append(
+            {
+                "severity": "fail" if strict_files else "warning",
+                "code": "unexpected-files",
+                "files": unexpected,
+            }
+        )
+
+    failures = [issue for issue in issues if issue["severity"] == "fail"]
+    warnings = [issue for issue in issues if issue["severity"] == "warning"]
+    return {
+        "schema_version": 1,
+        "ok": not failures and valid_assets == len(entries),
+        "expected_count": expected_count,
+        "manifest_count": len(entries),
+        "valid_assets": valid_assets,
+        "pass_count": max(0, len(entries) - len({issue.get("file") for issue in issues if issue.get("file")})),
+        "warning_count": len(warnings),
+        "fail_count": len(failures),
+        "issues": issues,
+    }
+
+
+def main() -> None:
+    parser = argparse.ArgumentParser(description=__doc__)
+    parser.add_argument("--manifest", required=True, type=Path)
+    parser.add_argument("--asset-root", required=True, type=Path)
+    parser.add_argument("--request", type=Path)
+    parser.add_argument("--json-out", required=True, type=Path)
+    parser.add_argument("--chroma-distance-threshold", type=float, default=12.0)
+    parser.add_argument("--minimum-visible-alpha", type=int, default=16)
+    parser.add_argument("--strict-files", action="store_true")
+    args = parser.parse_args()
+    report = validate_pack(
+        read_json(args.manifest),
+        args.asset_root,
+        read_json(args.request) if args.request else None,
+        chroma_distance_threshold=args.chroma_distance_threshold,
+        minimum_visible_alpha=args.minimum_visible_alpha,
+        strict_files=args.strict_files,
+    )
+    write_json(args.json_out, report)
+    print(json.dumps(report, ensure_ascii=False))
+    if not report["ok"]:
+        raise SystemExit(2)
+
+
+if __name__ == "__main__":
+    main()

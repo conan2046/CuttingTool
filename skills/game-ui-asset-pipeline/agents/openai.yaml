@@ -1,0 +1,4 @@
+interface:
+  display_name: "Game UI Asset Pipeline"
+  short_description: "Generate and split game UI asset sheets"
+  default_prompt: "Use $game-ui-asset-pipeline to create a style-consistent game UI asset sheet, split it into transparent PNGs, validate the results, and package the asset manifest."

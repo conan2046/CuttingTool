@@ -1,0 +1,23 @@
+{
+  "skill_name": "game-ui-asset-pipeline",
+  "evals": [
+    {
+      "id": 1,
+      "prompt": "参考这张暗黑幻想UI图，帮我生成16个可自动切割的背包道具图标，并最终导出128x128透明PNG。",
+      "expected_output": "先建立或确认风格基准，生成4x4纯色色键资源Sheet，再执行透明切割、归一化、命名、Manifest和QA。",
+      "files": []
+    },
+    {
+      "id": 2,
+      "prompt": "把这张UI资源整图切成独立透明PNG，里面有按钮、面板和图标。",
+      "expected_output": "先诊断图片是否具有真实Alpha、假棋盘格、文字和遮挡，再说明可提取范围，按分类切割并输出QA；不承诺恢复不可见内容。",
+      "files": []
+    },
+    {
+      "id": 3,
+      "prompt": "做一套4组暗黑手游按钮，每组Normal、Pressed、Disabled三种状态，按钮上不要文字。",
+      "expected_output": "生成3列x4行状态Sheet，锁定同组轮廓和尺寸，使用纯色色键背景，并准备后续透明化和状态命名。",
+      "files": []
+    }
+  ]
+}

@@ -1,0 +1,13 @@
+[project]
+name = "cuttingtool"
+version = "0.1.0"
+description = "Deterministic game UI asset sheet preparation, extraction, normalization, and QA tools."
+requires-python = ">=3.11"
+dependencies = [
+  "Pillow>=12.0,<14",
+  "numpy>=2.0,<3",
+]
+
+[tool.cuttingtool]
+skill_source = "skills/game-ui-asset-pipeline"
+skill_install = "C:/Users/Admin/.codex/skills/game-ui-asset-pipeline"
