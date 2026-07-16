@@ -42,6 +42,8 @@ V1 必须支持：
 - 保留从生成源图到最终文件的可追溯关系。
 - 同一请求包含多个分类时自动建立独立 Job；单分类超出容量时自动拆分多张 Sheet。
 - 在所有生成图就绪后，通过统一确定性 Runner 汇总正式 Manifest、QA 和运行摘要。
+- 对没有 Layout Guide 的未知整图先执行背景诊断，生成候选 bbox、可编辑修正 JSON 和标注预览。
+- 在不引入桌面 GUI 的前提下，用批准后的 bbox 修正文件完成透明切割和正式 QA。
 
 V1 不包含：
 
@@ -335,6 +337,10 @@ GPT Image 2 不提供原生透明背景时，默认使用：
 3. 已知网格：槽位内组件检测。
 4. 自动检测失败：输出待人工校正的包围框，不擅自丢弃资源。
 
+未知整图必须分类为 `alpha-sheet`、`flat-background-sheet`、`checkerboard-presentation` 或 `opaque-mixed-image`。只有前两类允许进入 bbox 修正导出；假棋盘格和未解析背景必须返回失败并说明需要重新生成或提供真实 Alpha。
+
+候选 bbox 首次输出时 `approved` 必须为 `false`。Codex 查看标注预览并确认数量、边界、语义、分类、状态、启用项和连续编号后，才能改为 `true`。修正文件是当前无 GUI 工作流的正式人工介入点。
+
 ### 2. 连通域处理
 
 必须支持：
@@ -437,6 +443,8 @@ output/<project-id>-<timestamp>/
 ```
 
 多分类或多 Sheet 任务先运行 `prepare_ui_batch.py` 生成 Job、独立请求、Prompt 和 Layout Guide。所有 `generated_output` 就绪后运行 `run_ui_pipeline.py --run-dir <run-dir>`；Runner 负责原生 Alpha/色键分流、单次生产尺寸归一、逐 Job 切割、分类连续编号、总 Manifest、Contact Sheet、严格 QA 和 `run-summary.json`。Runner 不调用图片 API，缺少任何生成 Sheet 时必须在写入正式输出前失败。
+
+未知整图先运行 `diagnose_ui_sheet.py`，输出 `input-diagnosis.json`、`bbox-corrections.json` 和 `bbox-preview.png`。修正确认后运行 `apply_bbox_corrections.py`；脚本必须拒绝未批准修正、假棋盘格、未解析背景、bbox 越界、bbox 重叠、bbox 切断前景和非连续编号。
 
 只有在输出已经复制到项目运行目录、完成验证后，才能清理生成目录中的临时副本。
 
@@ -569,6 +577,8 @@ fail     禁止进入正式输出
 1. 标准纯色色键 Sheet。
 2. 本项目附件一类的假棋盘格/混合展示图，用于验证正确拒绝或降级处理。
 3. 包含重叠、裁边、残色的失败样本。
+
+未知整图样本必须由自动测试直接读取，不能只在临时目录中动态构造后删除。标注预览和正式 Contact Sheet 都必须完成视觉检查。
 
 批量编排还必须覆盖：至少两个分类、至少一个分类跨两张 Sheet、同一按钮状态组不跨 Sheet、色键与原生 Alpha 输入混合、跨 Sheet 分类编号连续、缺少生成图时预检失败。
 

@@ -47,6 +47,7 @@ description: 生成、拆分、透明化、校验并打包游戏 UI 位图资源
 - 生成布局引导图或确定槽位时，读取 `references/sheet-layout-contract.md`。
 - 导出文件和 Manifest 时，读取 `references/naming-contract.md`。
 - 同一任务包含多个分类或需要自动拆分多张 Sheet 时，读取 `references/batch-request-contract.md`。
+- 输入是未知整图、假棋盘格或需要人工修正 bbox 时，读取 `references/unknown-sheet-contract.md`。
 
 不要一次加载无关参考文件。
 
@@ -79,6 +80,29 @@ ${CODEX_HOME:-$HOME/.codex}/skills/.system/imagegen/SKILL.md
 ### D. 混合展示图诊断
 
 输入同时包含界面预览、标题、分隔线、假棋盘格或相互遮挡元素。先诊断可提取范围；不要承诺无损恢复所有资源。
+
+未知整图先运行：
+
+```bash
+"$PYTHON" scripts/diagnose_ui_sheet.py \
+  --input input/ui-sheet.png \
+  --category Icon_Item \
+  --json-out output/run/qa/input-diagnosis.json \
+  --corrections-out output/run/qa/bbox-corrections.json \
+  --preview-out output/run/qa/bbox-preview.png
+```
+
+查看标注预览并编辑修正 JSON。只有背景可安全透明化、bbox 完整且语义命名确认后，才设置 `approved=true`，然后运行：
+
+```bash
+"$PYTHON" scripts/apply_bbox_corrections.py \
+  --input input/ui-sheet.png \
+  --corrections output/run/qa/bbox-corrections.json \
+  --run-dir output/run \
+  --project-id unknown-ui-pack
+```
+
+假棋盘格是烘焙进 RGB 的展示背景，不是真实 Alpha。允许输出诊断和候选框，但禁止把它直接转换成正式透明资源；要求重新生成纯色色键图或提供真实 Alpha。
 
 ## 默认工作流
 

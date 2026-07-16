@@ -29,6 +29,9 @@
 - 导出稳定命名的透明 PNG。
 - 生成 Manifest、Contact Sheet 和 QA 报告。
 - 一键处理所有已生成 Sheet，自动输出总 Manifest 和 `run-summary.json`。
+- 诊断没有布局信息的未知整图，识别真实 Alpha、纯色背景、假棋盘格和无法解析的混合背景。
+- 输出可编辑 bbox JSON 和标注预览，不依赖桌面 GUI 完成人工校正。
+- 使用批准后的 bbox 直接生成透明资源包、Manifest、Contact Sheet 和 QA。
 
 暂未实现：
 
@@ -36,7 +39,7 @@
 - Unity 自动导入。
 - 自动九宫格推断。
 - 复杂半透明特效的完全自动处理。
-- 混合展示图的智能区域分类。
+- 复杂混合展示图的自动语义分类和遮挡内容恢复。
 
 ## Skill 源码
 
@@ -88,6 +91,31 @@ qa/contact-sheet.png
 qa/qa-report.json
 qa/run-summary.json
 ```
+
+## 未知整图诊断与修正
+
+没有 Layout Guide 的整图先运行：
+
+```powershell
+& $PYTHON .\skills\game-ui-asset-pipeline\scripts\diagnose_ui_sheet.py `
+  --input .\input\ui-sheet.png `
+  --category Icon_Item `
+  --json-out .\output\unknown-ui\qa\input-diagnosis.json `
+  --corrections-out .\output\unknown-ui\qa\bbox-corrections.json `
+  --preview-out .\output\unknown-ui\qa\bbox-preview.png
+```
+
+检查预览，修改语义名、分类、状态、bbox 和启用状态；确认后设置 `approved=true`：
+
+```powershell
+& $PYTHON .\skills\game-ui-asset-pipeline\scripts\apply_bbox_corrections.py `
+  --input .\input\ui-sheet.png `
+  --corrections .\output\unknown-ui\qa\bbox-corrections.json `
+  --run-dir .\output\unknown-ui `
+  --project-id unknown-ui
+```
+
+详细规则见 [unknown-sheet-contract.md](skills/game-ui-asset-pipeline/references/unknown-sheet-contract.md)。假棋盘格只允许诊断，不允许冒充真实透明资源导出。
 
 ## 单分类调试流程
 
