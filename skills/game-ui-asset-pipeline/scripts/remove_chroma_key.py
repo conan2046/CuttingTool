@@ -26,6 +26,17 @@ def format_hex(color: tuple[int, int, int]) -> str:
     return "#" + "".join(f"{channel:02X}" for channel in color)
 
 
+def chroma_spill_score(rgb: np.ndarray, key: tuple[int, int, int]) -> np.ndarray:
+    key_channels = np.asarray(key, dtype=np.uint8)
+    high = np.flatnonzero(key_channels >= 240)
+    low = np.flatnonzero(key_channels <= 15)
+    if high.size == 1 and low.size >= 1:
+        return rgb[:, :, high[0]] - np.max(rgb[:, :, low], axis=2)
+    if high.size >= 2 and low.size >= 1:
+        return np.min(rgb[:, :, high], axis=2) - np.max(rgb[:, :, low], axis=2)
+    return np.zeros(rgb.shape[:2], dtype=np.float32)
+
+
 def sample_border_key(rgb: np.ndarray, border_width: int = 8) -> tuple[int, int, int]:
     height, width, _ = rgb.shape
     border_width = max(1, min(border_width, max(1, min(height, width) // 4)))
@@ -166,6 +177,7 @@ def remove_chroma(
     original_alpha = rgba[:, :, 3] / 255.0
     key_array = np.asarray(key, dtype=np.float32).reshape(1, 1, 3)
     distance = np.linalg.norm(rgb - key_array, axis=2)
+    source_spill_score = chroma_spill_score(rgb, key)
 
     matte = np.clip(
         (distance - transparent_threshold) / (opaque_threshold - transparent_threshold),
@@ -178,8 +190,12 @@ def remove_chroma(
     if despill:
         foreground_distances = distance[distance >= opaque_threshold]
         high_distance = float(np.percentile(foreground_distances, 99)) if foreground_distances.size else opaque_threshold
-        seed_threshold = max(opaque_threshold + 48.0, opaque_threshold * 1.5, high_distance * 0.85)
-        stable_foreground = (distance >= seed_threshold) & (original_alpha >= 0.999)
+        seed_threshold = max(opaque_threshold + 48.0, opaque_threshold * 1.5, high_distance * 0.65)
+        stable_foreground = (
+            (distance >= seed_threshold)
+            & (source_spill_score < 16.0)
+            & (original_alpha >= 0.999)
+        )
         radius = max(2, min(16, int(round(min(source.size) / 128.0))))
         mask_image = Image.fromarray((stable_foreground.astype(np.uint8) * 255), mode="L")
         blurred_mask = np.asarray(mask_image.filter(ImageFilter.BoxBlur(radius)), dtype=np.float32) / 255.0
@@ -206,10 +222,49 @@ def remove_chroma(
             where=denominator > 1.0,
         )
         has_foreground_estimate = blurred_mask > 1.0 / 255.0
+        transition_band = (matte > 0.0) & (matte < 1.0)
         projected_alpha = np.clip(projected_alpha, 0.0, 1.0)
-        alpha = original_alpha * np.where(has_foreground_estimate, projected_alpha, matte)
-        recoverable = has_foreground_estimate & (alpha > 1.0 / 255.0) & (alpha < 0.999)
+        reconstructed = key_array + projected_alpha[:, :, None] * foreground_vector
+        projection_fit_error = np.linalg.norm(rgb - reconstructed, axis=2)
+        background_mask_image = Image.fromarray(
+            ((distance <= transparent_threshold).astype(np.uint8) * 255),
+            mode="L",
+        )
+        neighborhood_size = radius * 2 + 1
+        near_background = np.asarray(
+            background_mask_image.filter(ImageFilter.MaxFilter(neighborhood_size)),
+            dtype=np.uint8,
+        ) > 0
+        fitted_chroma_mix = (
+            near_background
+            & (projected_alpha > 1.0 / 255.0)
+            & (projected_alpha < 0.999)
+            & (projection_fit_error <= 24.0)
+        )
+        spill_chroma_mix = (
+            near_background
+            & (source_spill_score >= 16.0)
+            & (projected_alpha > 1.0 / 255.0)
+        )
+        projection_mask = has_foreground_estimate & (
+            transition_band | fitted_chroma_mix | spill_chroma_mix
+        )
+        alpha = original_alpha * np.where(projection_mask, projected_alpha, matte)
+        recoverable = projection_mask & (alpha > 1.0 / 255.0)
         cleaned_rgb[recoverable] = np.clip(estimated_foreground[recoverable], 0.0, 255.0)
+
+    cleaned_distance = np.linalg.norm(cleaned_rgb - key_array, axis=2)
+    cleaned_spill_score = chroma_spill_score(cleaned_rgb, key)
+    unresolved_chroma_edge = (
+        (alpha > 1.0 / 255.0)
+        & (alpha < 0.999)
+        & (
+            (cleaned_distance <= opaque_threshold)
+            | (cleaned_spill_score >= 16.0)
+        )
+    )
+    alpha[unresolved_chroma_edge] = 0.0
+    cleaned_rgb[unresolved_chroma_edge] = 0.0
 
     transparent = alpha <= 1.0 / 255.0
     cleaned_rgb[transparent] = 0.0
@@ -235,6 +290,9 @@ def remove_chroma(
         "partial_alpha_pixels": int(np.count_nonzero((output_array[:, :, 3] > 0) & (output_array[:, :, 3] < 255))),
         "opaque_pixels": int(np.count_nonzero(output_array[:, :, 3] == 255)),
         "visible_near_key_pixels": int(np.count_nonzero(near_key_visible)),
+        "discarded_unresolved_chroma_edge_pixels": int(np.count_nonzero(unresolved_chroma_edge)),
+        "fitted_chroma_mix_pixels": int(np.count_nonzero(projection_mask & fitted_chroma_mix)) if despill else 0,
+        "spill_chroma_mix_pixels": int(np.count_nonzero(projection_mask & spill_chroma_mix)) if despill else 0,
     }
     return output, report
 

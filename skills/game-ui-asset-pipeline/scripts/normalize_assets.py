@@ -56,7 +56,9 @@ def normalize_image(
     resized = (
         trimmed
         if (resized_width, resized_height) == trimmed.size
-        else trimmed.resize((resized_width, resized_height), Image.Resampling.LANCZOS)
+        else trimmed.convert("RGBa")
+        .resize((resized_width, resized_height), Image.Resampling.LANCZOS)
+        .convert("RGBA")
     )
 
     canvas = Image.new("RGBA", (canvas_width, canvas_height), (0, 0, 0, 0))

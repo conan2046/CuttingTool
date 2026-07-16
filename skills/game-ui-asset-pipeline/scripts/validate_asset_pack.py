@@ -10,7 +10,7 @@ from pathlib import Path
 from typing import Any
 
 import numpy as np
-from PIL import Image
+from PIL import Image, ImageFilter
 
 
 FILENAME_PATTERN = re.compile(
@@ -50,12 +50,24 @@ def parse_key(value: str | None) -> np.ndarray | None:
     return np.asarray([int(encoded[index : index + 2], 16) for index in (0, 2, 4)], dtype=np.float32)
 
 
+def chroma_spill_score(rgb: np.ndarray, key: np.ndarray) -> np.ndarray:
+    high = np.flatnonzero(key >= 240)
+    low = np.flatnonzero(key <= 15)
+    if high.size == 1 and low.size >= 1:
+        return rgb[:, :, high[0]] - np.max(rgb[:, :, low], axis=2)
+    if high.size >= 2 and low.size >= 1:
+        return np.min(rgb[:, :, high], axis=2) - np.max(rgb[:, :, low], axis=2)
+    return np.zeros(rgb.shape[:2], dtype=np.float32)
+
+
 def validate_pack(
     manifest: dict[str, Any],
     asset_root: Path,
     request: dict[str, Any] | None = None,
     chroma_distance_threshold: float = 12.0,
     minimum_visible_alpha: int = 16,
+    chroma_spill_threshold: float = 40.0,
+    maximum_visible_chroma_spill_pixels: int = 16,
     strict_files: bool = False,
 ) -> dict[str, Any]:
     asset_root = asset_root.expanduser().resolve()
@@ -146,6 +158,28 @@ def validate_pack(
                         "pixels": near_key_count,
                     }
                 )
+            transparent_mask = Image.fromarray(((alpha == 0).astype(np.uint8) * 255), mode="L")
+            near_transparent = np.asarray(
+                transparent_mask.filter(ImageFilter.MaxFilter(5)),
+                dtype=np.uint8,
+            ) > 0
+            spill_score = chroma_spill_score(array[:, :, :3].astype(np.float32), entry_chroma_key)
+            spill_count = int(
+                np.count_nonzero(
+                    visible
+                    & near_transparent
+                    & (spill_score >= chroma_spill_threshold)
+                )
+            )
+            if spill_count > maximum_visible_chroma_spill_pixels:
+                issues.append(
+                    {
+                        "severity": "fail",
+                        "code": "visible-chroma-spill",
+                        "file": filename,
+                        "pixels": spill_count,
+                    }
+                )
         valid_assets += 1
 
     for category, indices in sorted(category_indices.items()):
@@ -207,6 +241,8 @@ def main() -> None:
     parser.add_argument("--json-out", required=True, type=Path)
     parser.add_argument("--chroma-distance-threshold", type=float, default=12.0)
     parser.add_argument("--minimum-visible-alpha", type=int, default=16)
+    parser.add_argument("--chroma-spill-threshold", type=float, default=40.0)
+    parser.add_argument("--maximum-visible-chroma-spill-pixels", type=int, default=16)
     parser.add_argument("--strict-files", action="store_true")
     args = parser.parse_args()
     report = validate_pack(
@@ -215,6 +251,8 @@ def main() -> None:
         read_json(args.request) if args.request else None,
         chroma_distance_threshold=args.chroma_distance_threshold,
         minimum_visible_alpha=args.minimum_visible_alpha,
+        chroma_spill_threshold=args.chroma_spill_threshold,
+        maximum_visible_chroma_spill_pixels=args.maximum_visible_chroma_spill_pixels,
         strict_files=args.strict_files,
     )
     write_json(args.json_out, report)

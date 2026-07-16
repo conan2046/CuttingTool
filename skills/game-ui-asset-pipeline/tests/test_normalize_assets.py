@@ -3,6 +3,7 @@ import sys
 import unittest
 from pathlib import Path
 
+import numpy as np
 from PIL import Image, ImageDraw
 
 
@@ -55,6 +56,25 @@ class NormalizeAssetsTest(unittest.TestCase):
         )
         self.assertEqual(metadata["content_position"][1] + metadata["content_size"][1], 58)
         self.assertEqual(output.getpixel((32, 57))[3], 255)
+
+    def test_downscale_does_not_revive_low_alpha_chroma_rgb(self) -> None:
+        source = Image.new("RGBA", (256, 256), (0, 0, 0, 0))
+        draw = ImageDraw.Draw(source)
+        draw.rectangle((31, 31, 224, 224), fill=(0, 255, 0, 4))
+        draw.rectangle((40, 40, 215, 215), fill=(28, 24, 20, 255))
+
+        output, _ = MODULE.normalize_image(
+            source,
+            target_size=(64, 64),
+            padding=4,
+            alignment="center",
+        )
+
+        array = np.asarray(output)
+        visible = array[:, :, 3] >= 16
+        key = np.asarray((0, 255, 0), dtype=np.float32)
+        distance = np.linalg.norm(array[:, :, :3].astype(np.float32) - key, axis=2)
+        self.assertEqual(int(np.count_nonzero(visible & (distance <= 12.0))), 0)
 
 
 if __name__ == "__main__":

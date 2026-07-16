@@ -4,7 +4,7 @@
 > 工作目录：`D:\CuttingTool`  
 > 仓库：`https://github.com/conan2046/CuttingTool.git`  
 > 分支：`main`  
-> 已完成功能基线：`c8666b8 feat: harden chroma extraction and skill evals`
+> 已完成功能基线：v0.4.0 三风格真实生产回归与跨色键净边修复
 
 ## 1. 新会话先做什么
 
@@ -90,9 +90,9 @@ game-ui-asset-pipeline
 
 | 项目 | 结果 |
 |---|---:|
-| 源码 `unittest` | 38/38 通过 |
-| 安装态 `unittest` | 38/38 通过 |
-| 金/白/深色视觉矩阵 | 3 pass / 0 warning / 0 fail |
+| 源码 `unittest` | 41/41 通过 |
+| 安装态 `unittest` | 41/41 通过 |
+| 三风格真实生产回归 | 36 pass / 0 warning / 0 fail |
 | 独立 Codex 新任务触发 | 9/9 通过 |
 | Skill 源码/安装副本 | 33 个正式文件哈希一致，0 差异 |
 
@@ -101,7 +101,26 @@ game-ui-asset-pipeline
 - `D:\CuttingTool\skills\game-ui-asset-pipeline\evals\trigger-acceptance-2026-07-16.json`
 - `D:\CuttingTool\output\adaptive-chroma-v03\qa\contact-sheet.png`
 - `D:\CuttingTool\output\adaptive-chroma-v03\qa\qa-report.json`
+- `D:\CuttingTool\output\dark-metal-regression-a\qa\contact-sheet.png`
+- `D:\CuttingTool\output\dark-metal-regression-a\qa\qa-report.json`
+- `D:\CuttingTool\output\bright-cartoon-regression-b\qa\contact-sheet.png`
+- `D:\CuttingTool\output\bright-cartoon-regression-b\qa\qa-report.json`
+- `D:\CuttingTool\output\lowlight-dark-regression-c\qa\contact-sheet.png`
+- `D:\CuttingTool\output\lowlight-dark-regression-c\qa\qa-report.json`
 - `D:\CuttingTool\CHANGELOG.md`
+
+### 3.6 v0.4.0：三风格真实生产回归
+
+- 使用内置 `imagegen` 完成 12 件 `Icon_Equip`、4×3、绿色色键真实生产 Sheet。
+- 完成 12 件明亮卡通 `Icon_Item`、4×3、品红色键真实生产 Sheet。
+- 完成 12 件低明度深色 `Icon_Skill`、4×3、青色第三色键真实生产 Sheet。
+- 首轮 Runner 暴露确定前景被局部投影漂白，以及低 Alpha 色键像素在归一化缩放后重新显色。
+- 局部前景投影覆盖软遮罩过渡带，以及背景邻域中符合线性混合模型或具有色键通道优势的互补色边缘；远离背景的确定前景保持原始 RGB/Alpha。
+- 无法安全重建的部分 Alpha 近色残边会透明化，并记录 `discarded_unresolved_chroma_edge_pixels`。
+- 归一化改为预乘 Alpha 缩放，阻止色键 RGB 在缩小时复活。
+- QA 新增 `visible-chroma-spill`，拦截不接近纯色键但形成连续绿/品红/青色轮廓的可见偏色。
+- 三组回归合计：36 pass、0 warning、0 fail；三份 Contact Sheet 已人工检查。
+- 回归产物：`output/dark-metal-regression-a`、`output/bright-cartoon-regression-b`、`output/lowlight-dark-regression-c`。
 
 ## 4. 当前卡在哪
 
@@ -121,13 +140,11 @@ game-ui-asset-pipeline
 
 推荐按以下顺序继续：
 
-### P1：真实生产样本回归
+### P1：真实生产样本回归（已完成）
 
-1. 选择至少 3 套不同风格的真实 UI Sheet：暗黑金属、明亮卡通、低明度深色。
-2. 覆盖绿色、品红和第三色键。
-3. 跑完整 Runner，保存 Manifest、Contact Sheet、QA 和阈值诊断。
-4. 对比自适应阈值是否误伤近色主体、发光、细尖角和内部孔洞。
-5. 把真实发现的通用失败模式转成持久测试，不要只做一次性人工修补。
+- 暗黑金属、明亮卡通、低明度深色三套完成。
+- 绿色、品红、青色第三色键均完成 Runner、Manifest、Contact Sheet、QA 和阈值诊断。
+- 真实发现的漂白、缩放残色和互补色边缘偏色均已转成持久测试。
 
 ### P2：碎片策略真实校准
 
@@ -170,6 +187,14 @@ game-ui-asset-pipeline
 ### 6.2 不要盲目扩大色键阈值
 
 背景有色差时必须先看边框分布、置信度和近色主体风险。低置信度或 `near-key-subject-risk` 时禁止自动采用。不能为了让资源数量“看起来正确”而吞掉主体颜色。
+
+### 6.2.1 不要把前景投影应用到确定前景
+
+真实暗黑金属回归曾把局部前景估算应用到整个装备内部，导致黑铁和金边大面积漂白。投影只能作用于软遮罩过渡带；确定前景必须保留原始 RGB/Alpha。
+
+### 6.2.2 不要直接缩放直通道 RGBA
+
+低 Alpha 的色键边缘像素经直通道 Lanczos 缩放后可能重新达到 `alpha >= 16`，形成可见绿边。归一化必须先转预乘 Alpha 再缩放，并对最终 Contact Sheet 做视觉检查。
 
 ### 6.3 不要把 Layout Guide 当硬裁切框
 
@@ -278,6 +303,6 @@ $PYTHON = 'C:\Users\Admin\.cache\codex-runtimes\codex-primary-runtime\dependenci
 ## 8. 最终状态
 
 - `c8666b8` 已推送至 `origin/main`。
-- v0.3.0 功能阶段已完成，无未处理测试失败。
-- 下一会话不需要重做本会话内容，应直接从真实生产样本回归开始。
+- v0.4.0 三风格真实生产回归已完成；源码/安装态 41/41 通过，Skill 33 个正式文件哈希一致。
+- 下一阶段直接进入 P2 碎片策略真实校准，不重做 P1 三套样本。
 - GUI 继续保持最低优先级。

@@ -31,6 +31,7 @@ class ChromaAntialiasMatrixTest(unittest.TestCase):
     CASES = (
         ("GoldOnGreen", (0, 255, 0), (218, 165, 32)),
         ("WhiteOnMagenta", (255, 0, 255), (248, 248, 248)),
+        ("GreenOnMagenta", (255, 0, 255), (74, 196, 38)),
         ("DarkOnGreen", (0, 255, 0), (18, 22, 30)),
     )
 
@@ -98,6 +99,41 @@ class ChromaAntialiasMatrixTest(unittest.TestCase):
         )
         self.assertTrue(report["ok"], report)
         self.assertEqual(output.getpixel((0, 0)), (0, 0, 0, 0))
+
+    def test_despill_preserves_opaque_textured_foreground(self) -> None:
+        key = (0, 255, 0)
+        source = Image.new("RGB", (96, 96), key)
+        draw = ImageDraw.Draw(source)
+        draw.rectangle((20, 20, 75, 75), fill=(18, 22, 30))
+        draw.rectangle((28, 28, 67, 67), fill=(190, 132, 42))
+        draw.rectangle((36, 36, 59, 59), fill=(112, 18, 24))
+        source = source.resize((128, 128), Image.Resampling.LANCZOS)
+
+        diagnostics = CHROMA.recommend_chroma_thresholds(source, key)
+        output, report = CHROMA.remove_chroma(
+            source,
+            key,
+            diagnostics["suggested_transparent_threshold"],
+            diagnostics["suggested_opaque_threshold"],
+        )
+
+        self.assertTrue(report["ok"], report)
+        source_array = np.asarray(source)
+        output_array = np.asarray(output)
+        definite_foreground = (
+            np.linalg.norm(source_array.astype(np.float32) - np.asarray(key, dtype=np.float32), axis=2)
+            >= diagnostics["suggested_opaque_threshold"]
+        )
+        interior = np.zeros(definite_foreground.shape, dtype=bool)
+        interior[44:84, 44:84] = True
+        preserved_interior = definite_foreground & interior
+        self.assertTrue(np.all(output_array[:, :, 3][preserved_interior] == 255))
+        self.assertTrue(
+            np.array_equal(
+                output_array[:, :, :3][preserved_interior],
+                source_array[preserved_interior],
+            )
+        )
 
     def test_near_key_subject_blocks_adaptive_application(self) -> None:
         key = (0, 255, 0)

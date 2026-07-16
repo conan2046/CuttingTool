@@ -107,6 +107,20 @@ class DeliveryQaTest(unittest.TestCase):
             self.assertFalse(report["ok"])
             self.assertIn("visible-chroma-residue", {issue["code"] for issue in report["issues"]})
 
+    def test_visible_chroma_spill_band_fails(self) -> None:
+        with tempfile.TemporaryDirectory() as temporary_directory:
+            root = Path(temporary_directory)
+            manifest = self.create_pack(root)
+            path = root / manifest["assets"][0]["output"]
+            with Image.open(path) as image:
+                rgba = image.convert("RGBA")
+            for x in range(8, 28):
+                rgba.putpixel((x, 8), (200, 50, 200, 64))
+            rgba.save(path)
+            report = VALIDATE.validate_pack(manifest, root, {"chroma_key": "#FF00FF"})
+            self.assertFalse(report["ok"])
+            self.assertIn("visible-chroma-spill", {issue["code"] for issue in report["issues"]})
+
     def test_non_continuous_category_indices_fail(self) -> None:
         with tempfile.TemporaryDirectory() as temporary_directory:
             root = Path(temporary_directory)
