@@ -559,7 +559,20 @@ fail     禁止进入正式输出
 - 中文 Markdown、JSON 和配置使用 UTF-8。
 - 删除或移动前确认目标绝对路径位于项目目录或明确授权目录内。
 
-### 3. 日志
+### 3. Git 与 GitHub CLI
+
+- GitHub CLI 固定路径：`C:\Program Files\GitHub CLI\gh.exe`。
+- 当前已验证版本：`gh 2.96.0`；PowerShell PATH 未刷新或裸 `gh` 无法解析时，直接使用上述完整路径。
+- 提交推送或创建 PR 前执行：
+
+  ```powershell
+  & 'C:\Program Files\GitHub CLI\gh.exe' --version
+  & 'C:\Program Files\GitHub CLI\gh.exe' auth status
+  ```
+
+- 认证检查只能确认账号、协议和权限范围，不得把 Token、认证信息或其他敏感凭据写入 Markdown、日志或提交内容。
+
+### 4. 日志
 
 脚本日志必须：
 
