@@ -2,6 +2,72 @@
 
 记录每次正式功能提交的目标、主要改动、验证结果和兼容性影响。按时间倒序维护；纯格式整理或无功能影响的微小修正可以合并记录。
 
+## 2026-07-16｜v0.9.0｜P5 GPT Image 2 RGB＋Alpha Matte 双图链路
+
+提交：随本记录同提交。
+
+### 目标
+
+不依赖 API Key，直接使用 Codex 内置 GPT Image 2 完成烟雾、玻璃、液体和柔光的连续半透明 RGBA 生产，同时严格区分 Matte 推导 Alpha 与模型原生 Alpha。
+
+### 主要改动
+
+- 新增 `transparency_mode=model-matte-derived`，批量和单分类准备器同时生成彩色 Sheet Prompt、Alpha Matte Prompt、双图输出路径和 Job 元数据。
+- 彩色图固定使用纯黑 RGB 背景；Matte 通过同图编辑生成，黑/白/灰分别表示透明/不透明/部分透明。
+- 新增双图合成器：估算真实黑背景，按 `F=(C-(1-α)B)/α` 恢复直通道前景 RGB，零 Alpha 隐藏 RGB 清零。
+- Runner 在正式输出前验证灰度纯度、黑边、连续 Alpha、彩色背景平整度、双图包围框和像素覆盖关系，并记录双图 SHA-256。
+- 新增非灰度、全不透明、错位和背景污染失败矩阵；任何预检失败均不创建正式 Manifest。
+- Manifest、QA 和运行摘要记录 `alpha_origin=gpt-image-2-matte-derived`，不冒充模型原生 Alpha。
+- 原有 `native-alpha-required` 继续保留为独立可选模式；版本升级到 `0.9.0`。
+
+### 验证
+
+- 内置 GPT Image 2 真实生成 1 张彩色 Sheet＋1 张 Matte，覆盖烟雾、玻璃、液体、柔光四类资源。
+- 真实 Matte：256 个 Alpha 等级、731103 个部分透明像素、源图/Matte 包围框 IoU 0.9625、源图覆盖率 0.8336、Matte 支持率 0.9998。
+- 真实端到端：4 pass / 0 warning / 0 fail；Contact Sheet 已人工检查，四类透明层次、轮廓、缩放和颜色均通过。
+- 源码 `unittest`：65/65 通过。
+- 安装态 `unittest`：65/65 通过；源码/安装副本 39 个正式文件 SHA-256 完全一致，缺失、差异和额外文件均为 0。
+
+### 兼容性
+
+- 不新增 API Key、付费调用、Python 依赖、OpenCV、桌面 GUI 或 Unity 自动导入。
+- 现有色键、已有 Alpha 和模型原生 Alpha Job 行为不变；Matte 模式为显式 opt-in。
+
+## 2026-07-16｜v0.8.0｜P5 原生 Alpha 接入、来源证明与失败降级
+
+提交：随本记录同提交。
+
+### 目标
+
+建立烟雾、玻璃、液体、柔光的原生 RGBA 接入链路，先用实测证明内置生成边界，再实现不依赖色键估算的来源校验、保真处理和失败阻断。
+
+### 主要改动
+
+- 使用内置 `imagegen` 生成四类透明特效探测 Sheet；结果为 `1254×1254 RGB` PNG，棋盘格烘焙进像素，无 Alpha 通道。真实失败样本固化到 `samples/native-alpha`。
+- 批量和单分类请求新增 `transparency_mode=native-alpha-required`；准备器拒绝把 `built-in-imagegen` 配置为原生来源，并生成独立来源侧车路径。
+- 新增原生 Alpha 预检：验证 RGBA、透明像素、部分透明像素、Alpha 等级、源图 SHA-256、模型/生成方式、`alpha_origin=model-native` 和 `background_removal_applied=false`。
+- 原生预检失败只写 Job 报告、总 QA 和失败摘要，不创建正式 Manifest、Contact Sheet 或资源 PNG。
+- 原生分流只清理零 Alpha 隐藏 RGB；生产画布缩放和单体归一化统一使用预乘 Alpha Lanczos。
+- Manifest 追加透明模式、Alpha 来源、源图哈希和来源侧车路径；最终 QA 检查连续 Alpha 层次是否在切割/缩放后丢失。
+- 新增原生 Alpha 契约、四类合成矩阵和真实内置失败回归；版本从 `0.7.0` 升级为 `0.8.0`。
+
+### 验证
+
+- P4 基线：56/56 通过。
+- 源码 `unittest`：60/60 通过。
+- 安装态 `unittest`：60/60 通过；真实内置失败样本使用 Skill 内自包含派生裁片，安装后不依赖项目根目录。
+- P5 定向矩阵：4/4 通过，覆盖烟雾、玻璃、液体、柔光、内置 RGB 棋盘格拒绝和背景移除伪原生拒绝。
+- 合成端到端：4 pass / 0 warning / 0 fail；Manifest、来源报告、Contact Sheet、QA 和运行摘要完整。
+- Contact Sheet 已人工检查：四项渐变 Alpha 可见，透明留白、缩放和分类顺序正确；该合成样本只验证算法，不替代外部真实生成验收。
+- Skill 源码与安装副本：38 个正式文件哈希一致，0 差异。
+- 外部真实生成尚未执行：需要用户再次确认带 API Key/可能计费的 `gpt-image-1.5` 透明回退。
+
+### 兼容性
+
+- 现有色键和已有 Alpha Job 默认行为不变；原生模式为显式 opt-in。
+- 不新增 Python 依赖、OpenCV、桌面 GUI 或 Unity 自动导入。
+- `native-alpha-required` 使用 Manifest schema v3 和来源侧车文件；旧运行目录继续按原路径处理。
+
 ## 2026-07-16｜路线调整｜P5 原生透明特效链路升为最高优先级
 
 提交：随本记录同提交。

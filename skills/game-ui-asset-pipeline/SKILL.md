@@ -27,6 +27,8 @@ description: 生成、拆分、透明化、校验并打包游戏 UI 位图资源
 - Icon_Equip
 - Icon_Skill
 - Icon_Effect 中可通过色键稳定提取的简单硬边特效
+- 使用 GPT Image 2 彩色 Sheet＋灰度 Alpha Matte 推导的烟雾、玻璃、液体和柔光特效
+- 具有可验证生成来源的原生 RGBA 烟雾、玻璃、液体和柔光特效
 
 以上九项是运行配置和验收 JSON 使用的内部类别名，必须原样返回。`01_Panel` 到 `09_Icon_Effect` 只用于文件名前缀；不要把 `09_Icon_Effect` 当成内部 `category`。
 
@@ -51,6 +53,7 @@ description: 生成、拆分、透明化、校验并打包游戏 UI 位图资源
 - 同一任务包含多个分类或需要自动拆分多张 Sheet 时，读取 `references/batch-request-contract.md`。
 - 输入是未知整图、假棋盘格或需要人工修正 bbox 时，读取 `references/unknown-sheet-contract.md`。
 - 色键背景存在色差、阈值需要自适应或组件出现碎片时，读取 `references/chroma-fragment-contract.md`。
+- 请求原生透明、烟雾、玻璃、液体或柔光时，读取 `references/native-alpha-contract.md`。
 
 不要一次加载无关参考文件。
 
@@ -62,7 +65,7 @@ description: 生成、拆分、透明化、校验并打包游戏 UI 位图资源
 ${CODEX_HOME:-$HOME/.codex}/skills/.system/imagegen/SKILL.md
 ```
 
-默认使用内置图片生成路径。不要直接调用 Image API、图片 CLI 或自写 SDK 脚本。需要原生透明、复杂烟雾、玻璃、液体或柔光且色键方案不可靠时，按 `$imagegen` 的回退规则向用户说明并获得确认。
+默认使用内置图片生成路径。复杂烟雾、玻璃、液体或柔光优先使用 `model-matte-derived`：先生成纯黑底彩色 Sheet，再把该图作为编辑目标生成像素对齐的灰度 Alpha Matte。不要把 Matte 推导结果称为模型原生 Alpha。只有用户明确要求源文件原生 Alpha 时，才按 `$imagegen` 的 CLI 回退规则确认授权。
 
 ## 输入判断
 
@@ -125,6 +128,7 @@ ${CODEX_HOME:-$HOME/.codex}/skills/.system/imagegen/SKILL.md
 - 色键
 - 留白和对齐方式
 - 是否允许紧贴主体的发光
+- 透明模式：`chroma-key`、`model-matte-derived` 或 `native-alpha-required`
 
 用户未指定时，按 `asset-categories.md` 的默认值推断。只有会显著改变结果的缺口才需要询问。
 
@@ -180,7 +184,7 @@ ${CODEX_HOME:-$HOME/.codex}/skills/.system/imagegen/SKILL.md
 - Layout Guide：只负责排布
 - 本分类的资源清单和顺序
 
-要求模型输出准确数量、互不接触、完整居中、纯色色键背景的资源。生成后立即检查数量、分离度、边缘裁切、网格污染和风格一致性。
+要求模型输出准确数量、互不接触、完整居中的资源。普通资源使用纯色色键；复杂半透明资源使用纯黑底彩色 Sheet，并基于该图生成同尺寸、同布局、同轮廓的灰度 Alpha Matte。生成后立即检查数量、分离度、边缘裁切、网格污染、Matte 对齐和风格一致性。
 
 ### 6. 确定性后处理
 
@@ -191,7 +195,9 @@ ${CODEX_HOME:-$HOME/.codex}/skills/.system/imagegen/SKILL.md
   --run-dir output/<project-id>
 ```
 
-Runner 自动识别原生 Alpha 或色键背景，必要时将生成图单次缩放到生产画布，依次完成背景清理、切割、归一化、正式 Manifest、Contact Sheet、严格 QA 和 `run-summary.json`。默认拒绝覆盖已有正式 Manifest；明确重跑时使用 `--force`。
+Runner 根据 Job 声明分流 `model-matte-derived`、原生 Alpha、已有 Alpha 或色键背景。Matte 模式必须在正式输出前验证双图齐全、灰度纯度、黑色边框、连续 Alpha 层次、背景平整度、像素覆盖关系和双图 SHA-256；通过后用已知黑背景合成方程恢复直通道 RGB＋Alpha。失败时只写 QA 与失败摘要，不生成正式 Manifest。所有 RGBA 生产尺寸与单体归一化均使用预乘 Alpha。默认拒绝覆盖已有正式 Manifest；明确重跑时使用 `--force`。
+
+内置 `imagegen` 当前不能直接用于 `native-alpha-required`，但可以用于 `model-matte-derived`，不需要 API Key。原生模式仍需用户明确确认外部透明生成回退，并保存 `generated/<job-id>.provenance.json`。
 
 以下分步命令保留用于单 Sheet 调试和人工校正：
 
@@ -206,6 +212,7 @@ Runner 自动识别原生 Alpha 或色键背景，必要时将生成图单次缩
 
 ```text
 背景识别
+→ Alpha Matte 校验与双图合成（如适用）
 → 色键转 Alpha
 → 组件检测与合并
 → 包围框裁切

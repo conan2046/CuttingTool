@@ -11,7 +11,15 @@ from pathlib import Path
 from typing import Any
 
 from make_layout_guide import LayoutSpec, render_layout_guide, write_json
-from prepare_ui_run import CATEGORY_DEFAULTS, AssetRequest, build_prompt, normalize_chroma_key, parse_pair, slugify
+from prepare_ui_run import (
+    CATEGORY_DEFAULTS,
+    AssetRequest,
+    build_alpha_matte_prompt,
+    build_prompt,
+    normalize_chroma_key,
+    parse_pair,
+    slugify,
+)
 
 
 def read_json(path: Path) -> dict[str, Any]:
@@ -102,6 +110,7 @@ def prepare_batch(spec: dict[str, Any], run_dir: Path, force: bool = False) -> P
         (run_dir / relative).mkdir(parents=True, exist_ok=True)
 
     references: list[dict[str, str]] = []
+    generation_method = str(spec.get("generation_method", "built-in-imagegen"))
     canonical = spec.get("canonical_style")
     if canonical:
         canonical_source = Path(str(canonical))
@@ -136,9 +145,13 @@ def prepare_batch(spec: dict[str, Any], run_dir: Path, force: bool = False) -> P
             category_spec.get("target_size"), target_default, "target_size"
         )
         capacity = grid[0] * grid[1]
-        chroma_key = normalize_chroma_key(
-            str(category_spec.get("chroma_key", "auto")),
-            bool(category_spec.get("subject_uses_green", False)),
+        transparency_mode = str(category_spec.get("transparency_mode", "chroma-key"))
+        if transparency_mode not in {"chroma-key", "model-matte-derived", "native-alpha-required"}:
+            raise ValueError(f"unsupported transparency_mode: {transparency_mode}")
+        if transparency_mode == "native-alpha-required" and generation_method == "built-in-imagegen":
+            raise ValueError("built-in-imagegen cannot prove native alpha; select an explicit native-alpha generation method")
+        chroma_key = None if transparency_mode in {"native-alpha-required", "model-matte-derived"} else normalize_chroma_key(
+            str(category_spec.get("chroma_key", "auto")), bool(category_spec.get("subject_uses_green", False))
         )
         category_request = {
             "category": category,
@@ -148,6 +161,8 @@ def prepare_batch(spec: dict[str, Any], run_dir: Path, force: bool = False) -> P
             "alignment": str(category_spec.get("alignment", defaults["alignment"])),
             "padding": int(category_spec.get("padding", 8)),
             "chroma_key": chroma_key,
+            "transparency_mode": transparency_mode,
+            "generation_method": generation_method,
             "allow_attached_glow": bool(category_spec.get("allow_attached_glow", False)),
             "fragment_policy": category_spec.get("fragment_policy"),
             "assets": assets,
@@ -194,9 +209,21 @@ def prepare_batch(spec: dict[str, Any], run_dir: Path, force: bool = False) -> P
                     chroma_key,
                     str(spec.get("style_notes", "")),
                     category_request["allow_attached_glow"],
+                    transparency_mode,
                 ),
                 encoding="utf-8",
             )
+            matte_prompt_path = run_dir / "prompts" / f"{job_id}-alpha-matte.md"
+            if transparency_mode == "model-matte-derived":
+                matte_prompt_path.write_text(
+                    build_alpha_matte_prompt(
+                        category,
+                        [AssetRequest(item["semantic_name"], item["state"], item["description"]) for item in chunk],
+                        grid[0],
+                        grid[1],
+                    ),
+                    encoding="utf-8",
+                )
             jobs.append(
                 {
                     "id": job_id,
@@ -207,11 +234,18 @@ def prepare_batch(spec: dict[str, Any], run_dir: Path, force: bool = False) -> P
                     "expected_count": len(chunk),
                     "request_file": f"requests/{job_id}.json",
                     "prompt_file": f"prompts/{job_id}.md",
+                    "alpha_matte_prompt_file": f"prompts/{job_id}-alpha-matte.md"
+                    if transparency_mode == "model-matte-derived" else None,
                     "layout_guide": f"references/layout-guides/{job_id}.png",
                     "layout_json": f"references/layout-guides/{job_id}.json",
                     "input_images": references
                     + [{"path": f"references/layout-guides/{job_id}.png", "role": "layout-guide-only"}],
                     "generated_output": f"generated/{job_id}.png",
+                    "alpha_matte_output": f"generated/{job_id}-alpha-matte.png"
+                    if transparency_mode == "model-matte-derived" else None,
+                    "transparency_mode": transparency_mode,
+                    "provenance_file": f"generated/{job_id}.provenance.json"
+                    if transparency_mode == "native-alpha-required" else None,
                     "final_directory": f"final/{category}",
                 }
             )
@@ -224,7 +258,7 @@ def prepare_batch(spec: dict[str, Any], run_dir: Path, force: bool = False) -> P
             "project_id": project_id,
             "created_at": created_at,
             "style_notes": str(spec.get("style_notes", "")),
-            "generation_method": str(spec.get("generation_method", "built-in-imagegen")),
+            "generation_method": generation_method,
             "references": references,
             "categories": normalized_categories,
             "expected_count": sum(len(item["assets"]) for item in normalized_categories),

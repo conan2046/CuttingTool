@@ -21,6 +21,11 @@ def write_json(path: Path, payload: dict[str, Any]) -> None:
     path.write_text(json.dumps(payload, ensure_ascii=False, indent=2) + "\n", encoding="utf-8")
 
 
+def resize_rgba_premultiplied(image: Image.Image, size: tuple[int, int]) -> Image.Image:
+    """Resize RGBA without letting hidden straight RGB bleed into visible pixels."""
+    return image.convert("RGBA").convert("RGBa").resize(size, Image.Resampling.LANCZOS).convert("RGBA")
+
+
 def normalize_image(
     image: Image.Image,
     target_size: tuple[int, int] | None,
@@ -56,9 +61,7 @@ def normalize_image(
     resized = (
         trimmed
         if (resized_width, resized_height) == trimmed.size
-        else trimmed.convert("RGBa")
-        .resize((resized_width, resized_height), Image.Resampling.LANCZOS)
-        .convert("RGBA")
+        else resize_rgba_premultiplied(trimmed, (resized_width, resized_height))
     )
 
     canvas = Image.new("RGBA", (canvas_width, canvas_height), (0, 0, 0, 0))

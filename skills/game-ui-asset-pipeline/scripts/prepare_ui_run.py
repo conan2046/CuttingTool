@@ -94,9 +94,10 @@ def build_prompt(
     height: int,
     columns: int,
     rows: int,
-    chroma_key: str,
+    chroma_key: str | None,
     style_notes: str,
     allow_attached_glow: bool,
+    transparency_mode: str = "chroma-key",
 ) -> str:
     ordered_assets = "\n".join(
         f"{index}. {asset.semantic_name} | state={asset.state}"
@@ -109,6 +110,26 @@ def build_prompt(
         else "Do not add glow, aura, detached particles, floating effects, or shadows."
     )
     style_line = style_notes.strip() or "Follow the attached canonical UI style reference exactly."
+    if transparency_mode == "native-alpha-required":
+        background_contract = """Native transparency contract:
+- Output PNG with a genuine RGBA alpha channel created by the image model
+- Background pixels must have alpha=0; preserve graduated alpha for smoke, glass, liquid, glow, and soft edges
+- Do not draw a checkerboard, solid backdrop, color key, presentation card, floor, reflection, or opaque rectangle
+- Do not flatten transparency; do not use local background removal or chroma-key estimation"""
+        final_check = "true source RGBA with graduated alpha"
+    elif transparency_mode == "model-matte-derived":
+        background_contract = """Model-matte color contract:
+- Render every requested effect over one perfectly flat pure black RGB background
+- Preserve translucent-looking interiors, smoke density, glass highlights, liquid films, and glow falloff in color
+- No checkerboard, scene, floor, cast shadow, presentation card, gradient backdrop, or opaque frame
+- This is the color source; a separate grayscale opacity matte will be generated from it"""
+        final_check = "flat black color-source background"
+    else:
+        background_contract = f"""Background contract:
+- Perfectly flat pure {chroma_key} chroma-key background
+- No gradient, texture, lighting variation, noise, reflection, floor, contact shadow, or cast shadow
+- Do not use {chroma_key} or visually similar colors inside any asset, outline, highlight, shadow, or effect"""
+        final_check = "flat chroma background"
     return f"""Task: generate a production-ready game UI `{category}` asset sheet for automatic extraction.
 
 Input image roles:
@@ -132,10 +153,7 @@ Style:
 - Preserve one coherent UI family across every asset
 - Keep details readable at mobile-game UI size
 
-Background contract:
-- Perfectly flat pure {chroma_key} chroma-key background
-- No gradient, texture, lighting variation, noise, reflection, floor, contact shadow, or cast shadow
-- Do not use {chroma_key} or visually similar colors inside any asset, outline, highlight, shadow, or effect
+{background_contract}
 
 Forbidden:
 - Text, numbers, labels, frame indices, logos, watermarks
@@ -144,7 +162,36 @@ Forbidden:
 - Cropped assets, merged assets, duplicated assets, or unrequested variants
 - {effect_rule}
 
-Before returning, reject the result unless the exact requested count, order, separation, complete silhouettes, flat chroma background, and canonical style are all correct.
+Before returning, reject the result unless the exact requested count, order, separation, complete silhouettes, {final_check}, and canonical style are all correct.
+"""
+
+
+def build_alpha_matte_prompt(category: str, assets: list[AssetRequest], columns: int, rows: int) -> str:
+    ordered_assets = "\n".join(
+        f"{index}. {asset.semantic_name} | state={asset.state}" for index, asset in enumerate(assets, start=1)
+    )
+    return f"""Use case: precise-object-edit
+Asset type: grayscale opacity matte for a game UI `{category}` production sheet
+Primary request: convert the attached color-source sheet into a pixel-aligned grayscale opacity matte without changing any silhouette, position, scale, spacing, or canvas dimensions.
+
+Ordered assets, left-to-right and top-to-bottom:
+{ordered_assets}
+
+Layout invariants:
+- Grid: {columns} columns x {rows} rows
+- Exact asset count: {len(assets)}
+- Preserve the exact geometry and placement of every attached effect
+
+Matte encoding:
+- Pure black means fully transparent
+- Pure white means fully opaque
+- Gray levels encode partial opacity
+- Smoke tails, glass interiors, liquid films, droplets, soft glows, and antialiased edges must use continuous gray gradients
+- Background must be uniform pure black
+
+Forbidden:
+- Color, checkerboard, text, labels, borders, shadows, added particles, moved elements, resized elements, altered silhouettes, or any decorative background
+- Do not redesign the effects; output only their aligned opacity information
 """
 
 
@@ -162,7 +209,11 @@ def create_run(args: argparse.Namespace) -> Path:
     if len(assets) > columns * rows:
         raise ValueError(f"asset count {len(assets)} exceeds grid capacity {columns * rows}")
 
-    chroma_key = normalize_chroma_key(args.chroma_key, args.subject_uses_green)
+    if args.transparency_mode == "native-alpha-required" and args.generation_method == "built-in-imagegen":
+        raise ValueError("built-in-imagegen cannot prove native alpha; select an explicit native-alpha generation method")
+    chroma_key = None if args.transparency_mode in {"native-alpha-required", "model-matte-derived"} else normalize_chroma_key(
+        args.chroma_key, args.subject_uses_green
+    )
     timestamp = datetime.now(timezone.utc).strftime("%Y%m%dT%H%M%SZ")
     run_dir = (
         args.output_dir.expanduser().resolve()
@@ -217,9 +268,13 @@ def create_run(args: argparse.Namespace) -> Path:
         chroma_key=chroma_key,
         style_notes=args.style_notes,
         allow_attached_glow=args.allow_attached_glow,
+        transparency_mode=args.transparency_mode,
     )
     prompt_path = run_dir / "prompts" / f"{sheet_slug}-sheet-01.md"
     prompt_path.write_text(prompt, encoding="utf-8")
+    matte_prompt_path = run_dir / "prompts" / f"{sheet_slug}-sheet-01-alpha-matte.md"
+    if args.transparency_mode == "model-matte-derived":
+        matte_prompt_path.write_text(build_alpha_matte_prompt(category, assets, columns, rows), encoding="utf-8")
 
     request_payload = {
         "schema_version": 2,
@@ -228,6 +283,8 @@ def create_run(args: argparse.Namespace) -> Path:
         "category": category,
         "style_notes": args.style_notes,
         "chroma_key": chroma_key,
+        "transparency_mode": args.transparency_mode,
+        "generation_method": args.generation_method,
         "canvas": canvas,
         "grid": grid,
         "target_size": target_size,
@@ -252,11 +309,18 @@ def create_run(args: argparse.Namespace) -> Path:
                 "status": "ready",
                 "expected_count": len(assets),
                 "prompt_file": str(prompt_path.relative_to(run_dir)).replace("\\", "/"),
+                "alpha_matte_prompt_file": str(matte_prompt_path.relative_to(run_dir)).replace("\\", "/")
+                if args.transparency_mode == "model-matte-derived" else None,
                 "layout_guide": str(guide_path.relative_to(run_dir)).replace("\\", "/"),
                 "layout_json": str(guide_json.relative_to(run_dir)).replace("\\", "/"),
                 "input_images": reference_records
                 + [{"path": str(guide_path.relative_to(run_dir)).replace("\\", "/"), "role": "layout-guide-only"}],
                 "generated_output": f"generated/{output_name}",
+                "alpha_matte_output": f"generated/{sheet_slug}-sheet-01-alpha-matte.png"
+                if args.transparency_mode == "model-matte-derived" else None,
+                "transparency_mode": args.transparency_mode,
+                "provenance_file": f"generated/{sheet_slug}-sheet-01.provenance.json"
+                if args.transparency_mode == "native-alpha-required" else None,
                 "final_directory": f"final/{category}",
             }
         ],
@@ -284,6 +348,12 @@ def main() -> None:
     parser.add_argument("--grid", help="COLUMNSxROWS; category default when omitted")
     parser.add_argument("--target-size", help="WIDTHxHEIGHT; category default when omitted")
     parser.add_argument("--chroma-key", default="auto")
+    parser.add_argument(
+        "--transparency-mode",
+        choices=["chroma-key", "model-matte-derived", "native-alpha-required"],
+        default="chroma-key",
+    )
+    parser.add_argument("--generation-method", default="built-in-imagegen")
     parser.add_argument("--subject-uses-green", action="store_true")
     parser.add_argument("--allow-attached-glow", action="store_true")
     parser.add_argument("--outer-margin", type=int, default=96)

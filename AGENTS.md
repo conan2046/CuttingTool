@@ -58,13 +58,15 @@ V1 不包含：
 
 未经用户明确扩大范围，不得把以上后续能力混入 V1。
 
-### 下一阶段最高优先级：原生透明特效生成链路
+### P5 复杂半透明特效链路
 
-- 用户已于 2026-07-16 明确授权把复杂烟雾、玻璃、液体、柔光的原生透明处理提升为下一阶段最高优先级；下个开发会话直接推进 P5。
-- P5 必须优先获取并保留生成源的真实 RGBA，不得把色键估算 Alpha 表述为原生透明。
-- Runner 必须对原生 Alpha 单独分流，保持半透明层次和隐藏 RGB 洁净；归一化继续使用预乘 Alpha。
-- 至少使用烟雾、玻璃、液体、柔光四类真实未知样本完成数据与视觉验收。原生 Alpha 来源、透明层次、边缘污染、缩放保真和失败降级都必须可追溯。
-- 当前内置生成能力若不能稳定提供真实 Alpha，先形成实测证据，再确定最小外部生成方案；不得假设用户已有 API Key，也不得未经再次确认产生付费调用。
+- 用户已于 2026-07-16 明确授权使用 Codex 内置 GPT Image 2 的 RGB＋Alpha Matte 双图方案推进 P5；默认不需要 API Key。
+- `model-matte-derived` 必须先生成纯黑底彩色 Sheet，再把该图作为编辑目标生成像素对齐的中性灰度 Matte；不得独立重画 Matte。
+- Matte 推导结果必须标记为 `alpha_origin=gpt-image-2-matte-derived`，不得表述为模型原生 Alpha。
+- Runner 必须验证双图哈希、灰度纯度、Matte 黑边、连续 Alpha、彩色背景平整度、包围框和像素覆盖关系；失败只写 QA/摘要，不创建正式 Manifest。
+- 至少使用烟雾、玻璃、液体、柔光四类真实 GPT Image 2 样本完成数据与视觉验收。来源、透明层次、Matte 对齐、边缘污染、缩放保真和失败降级都必须可追溯。
+- `native-alpha-required` 继续保留为可选严格模式；只有用户明确要求源文件直接携带 Alpha 时，才重新确认外部生成授权和费用。
+- `native-alpha-required` Job 必须提供同名来源侧车文件，记录模型、生成方式、源图相对路径、SHA-256、`alpha_origin=model-native` 和 `background_removal_applied=false`。Runner 在正式输出前验证 RGBA、透明像素、部分透明像素和 Alpha 等级；失败只写 QA/摘要，不创建正式 Manifest。
 
 ### 桌面 GUI 路线优先级
 
@@ -157,7 +159,7 @@ D:\CuttingTool\
 | `output/` | 最终交付与完整运行产物 |
 | `logs/` | 运行日志和诊断报告 |
 
-不得把正式项目资源只留在 `C:\Users\Admin\.codex\generated_images` 或系统临时目录。
+不得把正式项目资源只留在 `C:\Users\Administrator\.codex\generated_images` 或系统临时目录。
 
 ## 五、Skill 制作标准
 
@@ -172,7 +174,7 @@ D:\CuttingTool\skills\game-ui-asset-pipeline
 安装位置：
 
 ```text
-C:\Users\Admin\.codex\skills\game-ui-asset-pipeline
+C:\Users\Administrator\.codex\skills\game-ui-asset-pipeline
 ```
 
 始终先修改项目源码，再同步安装副本。不得只修改安装目录而不回写项目源码。
@@ -252,10 +254,11 @@ description: <清晰说明触发时机、能力和输出>
 GPT Image 2 不提供原生透明背景时，默认使用：
 
 ```text
-纯色色键生成 → 本地色键移除 → Alpha净边 → QA
+普通硬边资源：纯色色键生成 → 本地色键移除 → Alpha净边 → QA
+复杂半透明资源：纯黑底彩色 Sheet → 同图编辑生成灰度 Matte → 本地合成 RGBA → QA
 ```
 
-不得谎称模型已经生成真实透明通道。
+不得把色键或 Matte 推导 Alpha 谎称为模型原生透明通道。
 
 ### 2. 色键选择
 
@@ -476,7 +479,11 @@ output/<project-id>-<timestamp>/
    └─ run-summary.json
 ```
 
-多分类或多 Sheet 任务先运行 `prepare_ui_batch.py` 生成 Job、独立请求、Prompt 和 Layout Guide。所有 `generated_output` 就绪后运行 `run_ui_pipeline.py --run-dir <run-dir>`；Runner 负责原生 Alpha/色键分流、单次生产尺寸归一、逐 Job 切割、分类连续编号、总 Manifest、Contact Sheet、严格 QA 和 `run-summary.json`。Runner 不调用图片 API，缺少任何生成 Sheet 时必须在写入正式输出前失败。
+多分类或多 Sheet 任务先运行 `prepare_ui_batch.py` 生成 Job、独立请求、Prompt 和 Layout Guide。所有 `generated_output` 及适用的 `alpha_matte_output` 就绪后运行 `run_ui_pipeline.py --run-dir <run-dir>`；Runner 负责 Matte/原生 Alpha/色键分流、单次生产尺寸归一、逐 Job 切割、分类连续编号、总 Manifest、Contact Sheet、严格 QA 和 `run-summary.json`。Runner 不调用图片 API，缺少任何必需生成图时必须在写入正式输出前失败。
+
+原生 Alpha 分流还必须在任何正式输出前校验 `generated/<job-id>.provenance.json` 与源图哈希。原生源图只允许清理 `alpha=0` 的隐藏 RGB，不得改写可见 RGB/Alpha；生产画布缩放和单体归一化统一使用预乘 Alpha。内置 `imagegen` 实测返回 RGB 烘焙棋盘格，禁止用于 `native-alpha-required`。
+
+Matte 分流在正式输出前校验 `generated/<job-id>.png` 与 `generated/<job-id>-alpha-matte.png`。Matte 至少包含 8 个 Alpha 等级和 32 个部分透明像素；灰度通道差异 P95 ≤ 24、边框 Alpha P95 ≤ 24、彩色背景边框色差 P95 ≤ 28、双图包围框 IoU ≥ 0.55、双向像素覆盖率 ≥ 0.65。通过后按已知黑背景合成方程恢复直通道 RGB，并对后续缩放使用预乘 Alpha。
 
 `prepare_ui_run.py` 与 `prepare_ui_batch.py` 生成的 `jobs.json` 统一使用 schema v2。每个 Job 至少包含 `layout_json`、`layout_guide`、`generated_output` 和 `expected_count`；请求必须包含总 `expected_count`。单分类任务也必须能直接交给统一 Runner，不得保留只可分步调试的旧 Job schema。
 
@@ -621,7 +628,7 @@ fail     禁止进入正式输出
 
 未知整图样本必须由自动测试直接读取，不能只在临时目录中动态构造后删除。标注预览和正式 Contact Sheet 都必须完成视觉检查。
 
-批量编排还必须覆盖：至少两个分类、至少一个分类跨两张 Sheet、同一按钮状态组不跨 Sheet、色键与原生 Alpha 输入混合、跨 Sheet 分类编号连续、缺少生成图时预检失败。
+批量编排还必须覆盖：至少两个分类、至少一个分类跨两张 Sheet、同一按钮状态组不跨 Sheet、色键/Matte/原生 Alpha 输入混合、跨 Sheet 分类编号连续、缺少生成图时预检失败。Matte 专项必须覆盖非灰度、全不透明、错位和背景污染失败。
 
 Skill 触发评测必须覆盖九个内部资源类别，并至少在版本阶段验收时通过独立 Codex 新任务确认 Skill 选择、类别识别和第一动作。真实触发输出若返回文件名前缀而非内部类别名，必须修正规则并复验，不得按模糊命中计为严格通过。
 

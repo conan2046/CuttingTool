@@ -3,8 +3,8 @@
 > 更新时间：2026-07-16  
 > 工作目录：`D:\CuttingTool`  
 > 仓库：`https://github.com/conan2046/CuttingTool.git`  
-> 当前工作分支：`agent/p4-failure-matrix`（P4 Draft PR #2；P5 开工前先确认该分支已合并或基于最新 `main`）
-> 已完成功能基线：v0.7.0 P4 失败矩阵扩充
+> 当前工作分支：`agent/p5-native-alpha`
+> 已完成功能基线：v0.9.0 P5 GPT Image 2 RGB＋Alpha Matte 双图链路
 
 ## 1. 新会话先做什么
 
@@ -57,7 +57,7 @@ game-ui-asset-pipeline
 
 - `prepare_ui_batch.py` 支持多分类请求和超容量自动拆 Sheet。
 - 同一语义按钮状态组不会跨 Sheet。
-- `run_ui_pipeline.py` 统一处理原生 Alpha 和色键 Sheet。
+- `run_ui_pipeline.py` 统一处理模型 Matte、原生 Alpha 和色键 Sheet。
 - 自动汇总总 Manifest、Contact Sheet、QA 和 `run-summary.json`。
 - 分类编号跨 Sheet 连续。
 
@@ -154,31 +154,31 @@ game-ui-asset-pipeline
 
 ## 4. 当前卡在哪
 
-没有代码阻塞、测试阻塞或 Git 阻塞。当前是阶段完成后的会话收口点。
+当前没有代码、测试、图片生成或 API 权限阻塞。P5 已改用 Codex 内置 GPT Image 2 的 RGB＋Alpha Matte 双图方案完成四类真实验收，不需要 API Key。
 
 已知环境限制：WindowsApps 内的 `codex.exe` 从 PowerShell 直接执行会报“拒绝访问”，所以不能用 `codex exec` 做新任务触发验收。此前已改用 Codex 桌面的独立任务接口完成 9 类验收，不要再浪费时间重复尝试 WindowsApps CLI。
 
-当前尚未实现：
+当前尚未完成：
 
 - Unity 自动导入和 Sprite Editor 配置。
 - 自动九宫格边界推断。
-- 复杂烟雾、玻璃、液体、柔光等原生半透明资源的可靠处理。用户已明确将“原生透明特效生成链路”提升为下一阶段最高优先级，并授权下个会话直接推进。
+- 模型原生 Alpha 仍为可选严格来源；只有用户明确要求源图直接携带 Alpha 时才需要外部授权。
 - 混合展示图的全自动语义分类和遮挡内容恢复。
 - 桌面 GUI。
 
 ## 5. 下一步计划
 
-### P5：原生透明特效生成链路（下一阶段最高优先级）
+### P5：复杂半透明特效生成链路（已完成）
 
-下个会话直接执行，不再继续用色键阈值优化冒充复杂半透明支持：
+完成内容：
 
-1. 探测当前内置图片生成链路能否稳定输出真实 RGBA；保留原生 Alpha，不做色键移除或二次猜测。
-2. 为原生 Alpha Sheet 增加独立 Job/Runner 分流、Alpha 保真检测、预乘 Alpha 缩放和失败降级。
-3. 建立烟雾、玻璃、液体、柔光四类真实样本矩阵，检查透明层次、RGB 污染、轮廓完整性和缩放后视觉质量。
-4. 输出独立资源、Manifest、Contact Sheet、QA 和运行摘要；原生 Alpha 不可靠时必须明确失败，禁止回退后仍宣称原生透明。
-5. 更新 Skill、协议、测试、README、AGENTS、CHANGELOG、安装副本并完成源码/安装态一致性检查。
+1. 已完成：内置链路实测输出 RGB 烘焙棋盘格，无 Alpha；样本已固化。
+2. 已完成：新增 `model-matte-derived` 双图 Job、Runner 分流、来源哈希、Alpha 保真和预乘 Alpha 缩放。
+3. 已完成：使用内置 GPT Image 2 生成烟雾、玻璃、液体、柔光彩色 Sheet 与同图编辑 Matte。
+4. 已完成：灰度/黑边/层次/背景/对齐预检、RGBA 合成、切割、Manifest、Contact Sheet、QA 和运行摘要。
+5. 已完成：同步 Skill、协议、测试、README、AGENTS、CHANGELOG 和安装副本。
 
-完成标准：四类真实样本全部通过数据与视觉验收，且能证明 Alpha 来自生成源而非色键估算。若当前内置能力无法提供真实 Alpha，再基于实测证据确定最小外部生成方案及所需授权，不预设 API Key 已存在。
+完成结果：四类真实样本 4 pass / 0 warning / 0 fail；来源明确记录为 `gpt-image-2-matte-derived`，不表述为模型原生 Alpha。
 
 以下为已完成阶段：
 
@@ -265,7 +265,7 @@ D:\CuttingTool\skills\game-ui-asset-pipeline
 安装位置：
 
 ```text
-C:\Users\Admin\.codex\skills\game-ui-asset-pipeline
+C:\Users\Administrator\.codex\skills\game-ui-asset-pipeline
 ```
 
 始终先改项目源码，再同步安装副本，最后比较逐文件哈希。
@@ -275,7 +275,7 @@ C:\Users\Admin\.codex\skills\game-ui-asset-pipeline
 唯一规定测试入口是标准库 `unittest`，不要尝试、探测或安装 `pytest`：
 
 ```powershell
-$PYTHON = 'C:\Users\Admin\.cache\codex-runtimes\codex-primary-runtime\dependencies\python\python.exe'
+$PYTHON = 'C:\Users\Administrator\.cache\codex-runtimes\codex-primary-runtime\dependencies\python\python.exe'
 & $PYTHON -m unittest discover `
   -s .\skills\game-ui-asset-pipeline\tests `
   -p 'test_*.py' `
@@ -316,7 +316,7 @@ $GIT = 'C:\Program Files\Git\cmd\git.exe'
 ### 源码测试
 
 ```powershell
-$PYTHON = 'C:\Users\Admin\.cache\codex-runtimes\codex-primary-runtime\dependencies\python\python.exe'
+$PYTHON = 'C:\Users\Administrator\.cache\codex-runtimes\codex-primary-runtime\dependencies\python\python.exe'
 & $PYTHON -m unittest discover `
   -s .\skills\game-ui-asset-pipeline\tests `
   -p 'test_*.py' `
@@ -327,7 +327,7 @@ $PYTHON = 'C:\Users\Admin\.cache\codex-runtimes\codex-primary-runtime\dependenci
 
 ```powershell
 & $PYTHON -m unittest discover `
-  -s 'C:\Users\Admin\.codex\skills\game-ui-asset-pipeline\tests' `
+  -s 'C:\Users\Administrator\.codex\skills\game-ui-asset-pipeline\tests' `
   -p 'test_*.py' `
   -v
 ```
@@ -341,7 +341,7 @@ $PYTHON = 'C:\Users\Admin\.cache\codex-runtimes\codex-primary-runtime\dependenci
 
 ## 8. 最终状态
 
-- `c8666b8` 已推送至 `origin/main`。
-- v0.7.0 P4 失败矩阵扩充已完成；最终测试与安装态数量以 CHANGELOG 最新记录为准。
-- 下一阶段进入自然语言一键编排与交付摘要收敛，不重做 P1-P4 样本。
+- 当前开发分支：`agent/p5-native-alpha`，基于完整 P4 与 P5 路线文档基线。
+- v0.9.0 P5 使用内置 GPT Image 2 完成四类真实 Matte 推导透明链路；最终测试数量以 CHANGELOG 最新记录为准。
+- 下一阶段进入自然语言一键编排、交付摘要收敛和更多跨风格 Matte 回归，不需要 API Key，不重做 P1-P4。
 - GUI 继续保持最低优先级。

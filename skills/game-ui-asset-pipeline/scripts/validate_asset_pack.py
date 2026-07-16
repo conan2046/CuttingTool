@@ -174,6 +174,48 @@ def validate_pack(
                         "pixels": spill_count,
                     }
                 )
+        if entry.get("transparency_mode") == "native-alpha-required":
+            if entry.get("alpha_origin") != "model-native":
+                issues.append({"severity": "fail", "code": "native-alpha-origin-missing", "file": filename})
+            if not re.fullmatch(r"[0-9a-f]{64}", str(entry.get("source_sha256", ""))):
+                issues.append({"severity": "fail", "code": "native-alpha-source-hash-missing", "file": filename})
+            if not str(entry.get("alpha_provenance", "")).endswith(".provenance.json"):
+                issues.append({"severity": "fail", "code": "native-alpha-provenance-missing", "file": filename})
+            elif not (asset_root / str(entry["alpha_provenance"])).is_file():
+                issues.append({"severity": "fail", "code": "native-alpha-provenance-file-missing", "file": filename})
+            partial_count = int(np.count_nonzero((alpha > 0) & (alpha < 255)))
+            if partial_count == 0 or np.unique(alpha).size < 8:
+                issues.append(
+                    {
+                        "severity": "fail",
+                        "code": "native-alpha-layering-lost",
+                        "file": filename,
+                        "partial_alpha_pixels": partial_count,
+                        "distinct_alpha_levels": int(np.unique(alpha).size),
+                    }
+                )
+        if entry.get("transparency_mode") == "model-matte-derived":
+            if entry.get("alpha_origin") != "gpt-image-2-matte-derived":
+                issues.append({"severity": "fail", "code": "model-matte-origin-missing", "file": filename})
+            for field in ("source_sha256", "alpha_matte_sha256"):
+                if not re.fullmatch(r"[0-9a-f]{64}", str(entry.get(field, ""))):
+                    issues.append({"severity": "fail", "code": f"{field.replace('_', '-')}-missing", "file": filename})
+            matte_relative = str(entry.get("alpha_matte", ""))
+            if not matte_relative.endswith("-alpha-matte.png"):
+                issues.append({"severity": "fail", "code": "alpha-matte-path-missing", "file": filename})
+            elif not (asset_root / matte_relative).is_file():
+                issues.append({"severity": "fail", "code": "alpha-matte-file-missing", "file": filename})
+            partial_count = int(np.count_nonzero((alpha > 0) & (alpha < 255)))
+            if partial_count == 0 or np.unique(alpha).size < 8:
+                issues.append(
+                    {
+                        "severity": "fail",
+                        "code": "model-matte-layering-lost",
+                        "file": filename,
+                        "partial_alpha_pixels": partial_count,
+                        "distinct_alpha_levels": int(np.unique(alpha).size),
+                    }
+                )
         valid_assets += 1
 
     for category, indices in sorted(category_indices.items()):

@@ -88,6 +88,12 @@
 
 普通不含绿色的 UI 首选 `#00FF00`；资源包含绿色时改用 `#FF00FF`。
 
+## 复杂半透明特效
+
+烟雾、玻璃、液体和柔光默认设置 `transparency_mode=model-matte-derived`：先用内置 GPT Image 2 生成纯黑底彩色 Sheet，再将该图作为编辑目标生成像素对齐的灰度 Alpha Matte。黑色表示透明、白色表示不透明、连续灰度表示部分透明。
+
+只有用户明确要求生成源直接携带 Alpha 时才使用 `native-alpha-required`。两种模式的字段、提示词、预检、来源标记和失败降级见 `native-alpha-contract.md`。
+
 ## 失败重试
 
 每次只针对一个失败原因重试：

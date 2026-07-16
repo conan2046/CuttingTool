@@ -5,8 +5,8 @@
 ```text
 多分类任务规格
 → 自动拆分 Sheet 与 Layout Guide
-→ GPT Image 资源 Sheet
-→ 一键识别 Alpha/色键并切割
+→ GPT Image 资源 Sheet／RGB＋Alpha Matte 双图
+→ 一键识别 Alpha、Matte 或色键并切割
 → 尺寸归一化与总 Manifest
 → Contact Sheet、严格 QA、运行摘要
 ```
@@ -41,6 +41,12 @@
 - 使用批准后的 bbox 直接生成透明资源包、Manifest、Contact Sheet 和 QA。
 - 应用前拦截越界、重叠、可见前景裁断和编号错误；失败不写正式 Manifest，并生成修正前后差异预览。
 - 九类标准资源均有静态 eval 和真实 Codex 新任务触发验收。
+- 支持 `native-alpha-required` Job：正式输出前验证生成源 RGBA、连续 Alpha、SHA-256、模型/生成方式和“未做背景移除”来源声明。
+- 原生 Alpha 分流只清理零 Alpha 隐藏 RGB；生产尺寸和单体缩放均使用预乘 Alpha；Manifest 与运行摘要保留来源证据。
+- 原生来源预检失败时只输出结构化 QA 和失败摘要，不创建正式 Manifest 或资源包。
+- 支持 `model-matte-derived`：使用 Codex 内置 GPT Image 2 生成纯黑底彩色 Sheet，再基于同一图生成像素对齐的灰度 Matte，不需要 API Key。
+- Matte Runner 校验灰度纯度、黑色边框、连续 Alpha、背景平整度、像素覆盖关系和双图 SHA-256；通过后按黑背景合成方程恢复 RGBA。
+- Manifest 明确记录 `alpha_origin=gpt-image-2-matte-derived`，不会把 Matte 推导结果冒充模型原生 Alpha。
 
 碎片策略真实校准样本位于 `output/p2-fragment-calibration`：面板、按钮、装备、技能共 16 件，包含尖角、链条、悬挂件、独立符文和硬边火花。
 
@@ -48,13 +54,13 @@
 
 - Unity 自动导入。
 - 自动九宫格推断。
-- 原生透明复杂特效链路（烟雾、玻璃、液体、柔光）；已提升为下一阶段最高优先级。
+- 外部模型原生 Alpha 生成仍为可选能力；只有明确要求源文件直接携带 Alpha 时才需要额外授权。
 - 复杂混合展示图的自动语义分类和遮挡内容恢复。
 
 ## 路线优先级
 
-1. P5 原生透明特效生成链路：烟雾、玻璃、液体、柔光四类真实 Alpha 生成、保真处理与端到端验收。
-2. 完善 Codex 自然语言一键编排和稳定交付。
+1. 完善 Codex 自然语言一键编排和稳定交付。
+2. 继续扩充 GPT Image 2 RGB＋Matte 的复杂特效和跨风格回归。
 3. 根据真实生产任务继续优化色键诊断、碎片合并、JSON 修正、bbox 标注预览和 Contact Sheet。
 4. 扩充复杂失败样本和跨风格回归矩阵。
 5. 桌面 GUI：长期最低优先级。只有前述流程稳定完成，且高频人工操作无法通过现有轻量方式解决时才重新评估。
@@ -70,7 +76,7 @@ D:\CuttingTool\skills\game-ui-asset-pipeline
 完成验证后安装到：
 
 ```text
-C:\Users\Admin\.codex\skills\game-ui-asset-pipeline
+C:\Users\Administrator\.codex\skills\game-ui-asset-pipeline
 ```
 
 ## Python 环境
@@ -78,7 +84,7 @@ C:\Users\Admin\.codex\skills\game-ui-asset-pipeline
 使用 Codex 工作区捆绑 Python，不使用裸 `python`：
 
 ```powershell
-$PYTHON = 'C:\Users\Admin\.cache\codex-runtimes\codex-primary-runtime\dependencies\python\python.exe'
+$PYTHON = 'C:\Users\Administrator\.cache\codex-runtimes\codex-primary-runtime\dependencies\python\python.exe'
 ```
 
 当前依赖：
@@ -111,6 +117,10 @@ qa/contact-sheet.png
 qa/qa-report.json
 qa/run-summary.json
 ```
+
+复杂半透明任务默认设置 `transparency_mode: "model-matte-derived"`。每个 Job 使用内置 GPT Image 2 生成彩色黑底 Sheet 和同名 `-alpha-matte.png`；不需要 API Key。真实烟雾、玻璃、液体、柔光验收位于 `output/p5-model-matte-real`。
+
+只有明确要求模型原生 Alpha 时才使用 `native-alpha-required` 和来源侧车文件。完整格式见 [native-alpha-contract.md](skills/game-ui-asset-pipeline/references/native-alpha-contract.md)。
 
 ## 未知整图诊断与修正
 
