@@ -1,6 +1,6 @@
 {
   "name": "com.hongda.game-ui-asset-pipeline",
-  "version": "0.12.0",
+  "version": "0.12.2",
   "displayName": "Game UI Asset Pipeline Unity Importer",
   "description": "Deterministic sprite import, 9-slice configuration, and interactive uGUI prefab generation for CuttingTool deliveries.",
   "unity": "2022.3",

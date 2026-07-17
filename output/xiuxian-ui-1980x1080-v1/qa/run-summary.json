@@ -1,0 +1,27 @@
+{
+  "schema_version": 3,
+  "project_id": "xiuxian-ui-main-v1",
+  "status": "complete",
+  "generation": {
+    "method": "built-in-imagegen",
+    "sheet_count": 10,
+    "native_alpha_required_count": 0,
+    "native_alpha_verified_count": 0,
+    "model_matte_required_count": 1,
+    "model_matte_verified_count": 1
+  },
+  "pipeline": {
+    "manifest": "final/manifest.json",
+    "contact_sheet": "qa/contact-sheet.png",
+    "qa_report": "qa/qa-report.json"
+  },
+  "results": {
+    "expected": 88,
+    "exported": 88,
+    "pass": 85,
+    "warning": 3,
+    "fail": 0,
+    "manual_action_required": []
+  },
+  "completed_at": "2026-07-17T05:49:43.574777+00:00"
+}

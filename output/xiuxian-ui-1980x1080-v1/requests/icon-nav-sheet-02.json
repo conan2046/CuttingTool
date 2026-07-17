@@ -1,0 +1,104 @@
+{
+  "schema_version": 2,
+  "project_id": "xiuxian-ui-main-v1",
+  "job_id": "icon-nav-sheet-02",
+  "category": "Icon_Nav",
+  "canvas": [
+    2048,
+    2048
+  ],
+  "grid": [
+    4,
+    4
+  ],
+  "target_size": [
+    128,
+    128
+  ],
+  "alignment": "center",
+  "padding": 10,
+  "chroma_key": "#FF00FF",
+  "transparency_mode": "chroma-key",
+  "generation_method": "built-in-imagegen",
+  "allow_attached_glow": false,
+  "assets": [
+    {
+      "semantic_name": "ActivityDrum",
+      "state": "Default",
+      "description": "ornamental war drum",
+      "category_index": 17
+    },
+    {
+      "semantic_name": "ActivityAchievement",
+      "state": "Default",
+      "description": "achievement medal and check seal",
+      "category_index": 18
+    },
+    {
+      "semantic_name": "ActivityAlliance",
+      "state": "Default",
+      "description": "alliance handshake emblem",
+      "category_index": 19
+    },
+    {
+      "semantic_name": "ActivityBanner",
+      "state": "Default",
+      "description": "small celestial battle banner",
+      "category_index": 20
+    },
+    {
+      "semantic_name": "ActivityRanking",
+      "state": "Default",
+      "description": "three-level ranking podium",
+      "category_index": 21
+    },
+    {
+      "semantic_name": "FunctionPavilion",
+      "state": "Default",
+      "description": "celestial pavilion building",
+      "category_index": 22
+    },
+    {
+      "semantic_name": "FunctionTreasure",
+      "state": "Default",
+      "description": "crystal treasure chest",
+      "category_index": 23
+    },
+    {
+      "semantic_name": "FunctionTalisman",
+      "state": "Default",
+      "description": "round coin talisman with tassel",
+      "category_index": 24
+    },
+    {
+      "semantic_name": "FunctionShop",
+      "state": "Default",
+      "description": "small xianxia shop building",
+      "category_index": 25
+    },
+    {
+      "semantic_name": "FunctionScroll",
+      "state": "Default",
+      "description": "rolled quest scroll with blue seal",
+      "category_index": 26
+    },
+    {
+      "semantic_name": "FunctionWealth",
+      "state": "Default",
+      "description": "fortune pouch and coins",
+      "category_index": 27
+    },
+    {
+      "semantic_name": "FunctionCompanion",
+      "state": "Default",
+      "description": "paired companion silhouettes, no facial detail",
+      "category_index": 28
+    },
+    {
+      "semantic_name": "FunctionCharacter",
+      "state": "Default",
+      "description": "single cultivator silhouette bust, no facial detail",
+      "category_index": 29
+    }
+  ]
+}

@@ -4,7 +4,10 @@ using System.IO;
 using System.Linq;
 using CuttingTool.GameUI;
 using UnityEditor;
+using UnityEditor.SceneManagement;
 using UnityEngine;
+using UnityEngine.EventSystems;
+using UnityEngine.SceneManagement;
 using UnityEngine.UI;
 
 namespace CuttingTool.GameUI.Editor
@@ -19,6 +22,7 @@ namespace CuttingTool.GameUI.Editor
             public string generated_root = string.Empty;
             public string prefab_root = string.Empty;
             public string report_path = string.Empty;
+            public string preview_output_dir = string.Empty;
             public bool create_asset_prefabs;
             public SpritePlan[] sprites = Array.Empty<SpritePlan>();
             public ScreenPlan[] screens = Array.Empty<ScreenPlan>();
@@ -56,8 +60,12 @@ namespace CuttingTool.GameUI.Editor
             public float[] pivot = Array.Empty<float>();
             public float[] anchored_position = Array.Empty<float>();
             public float[] size = Array.Empty<float>();
+            public float[] color = Array.Empty<float>();
             public bool preserve_aspect;
             public bool raycast_target;
+            public string highlighted_asset_id = string.Empty;
+            public string pressed_asset_id = string.Empty;
+            public string disabled_asset_id = string.Empty;
         }
 
         [Serializable]
@@ -78,6 +86,8 @@ namespace CuttingTool.GameUI.Editor
             public int imported_sprite_count;
             public int asset_prefab_count;
             public int screen_prefab_count;
+            public int preview_scene_count;
+            public int preview_image_count;
             public ImportIssue[] issues = Array.Empty<ImportIssue>();
         }
 
@@ -110,6 +120,7 @@ namespace CuttingTool.GameUI.Editor
                 ? CreateAssetPrefabs(plan, importedSprites, issues)
                 : 0;
             var screenPrefabCount = CreateScreenPrefabs(plan, importedSprites, issues);
+            var previewSceneCount = CreatePreviewScenes(plan, issues, out var previewImageCount);
             AssetDatabase.SaveAssets();
             AssetDatabase.Refresh(ImportAssetOptions.ForceSynchronousImport);
 
@@ -120,11 +131,13 @@ namespace CuttingTool.GameUI.Editor
                 imported_sprite_count = importedSprites.Count,
                 asset_prefab_count = assetPrefabCount,
                 screen_prefab_count = screenPrefabCount,
+                preview_scene_count = previewSceneCount,
+                preview_image_count = previewImageCount,
                 issues = issues.ToArray(),
             };
             Directory.CreateDirectory(Path.GetDirectoryName(plan.report_path) ?? ".");
             File.WriteAllText(plan.report_path, JsonUtility.ToJson(report, true));
-            Debug.Log($"GameUIImportComplete: sprites={report.imported_sprite_count} assetPrefabs={report.asset_prefab_count} screenPrefabs={report.screen_prefab_count} ok={report.ok}");
+            Debug.Log($"GameUIImportComplete: sprites={report.imported_sprite_count} assetPrefabs={report.asset_prefab_count} screenPrefabs={report.screen_prefab_count} previewScenes={report.preview_scene_count} previewImages={report.preview_image_count} ok={report.ok}");
             EditorApplication.Exit(report.ok ? 0 : 2);
         }
 
@@ -230,6 +243,8 @@ namespace CuttingTool.GameUI.Editor
                     rect.pivot = ReadVector2(element.pivot, new Vector2(0.5f, 0.5f));
                     rect.anchoredPosition = ReadVector2(element.anchored_position, Vector2.zero);
                     rect.sizeDelta = ReadVector2(element.size, new Vector2(100f, 100f));
+                    item.GetComponent<Image>().color = ReadColor(element.color, Color.white);
+                    ConfigureButtonSprites(item, element, sprites, issues);
                     objects[element.id] = item;
                 }
 
@@ -244,6 +259,164 @@ namespace CuttingTool.GameUI.Editor
                 count++;
             }
             return count;
+        }
+
+        private static int CreatePreviewScenes(ImportPlan plan, ICollection<ImportIssue> issues, out int previewImageCount)
+        {
+            var directory = $"{plan.generated_root}/Scenes";
+            EnsureAssetDirectory(directory);
+            Directory.CreateDirectory(plan.preview_output_dir);
+            var count = 0;
+            previewImageCount = 0;
+            foreach (var screen in plan.screens ?? Array.Empty<ScreenPlan>())
+            {
+                var prefabPath = $"{plan.prefab_root}/Screens/{SanitizeFileName(screen.id)}.prefab";
+                var screenPrefab = AssetDatabase.LoadAssetAtPath<GameObject>(prefabPath);
+                if (screenPrefab == null)
+                {
+                    AddIssue(issues, "preview-screen-prefab-missing", prefabPath, "Screen prefab is unavailable for preview scene generation.");
+                    continue;
+                }
+
+                var scene = EditorSceneManager.NewScene(NewSceneSetup.EmptyScene, NewSceneMode.Single);
+                var cameraObject = new GameObject("PreviewCamera", typeof(Camera));
+                var camera = cameraObject.GetComponent<Camera>();
+                camera.clearFlags = CameraClearFlags.SolidColor;
+                camera.backgroundColor = new Color(0.015f, 0.035f, 0.075f, 1f);
+                camera.orthographic = true;
+                cameraObject.tag = "MainCamera";
+
+                var canvasObject = new GameObject("PreviewCanvas", typeof(RectTransform), typeof(Canvas), typeof(CanvasScaler), typeof(GraphicRaycaster));
+                var canvas = canvasObject.GetComponent<Canvas>();
+                canvas.renderMode = RenderMode.ScreenSpaceCamera;
+                canvas.worldCamera = camera;
+                canvas.planeDistance = 1f;
+                var scaler = canvasObject.GetComponent<CanvasScaler>();
+                scaler.uiScaleMode = CanvasScaler.ScaleMode.ScaleWithScreenSize;
+                scaler.referenceResolution = ReadVector2(screen.reference_size, new Vector2(1920f, 1080f));
+                scaler.screenMatchMode = CanvasScaler.ScreenMatchMode.MatchWidthOrHeight;
+                scaler.matchWidthOrHeight = 0.5f;
+
+                var eventSystemObject = new GameObject("EventSystem", typeof(EventSystem), typeof(StandaloneInputModule));
+                SceneManager.MoveGameObjectToScene(cameraObject, scene);
+                SceneManager.MoveGameObjectToScene(canvasObject, scene);
+                SceneManager.MoveGameObjectToScene(eventSystemObject, scene);
+                var instance = PrefabUtility.InstantiatePrefab(screenPrefab, scene) as GameObject;
+                if (instance == null)
+                {
+                    AddIssue(issues, "preview-prefab-instantiation-failed", prefabPath, "Screen prefab could not be instantiated in preview scene.");
+                    continue;
+                }
+                instance.transform.SetParent(canvasObject.transform, false);
+                var rect = instance.GetComponent<RectTransform>();
+                rect.anchorMin = rect.anchorMax = new Vector2(0.5f, 0.5f);
+                rect.pivot = new Vector2(0.5f, 0.5f);
+                rect.anchoredPosition = Vector2.zero;
+                rect.sizeDelta = ReadVector2(screen.reference_size, new Vector2(1920f, 1080f));
+
+                var previewSize = ReadVector2(screen.reference_size, new Vector2(1920f, 1080f));
+                var previewPath = Path.Combine(plan.preview_output_dir, $"{SanitizeFileName(screen.id)}.png");
+                if (RenderPreview(camera, Mathf.RoundToInt(previewSize.x), Mathf.RoundToInt(previewSize.y), previewPath, issues))
+                {
+                    previewImageCount++;
+                }
+
+                var scenePath = $"{directory}/{SanitizeFileName(screen.id)}-Preview.unity";
+                if (!EditorSceneManager.SaveScene(scene, scenePath))
+                {
+                    AddIssue(issues, "preview-scene-save-failed", scenePath, "Unity could not save the preview scene.");
+                    continue;
+                }
+                count++;
+            }
+            return count;
+        }
+
+        private static bool RenderPreview(Camera camera, int width, int height, string outputPath, ICollection<ImportIssue> issues)
+        {
+            if (width <= 0 || height <= 0 || width > 4096 || height > 4096)
+            {
+                AddIssue(issues, "preview-size-invalid", outputPath, $"Preview size {width}x{height} is outside 1..4096.");
+                return false;
+            }
+            RenderTexture renderTexture = null;
+            Texture2D texture = null;
+            var previous = RenderTexture.active;
+            try
+            {
+                renderTexture = new RenderTexture(width, height, 24, RenderTextureFormat.ARGB32);
+                camera.targetTexture = renderTexture;
+                RenderTexture.active = renderTexture;
+                Canvas.ForceUpdateCanvases();
+                camera.Render();
+                texture = new Texture2D(width, height, TextureFormat.RGBA32, false);
+                texture.ReadPixels(new Rect(0, 0, width, height), 0, 0);
+                texture.Apply(false, false);
+                File.WriteAllBytes(outputPath, texture.EncodeToPNG());
+                return true;
+            }
+            catch (Exception exception)
+            {
+                AddIssue(issues, "preview-render-failed", outputPath, exception.Message);
+                return false;
+            }
+            finally
+            {
+                camera.targetTexture = null;
+                RenderTexture.active = previous;
+                if (renderTexture != null)
+                {
+                    UnityEngine.Object.DestroyImmediate(renderTexture);
+                }
+                if (texture != null)
+                {
+                    UnityEngine.Object.DestroyImmediate(texture);
+                }
+            }
+        }
+
+        private static void ConfigureButtonSprites(
+            GameObject item,
+            ElementPlan element,
+            IReadOnlyDictionary<string, Sprite> sprites,
+            ICollection<ImportIssue> issues)
+        {
+            var button = item.GetComponent<Button>();
+            if (button == null)
+            {
+                return;
+            }
+            var state = button.spriteState;
+            var hasSpriteSwap = false;
+            hasSpriteSwap |= AssignStateSprite(element.highlighted_asset_id, "highlighted", sprites, issues, sprite =>
+            {
+                state.highlightedSprite = sprite;
+                state.selectedSprite = sprite;
+            });
+            hasSpriteSwap |= AssignStateSprite(element.pressed_asset_id, "pressed", sprites, issues, sprite => state.pressedSprite = sprite);
+            hasSpriteSwap |= AssignStateSprite(element.disabled_asset_id, "disabled", sprites, issues, sprite => state.disabledSprite = sprite);
+            button.spriteState = state;
+            button.transition = hasSpriteSwap ? Selectable.Transition.SpriteSwap : Selectable.Transition.ColorTint;
+        }
+
+        private static bool AssignStateSprite(
+            string assetId,
+            string stateName,
+            IReadOnlyDictionary<string, Sprite> sprites,
+            ICollection<ImportIssue> issues,
+            Action<Sprite> assign)
+        {
+            if (string.IsNullOrWhiteSpace(assetId))
+            {
+                return false;
+            }
+            if (!sprites.TryGetValue(assetId, out var sprite))
+            {
+                AddIssue(issues, "button-state-sprite-missing", assetId, $"Button {stateName} sprite is missing.");
+                return false;
+            }
+            assign(sprite);
+            return true;
         }
 
         private static GameObject CreateVisualObject(string name, string bindingId, string kind, Sprite sprite, bool preserveAspect, bool raycastTarget)
@@ -286,6 +459,13 @@ namespace CuttingTool.GameUI.Editor
             return values != null && values.Count == 4
                 ? new Vector4(values[0], values[1], values[2], values[3])
                 : Vector4.zero;
+        }
+
+        private static Color ReadColor(IReadOnlyList<float> values, Color fallback)
+        {
+            return values != null && values.Count == 4
+                ? new Color(values[0], values[1], values[2], values[3])
+                : fallback;
         }
 
         private static void EnsureAssetDirectory(string assetPath)

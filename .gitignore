@@ -1,5 +1,7 @@
 # Generated runs and local working data
-/output/
+/output/*
+!/output/xiuxian-ui-1980x1080-v1/
+!/output/xiuxian-ui-1980x1080-v1/**
 /tmp/
 /logs/
 

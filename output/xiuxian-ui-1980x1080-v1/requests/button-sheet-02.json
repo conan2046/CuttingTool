@@ -1,0 +1,95 @@
+{
+  "schema_version": 2,
+  "project_id": "xiuxian-ui-main-v1",
+  "job_id": "button-sheet-02",
+  "category": "Button",
+  "canvas": [
+    2048,
+    2048
+  ],
+  "grid": [
+    4,
+    3
+  ],
+  "target_size": null,
+  "alignment": "center",
+  "padding": 12,
+  "chroma_key": "#00FF00",
+  "transparency_mode": "chroma-key",
+  "generation_method": "built-in-imagegen",
+  "allow_attached_glow": false,
+  "assets": [
+    {
+      "semantic_name": "QuestTab",
+      "state": "Normal",
+      "description": "shallow tab button, blank center",
+      "category_index": 13
+    },
+    {
+      "semantic_name": "QuestTab",
+      "state": "Hover",
+      "description": "same exact tab, brighter hover rim",
+      "category_index": 14
+    },
+    {
+      "semantic_name": "QuestTab",
+      "state": "Pressed",
+      "description": "same exact tab, selected pressed appearance",
+      "category_index": 15
+    },
+    {
+      "semantic_name": "QuestTab",
+      "state": "Disabled",
+      "description": "same exact tab, desaturated disabled",
+      "category_index": 16
+    },
+    {
+      "semantic_name": "QuestComplete",
+      "state": "Normal",
+      "description": "small ornamental action button, blank center",
+      "category_index": 17
+    },
+    {
+      "semantic_name": "QuestComplete",
+      "state": "Hover",
+      "description": "same exact button, brighter hover rim",
+      "category_index": 18
+    },
+    {
+      "semantic_name": "QuestComplete",
+      "state": "Pressed",
+      "description": "same exact button, visibly pressed",
+      "category_index": 19
+    },
+    {
+      "semantic_name": "QuestComplete",
+      "state": "Disabled",
+      "description": "same exact button, desaturated disabled",
+      "category_index": 20
+    },
+    {
+      "semantic_name": "QuestCompleteAll",
+      "state": "Normal",
+      "description": "wide primary ornamental action button, blank center",
+      "category_index": 21
+    },
+    {
+      "semantic_name": "QuestCompleteAll",
+      "state": "Hover",
+      "description": "same exact button, brighter hover rim",
+      "category_index": 22
+    },
+    {
+      "semantic_name": "QuestCompleteAll",
+      "state": "Pressed",
+      "description": "same exact button, visibly pressed",
+      "category_index": 23
+    },
+    {
+      "semantic_name": "QuestCompleteAll",
+      "state": "Disabled",
+      "description": "same exact button, desaturated disabled",
+      "category_index": 24
+    }
+  ]
+}

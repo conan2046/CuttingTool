@@ -1,0 +1,60 @@
+{
+  "schema_version": 1,
+  "ok": true,
+  "algorithm": "adaptive-soft-matte-with-local-foreground-projection",
+  "chroma_key": "#00FF00",
+  "transparent_threshold": 19.0,
+  "opaque_threshold": 96.0,
+  "despill": true,
+  "width": 2048,
+  "height": 2048,
+  "transparent_pixels": 4059392,
+  "partial_alpha_pixels": 107698,
+  "opaque_pixels": 27214,
+  "visible_near_key_pixels": 0,
+  "discarded_unresolved_chroma_edge_pixels": 22,
+  "discarded_opaque_chroma_spill_pixels": 0,
+  "fitted_chroma_mix_pixels": 102639,
+  "spill_chroma_mix_pixels": 104564,
+  "adaptive_thresholds_requested": true,
+  "adaptive_thresholds_applied": true,
+  "threshold_diagnostics": {
+    "schema_version": 1,
+    "algorithm": "border-distance-percentile-recommendation",
+    "chroma_key": "#00FF00",
+    "border_width": 8,
+    "sample_count": 65536,
+    "distance_percentiles": {
+      "p50": 9.9499,
+      "p90": 12.2066,
+      "p95": 13.0767,
+      "p99": 13.9284,
+      "p99_5": 14.5258,
+      "max": 32.3883
+    },
+    "distance_spread_p99_5_p50": 4.576,
+    "suggested_transparent_threshold": 19.0,
+    "suggested_opaque_threshold": 96.0,
+    "confidence": "high",
+    "interior_transition_pixels": 8088,
+    "interior_definite_foreground_pixels": 30893,
+    "interior_transition_fraction": 0.002734,
+    "transition_to_foreground_ratio": 0.261807,
+    "stable_core_support_ratio": 3.819609,
+    "near_key_subject_risk": false,
+    "auto_apply": true,
+    "issues": []
+  },
+  "input": "generated/panel-sheet-03.png",
+  "output": "extracted/panel-sheet-03-alpha.png",
+  "source_size": [
+    1254,
+    1254
+  ],
+  "processing_size": [
+    2048,
+    2048
+  ],
+  "resized": true,
+  "background_mode": "chroma-key"
+}

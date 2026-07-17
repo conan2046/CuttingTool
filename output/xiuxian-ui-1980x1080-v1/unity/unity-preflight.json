@@ -1,0 +1,12 @@
+{
+  "schema_version": 1,
+  "ok": true,
+  "project_id": "xiuxian-ui-main-v1",
+  "unity_project": "D:\\CodeProjects\\UIText",
+  "unity_version": "2022.3.62f3c1",
+  "sprite_count": 88,
+  "screen_count": 1,
+  "qa_report": "D:\\CuttingTool\\output\\xiuxian-ui-1980x1080-v1\\qa\\qa-report.json",
+  "issues": [],
+  "plan": "D:\\CuttingTool\\output\\xiuxian-ui-1980x1080-v1\\unity\\unity-import-plan.json"
+}

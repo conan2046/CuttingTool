@@ -48,7 +48,6 @@ def export_unity_ui(
         str(unity_editor),
         "-batchmode",
         "-quit",
-        "-nographics",
         "-projectPath",
         str(unity_project),
         "-executeMethod",

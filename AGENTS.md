@@ -91,9 +91,11 @@ V1 不包含：
 
 - 当前支持 Unity `2022.3.x` 与 UGUI；其他 Unity 主版本必须先兼容性验证。
 - 默认导入 `Assets/_Generated/GameUI/<project-id>`，安装嵌入包 `Packages/com.hongda.game-ui-asset-pipeline`；不得改写用户手工 Prefab。
-- TextureImporter 固定为 Sprite Single、Alpha Is Transparency、无 Mipmap、Clamp、Bilinear、Uncompressed，默认 PPU 100；Pivot 和 Border 来自可追溯计划。
-- Panel/Button 自动九宫格推断必须记录置信度和来源。低置信、中心区无效或覆写越界必须在启动 Unity 前失败。
+- TextureImporter 固定为 Sprite Single、Alpha Is Transparency、无 Mipmap、Clamp、Bilinear、Uncompressed；默认 PPU 100，Panel/Button 按源图与全部布局目标的最小缩放比自动提高 PPU，也可显式覆写。Pivot、Border、PPU 来源均须可追溯。
+- Panel/Button 自动九宫格推断必须记录置信度和来源。低置信、中心区无效、覆写越界，或 Border 经 PPU 换算后不适配任一布局目标尺寸，必须在启动 Unity 前失败。
 - 最终界面 Prefab 只从 schema v1 显式布局生成；父元素必须先声明，元素正式支持 Image/Button，并写入稳定 BindingId。
+- 布局允许 RGBA 纯色 Image；Button 状态资源必须显式引用正式 Manifest，并配置 SpriteSwap，不得用 ColorTint 冒充已有四态资源。
+- 每个正式 Screen 必须生成 Preview Scene 与同目标尺寸 Unity 渲染 PNG；Prefab 结构正确但未完成视觉渲染检查，不得视为完整验收。
 - Unity 导出前必须确认项目、版本、Editor、导入根和回滚范围；失败不得报告完成。
 
 ### 桌面 GUI 路线优先级

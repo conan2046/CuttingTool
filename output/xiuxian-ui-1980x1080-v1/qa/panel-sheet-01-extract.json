@@ -1,0 +1,27 @@
+{
+  "schema_version": 1,
+  "ok": true,
+  "expected_count": 4,
+  "exported_count": 4,
+  "pass_count": 2,
+  "warning_count": 2,
+  "fail_count": 0,
+  "issues": [
+    {
+      "severity": "warning",
+      "code": "detached-components",
+      "source_index": 1,
+      "component_count": 40,
+      "merged_component_count": 34,
+      "detached_component_count": 6
+    },
+    {
+      "severity": "warning",
+      "code": "detached-components",
+      "source_index": 2,
+      "component_count": 66,
+      "merged_component_count": 51,
+      "detached_component_count": 15
+    }
+  ]
+}

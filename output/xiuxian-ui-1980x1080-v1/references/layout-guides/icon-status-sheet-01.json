@@ -1,0 +1,185 @@
+{
+  "schema_version": 1,
+  "purpose": "layout-reference-only",
+  "warning": "Do not copy visible guide lines, labels, colors, or center marks into generated art.",
+  "image": "D:\\CuttingTool\\output\\xiuxian-ui-1980x1080-v1\\references\\layout-guides\\icon-status-sheet-01.png",
+  "layout": {
+    "width": 2048,
+    "height": 2048,
+    "columns": 4,
+    "rows": 2,
+    "outer_margin": 96,
+    "gutter": 48,
+    "safe_padding": 64
+  },
+  "slots": [
+    {
+      "index": 1,
+      "row": 0,
+      "column": 0,
+      "slot": {
+        "left": 96,
+        "top": 96,
+        "right": 524,
+        "bottom": 1000
+      },
+      "safe_box": {
+        "left": 160,
+        "top": 160,
+        "right": 460,
+        "bottom": 936
+      },
+      "center": [
+        310,
+        548
+      ]
+    },
+    {
+      "index": 2,
+      "row": 0,
+      "column": 1,
+      "slot": {
+        "left": 572,
+        "top": 96,
+        "right": 1000,
+        "bottom": 1000
+      },
+      "safe_box": {
+        "left": 636,
+        "top": 160,
+        "right": 936,
+        "bottom": 936
+      },
+      "center": [
+        786,
+        548
+      ]
+    },
+    {
+      "index": 3,
+      "row": 0,
+      "column": 2,
+      "slot": {
+        "left": 1048,
+        "top": 96,
+        "right": 1476,
+        "bottom": 1000
+      },
+      "safe_box": {
+        "left": 1112,
+        "top": 160,
+        "right": 1412,
+        "bottom": 936
+      },
+      "center": [
+        1262,
+        548
+      ]
+    },
+    {
+      "index": 4,
+      "row": 0,
+      "column": 3,
+      "slot": {
+        "left": 1524,
+        "top": 96,
+        "right": 1952,
+        "bottom": 1000
+      },
+      "safe_box": {
+        "left": 1588,
+        "top": 160,
+        "right": 1888,
+        "bottom": 936
+      },
+      "center": [
+        1738,
+        548
+      ]
+    },
+    {
+      "index": 5,
+      "row": 1,
+      "column": 0,
+      "slot": {
+        "left": 96,
+        "top": 1048,
+        "right": 524,
+        "bottom": 1952
+      },
+      "safe_box": {
+        "left": 160,
+        "top": 1112,
+        "right": 460,
+        "bottom": 1888
+      },
+      "center": [
+        310,
+        1500
+      ]
+    },
+    {
+      "index": 6,
+      "row": 1,
+      "column": 1,
+      "slot": {
+        "left": 572,
+        "top": 1048,
+        "right": 1000,
+        "bottom": 1952
+      },
+      "safe_box": {
+        "left": 636,
+        "top": 1112,
+        "right": 936,
+        "bottom": 1888
+      },
+      "center": [
+        786,
+        1500
+      ]
+    },
+    {
+      "index": 7,
+      "row": 1,
+      "column": 2,
+      "slot": {
+        "left": 1048,
+        "top": 1048,
+        "right": 1476,
+        "bottom": 1952
+      },
+      "safe_box": {
+        "left": 1112,
+        "top": 1112,
+        "right": 1412,
+        "bottom": 1888
+      },
+      "center": [
+        1262,
+        1500
+      ]
+    },
+    {
+      "index": 8,
+      "row": 1,
+      "column": 3,
+      "slot": {
+        "left": 1524,
+        "top": 1048,
+        "right": 1952,
+        "bottom": 1952
+      },
+      "safe_box": {
+        "left": 1588,
+        "top": 1112,
+        "right": 1888,
+        "bottom": 1888
+      },
+      "center": [
+        1738,
+        1500
+      ]
+    }
+  ]
+}

@@ -1,0 +1,378 @@
+{
+  "schema_version": 2,
+  "created_at": "2026-07-17T04:06:14.568446+00:00",
+  "jobs": [
+    {
+      "id": "panel-sheet-01",
+      "kind": "production-asset-sheet",
+      "category": "Panel",
+      "sheet_number": 1,
+      "status": "processed",
+      "expected_count": 4,
+      "request_file": "requests/panel-sheet-01.json",
+      "prompt_file": "prompts/panel-sheet-01.md",
+      "alpha_matte_prompt_file": null,
+      "layout_guide": "references/layout-guides/panel-sheet-01.png",
+      "layout_json": "references/layout-guides/panel-sheet-01.json",
+      "input_images": [
+        {
+          "path": "references/canonical-ui-style.png",
+          "role": "canonical-ui-style"
+        },
+        {
+          "path": "references/reference-01.png",
+          "role": "supporting-style-reference"
+        },
+        {
+          "path": "references/layout-guides/panel-sheet-01.png",
+          "role": "layout-guide-only"
+        }
+      ],
+      "generated_output": "generated/panel-sheet-01.png",
+      "alpha_matte_output": null,
+      "transparency_mode": "chroma-key",
+      "provenance_file": null,
+      "final_directory": "final/Panel",
+      "reports": {
+        "background": "qa/panel-sheet-01-background.json",
+        "extraction": "qa/panel-sheet-01-extract.json",
+        "normalized_manifest": "normalized/panel-sheet-01-manifest.json"
+      }
+    },
+    {
+      "id": "panel-sheet-02",
+      "kind": "production-asset-sheet",
+      "category": "Panel",
+      "sheet_number": 2,
+      "status": "processed",
+      "expected_count": 4,
+      "request_file": "requests/panel-sheet-02.json",
+      "prompt_file": "prompts/panel-sheet-02.md",
+      "alpha_matte_prompt_file": null,
+      "layout_guide": "references/layout-guides/panel-sheet-02.png",
+      "layout_json": "references/layout-guides/panel-sheet-02.json",
+      "input_images": [
+        {
+          "path": "references/canonical-ui-style.png",
+          "role": "canonical-ui-style"
+        },
+        {
+          "path": "references/reference-01.png",
+          "role": "supporting-style-reference"
+        },
+        {
+          "path": "references/layout-guides/panel-sheet-02.png",
+          "role": "layout-guide-only"
+        }
+      ],
+      "generated_output": "generated/panel-sheet-02.png",
+      "alpha_matte_output": null,
+      "transparency_mode": "chroma-key",
+      "provenance_file": null,
+      "final_directory": "final/Panel",
+      "reports": {
+        "background": "qa/panel-sheet-02-background.json",
+        "extraction": "qa/panel-sheet-02-extract.json",
+        "normalized_manifest": "normalized/panel-sheet-02-manifest.json"
+      }
+    },
+    {
+      "id": "panel-sheet-03",
+      "kind": "production-asset-sheet",
+      "category": "Panel",
+      "sheet_number": 3,
+      "status": "processed",
+      "expected_count": 1,
+      "request_file": "requests/panel-sheet-03.json",
+      "prompt_file": "prompts/panel-sheet-03.md",
+      "alpha_matte_prompt_file": null,
+      "layout_guide": "references/layout-guides/panel-sheet-03.png",
+      "layout_json": "references/layout-guides/panel-sheet-03.json",
+      "input_images": [
+        {
+          "path": "references/canonical-ui-style.png",
+          "role": "canonical-ui-style"
+        },
+        {
+          "path": "references/reference-01.png",
+          "role": "supporting-style-reference"
+        },
+        {
+          "path": "references/layout-guides/panel-sheet-03.png",
+          "role": "layout-guide-only"
+        }
+      ],
+      "generated_output": "generated/panel-sheet-03.png",
+      "alpha_matte_output": null,
+      "transparency_mode": "chroma-key",
+      "provenance_file": null,
+      "final_directory": "final/Panel",
+      "reports": {
+        "background": "qa/panel-sheet-03-background.json",
+        "extraction": "qa/panel-sheet-03-extract.json",
+        "normalized_manifest": "normalized/panel-sheet-03-manifest.json"
+      }
+    },
+    {
+      "id": "button-sheet-01",
+      "kind": "production-asset-sheet",
+      "category": "Button",
+      "sheet_number": 1,
+      "status": "processed",
+      "expected_count": 12,
+      "request_file": "requests/button-sheet-01.json",
+      "prompt_file": "prompts/button-sheet-01.md",
+      "alpha_matte_prompt_file": null,
+      "layout_guide": "references/layout-guides/button-sheet-01.png",
+      "layout_json": "references/layout-guides/button-sheet-01.json",
+      "input_images": [
+        {
+          "path": "references/canonical-ui-style.png",
+          "role": "canonical-ui-style"
+        },
+        {
+          "path": "references/reference-01.png",
+          "role": "supporting-style-reference"
+        },
+        {
+          "path": "references/layout-guides/button-sheet-01.png",
+          "role": "layout-guide-only"
+        }
+      ],
+      "generated_output": "generated/button-sheet-01.png",
+      "alpha_matte_output": null,
+      "transparency_mode": "chroma-key",
+      "provenance_file": null,
+      "final_directory": "final/Button",
+      "reports": {
+        "background": "qa/button-sheet-01-background.json",
+        "extraction": "qa/button-sheet-01-extract.json",
+        "normalized_manifest": "normalized/button-sheet-01-manifest.json"
+      }
+    },
+    {
+      "id": "button-sheet-02",
+      "kind": "production-asset-sheet",
+      "category": "Button",
+      "sheet_number": 2,
+      "status": "processed",
+      "expected_count": 12,
+      "request_file": "requests/button-sheet-02.json",
+      "prompt_file": "prompts/button-sheet-02.md",
+      "alpha_matte_prompt_file": null,
+      "layout_guide": "references/layout-guides/button-sheet-02.png",
+      "layout_json": "references/layout-guides/button-sheet-02.json",
+      "input_images": [
+        {
+          "path": "references/canonical-ui-style.png",
+          "role": "canonical-ui-style"
+        },
+        {
+          "path": "references/reference-01.png",
+          "role": "supporting-style-reference"
+        },
+        {
+          "path": "references/layout-guides/button-sheet-02.png",
+          "role": "layout-guide-only"
+        }
+      ],
+      "generated_output": "generated/button-sheet-02.png",
+      "alpha_matte_output": null,
+      "transparency_mode": "chroma-key",
+      "provenance_file": null,
+      "final_directory": "final/Button",
+      "reports": {
+        "background": "qa/button-sheet-02-background.json",
+        "extraction": "qa/button-sheet-02-extract.json",
+        "normalized_manifest": "normalized/button-sheet-02-manifest.json"
+      }
+    },
+    {
+      "id": "button-sheet-03",
+      "kind": "production-asset-sheet",
+      "category": "Button",
+      "sheet_number": 3,
+      "status": "processed",
+      "expected_count": 12,
+      "request_file": "requests/button-sheet-03.json",
+      "prompt_file": "prompts/button-sheet-03.md",
+      "alpha_matte_prompt_file": null,
+      "layout_guide": "references/layout-guides/button-sheet-03.png",
+      "layout_json": "references/layout-guides/button-sheet-03.json",
+      "input_images": [
+        {
+          "path": "references/canonical-ui-style.png",
+          "role": "canonical-ui-style"
+        },
+        {
+          "path": "references/reference-01.png",
+          "role": "supporting-style-reference"
+        },
+        {
+          "path": "references/layout-guides/button-sheet-03.png",
+          "role": "layout-guide-only"
+        }
+      ],
+      "generated_output": "generated/button-sheet-03.png",
+      "alpha_matte_output": null,
+      "transparency_mode": "chroma-key",
+      "provenance_file": null,
+      "final_directory": "final/Button",
+      "reports": {
+        "background": "qa/button-sheet-03-background.json",
+        "extraction": "qa/button-sheet-03-extract.json",
+        "normalized_manifest": "normalized/button-sheet-03-manifest.json"
+      }
+    },
+    {
+      "id": "icon-nav-sheet-01",
+      "kind": "production-asset-sheet",
+      "category": "Icon_Nav",
+      "sheet_number": 1,
+      "status": "processed",
+      "expected_count": 16,
+      "request_file": "requests/icon-nav-sheet-01.json",
+      "prompt_file": "prompts/icon-nav-sheet-01.md",
+      "alpha_matte_prompt_file": null,
+      "layout_guide": "references/layout-guides/icon-nav-sheet-01.png",
+      "layout_json": "references/layout-guides/icon-nav-sheet-01.json",
+      "input_images": [
+        {
+          "path": "references/canonical-ui-style.png",
+          "role": "canonical-ui-style"
+        },
+        {
+          "path": "references/reference-01.png",
+          "role": "supporting-style-reference"
+        },
+        {
+          "path": "references/layout-guides/icon-nav-sheet-01.png",
+          "role": "layout-guide-only"
+        }
+      ],
+      "generated_output": "generated/icon-nav-sheet-01.png",
+      "alpha_matte_output": null,
+      "transparency_mode": "chroma-key",
+      "provenance_file": null,
+      "final_directory": "final/Icon_Nav",
+      "reports": {
+        "background": "qa/icon-nav-sheet-01-background.json",
+        "extraction": "qa/icon-nav-sheet-01-extract.json",
+        "normalized_manifest": "normalized/icon-nav-sheet-01-manifest.json"
+      }
+    },
+    {
+      "id": "icon-nav-sheet-02",
+      "kind": "production-asset-sheet",
+      "category": "Icon_Nav",
+      "sheet_number": 2,
+      "status": "processed",
+      "expected_count": 13,
+      "request_file": "requests/icon-nav-sheet-02.json",
+      "prompt_file": "prompts/icon-nav-sheet-02.md",
+      "alpha_matte_prompt_file": null,
+      "layout_guide": "references/layout-guides/icon-nav-sheet-02.png",
+      "layout_json": "references/layout-guides/icon-nav-sheet-02.json",
+      "input_images": [
+        {
+          "path": "references/canonical-ui-style.png",
+          "role": "canonical-ui-style"
+        },
+        {
+          "path": "references/reference-01.png",
+          "role": "supporting-style-reference"
+        },
+        {
+          "path": "references/layout-guides/icon-nav-sheet-02.png",
+          "role": "layout-guide-only"
+        }
+      ],
+      "generated_output": "generated/icon-nav-sheet-02.png",
+      "alpha_matte_output": null,
+      "transparency_mode": "chroma-key",
+      "provenance_file": null,
+      "final_directory": "final/Icon_Nav",
+      "reports": {
+        "background": "qa/icon-nav-sheet-02-background.json",
+        "extraction": "qa/icon-nav-sheet-02-extract.json",
+        "normalized_manifest": "normalized/icon-nav-sheet-02-manifest.json"
+      }
+    },
+    {
+      "id": "icon-status-sheet-01",
+      "kind": "production-asset-sheet",
+      "category": "Icon_Status",
+      "sheet_number": 1,
+      "status": "processed",
+      "expected_count": 8,
+      "request_file": "requests/icon-status-sheet-01.json",
+      "prompt_file": "prompts/icon-status-sheet-01.md",
+      "alpha_matte_prompt_file": null,
+      "layout_guide": "references/layout-guides/icon-status-sheet-01.png",
+      "layout_json": "references/layout-guides/icon-status-sheet-01.json",
+      "input_images": [
+        {
+          "path": "references/canonical-ui-style.png",
+          "role": "canonical-ui-style"
+        },
+        {
+          "path": "references/reference-01.png",
+          "role": "supporting-style-reference"
+        },
+        {
+          "path": "references/layout-guides/icon-status-sheet-01.png",
+          "role": "layout-guide-only"
+        }
+      ],
+      "generated_output": "generated/icon-status-sheet-01.png",
+      "alpha_matte_output": null,
+      "transparency_mode": "chroma-key",
+      "provenance_file": null,
+      "final_directory": "final/Icon_Status",
+      "reports": {
+        "background": "qa/icon-status-sheet-01-background.json",
+        "extraction": "qa/icon-status-sheet-01-extract.json",
+        "normalized_manifest": "normalized/icon-status-sheet-01-manifest.json"
+      }
+    },
+    {
+      "id": "icon-effect-sheet-01",
+      "kind": "production-asset-sheet",
+      "category": "Icon_Effect",
+      "sheet_number": 1,
+      "status": "processed",
+      "expected_count": 4,
+      "request_file": "requests/icon-effect-sheet-01.json",
+      "prompt_file": "prompts/icon-effect-sheet-01.md",
+      "alpha_matte_prompt_file": "prompts/icon-effect-sheet-01-alpha-matte.md",
+      "layout_guide": "references/layout-guides/icon-effect-sheet-01.png",
+      "layout_json": "references/layout-guides/icon-effect-sheet-01.json",
+      "input_images": [
+        {
+          "path": "references/canonical-ui-style.png",
+          "role": "canonical-ui-style"
+        },
+        {
+          "path": "references/reference-01.png",
+          "role": "supporting-style-reference"
+        },
+        {
+          "path": "references/layout-guides/icon-effect-sheet-01.png",
+          "role": "layout-guide-only"
+        }
+      ],
+      "generated_output": "generated/icon-effect-sheet-01.png",
+      "alpha_matte_output": "generated/icon-effect-sheet-01-alpha-matte.png",
+      "transparency_mode": "model-matte-derived",
+      "provenance_file": null,
+      "final_directory": "final/Icon_Effect",
+      "reports": {
+        "background": "qa/icon-effect-sheet-01-background.json",
+        "extraction": "qa/icon-effect-sheet-01-extract.json",
+        "normalized_manifest": "normalized/icon-effect-sheet-01-manifest.json",
+        "alpha_matte": "qa/icon-effect-sheet-01-alpha-matte.json"
+      }
+    }
+  ],
+  "updated_at": "2026-07-17T05:49:43.572770+00:00"
+}

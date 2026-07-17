@@ -386,9 +386,9 @@ Contact Sheet 中的棋盘格只用于人工查看透明边缘，不得回写到
   --layout output/<project-id>/unity/unity-layout.json
 ```
 
-脚本把可追溯 PNG 导入 `Assets/_Generated/GameUI/<project-id>`，配置 Sprite Single、Alpha、PPU、Pivot 和 Border，生成独立资源 Prefab 与界面 Prefab。Panel/Button 自动分析九宫格；只有置信度达到阈值且中心拉伸区有效时自动写入，否则预检失败并要求在布局 JSON 的 `nine_slice_overrides` 中明确覆写。
+脚本把可追溯 PNG 导入 `Assets/_Generated/GameUI/<project-id>`，配置 Sprite Single、Alpha、PPU、Pivot 和 Border，生成独立资源 Prefab、界面 Prefab、可直接运行的 Preview Scene，并由 Unity 渲染像素尺寸一致的预览 PNG。Panel/Button 自动分析九宫格，并按源图到全部布局目标的最小缩放比推导 PPU；只有 Border 置信度、中心拉伸区及换算后的显示尺寸全部有效时才写入，否则预检失败并要求在布局 JSON 的 `nine_slice_overrides` 或 `pixels_per_unit_overrides` 中明确覆写。
 
-界面元素当前正式支持 `Image` 和 `Button`。每个对象附带稳定 `GameUIElementBinding.BindingId`；Button 自动配置 `Image`、`Button.targetGraphic` 和 Raycast。文字、本地化、业务事件和运行时数据绑定属于项目代码，不得伪造完成。
+界面元素当前正式支持 `Image` 和 `Button`。每个对象附带稳定 `GameUIElementBinding.BindingId`；Button 自动配置 `Image`、`Button.targetGraphic`、Raycast，并在布局提供状态资源时使用真实 Hover/Pressed/Disabled SpriteSwap。无 Sprite 的 Image 可通过 RGBA `color` 作为确定性底色。文字、本地化、业务事件和运行时数据绑定属于项目代码，不得伪造完成。
 
 Unity 导出失败时读取 `unity/unity-preflight.json`、`unity/unity-import-report.json` 和 `unity/unity-batch.log`。需要回滚本次生成目录时运行 `rollback_unity_export.py`；默认保留共享嵌入包，只有明确需要完全移除时才加 `--remove-package`。
 
@@ -445,7 +445,7 @@ output/<project-id>-<timestamp>/
 - 使用的图片生成方式
 - 通过、警告、失败数量
 - 尚需人工处理的资源编号
-- 如执行 Unity 阶段：Unity 预检、导入报告、生成 Prefab 目录和回滚清单
+- 如执行 Unity 阶段：Unity 预检、导入报告、Prefab、Preview Scene、Unity 渲染预览和回滚清单
 
 ## 项目规范同步
 

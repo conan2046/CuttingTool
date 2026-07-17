@@ -1,0 +1,120 @@
+{
+  "schema_version": 1,
+  "project_id": "xiuxian-ui-main-v1",
+  "category": "Panel",
+  "source_image_size": [
+    2048,
+    2048
+  ],
+  "assignment_mode": "global-components-nearest-slot-center",
+  "fragment_policy": {
+    "merge_distance": 12.0,
+    "merge_distance_ratio": 0.06,
+    "merge_distance_max": 64.0,
+    "major_component_ratio": 0.35,
+    "detached_action": "warning",
+    "small_detached_max_pixels": 0,
+    "small_detached_max_anchor_ratio": 0.0
+  },
+  "expected_count": 4,
+  "exported_count": 4,
+  "assets": [
+    {
+      "id": "01_Panel_PlayerProfileFrame_Default_001",
+      "category": "Panel",
+      "semantic_name": "PlayerProfileFrame",
+      "state": "Default",
+      "source_index": 1,
+      "category_index": 1,
+      "source_bbox": [
+        76,
+        205,
+        1084,
+        1029
+      ],
+      "output": "01_Panel_PlayerProfileFrame_Default_001.png",
+      "width": 1008,
+      "height": 824,
+      "component_count": 40,
+      "merged_component_count": 34,
+      "detached_component_count": 6,
+      "accepted_detached_count": 0,
+      "major_detached_count": 0,
+      "foreground_pixels": 193887,
+      "qa": "warning"
+    },
+    {
+      "id": "01_Panel_CurrencyCounterFrame_Default_002",
+      "category": "Panel",
+      "semantic_name": "CurrencyCounterFrame",
+      "state": "Default",
+      "source_index": 2,
+      "category_index": 2,
+      "source_bbox": [
+        1061,
+        298,
+        1925,
+        979
+      ],
+      "output": "01_Panel_CurrencyCounterFrame_Default_002.png",
+      "width": 864,
+      "height": 681,
+      "component_count": 66,
+      "merged_component_count": 51,
+      "detached_component_count": 15,
+      "accepted_detached_count": 0,
+      "major_detached_count": 0,
+      "foreground_pixels": 89460,
+      "qa": "warning"
+    },
+    {
+      "id": "01_Panel_MinimapFrame_Default_003",
+      "category": "Panel",
+      "semantic_name": "MinimapFrame",
+      "state": "Default",
+      "source_index": 3,
+      "category_index": 3,
+      "source_bbox": [
+        276,
+        805,
+        737,
+        1751
+      ],
+      "output": "01_Panel_MinimapFrame_Default_003.png",
+      "width": 461,
+      "height": 946,
+      "component_count": 24,
+      "merged_component_count": 24,
+      "detached_component_count": 0,
+      "accepted_detached_count": 0,
+      "major_detached_count": 0,
+      "foreground_pixels": 149771,
+      "qa": "pass"
+    },
+    {
+      "id": "01_Panel_QuestPanel_Default_004",
+      "category": "Panel",
+      "semantic_name": "QuestPanel",
+      "state": "Default",
+      "source_index": 4,
+      "category_index": 4,
+      "source_bbox": [
+        1120,
+        728,
+        1908,
+        1800
+      ],
+      "output": "01_Panel_QuestPanel_Default_004.png",
+      "width": 788,
+      "height": 1072,
+      "component_count": 41,
+      "merged_component_count": 41,
+      "detached_component_count": 0,
+      "accepted_detached_count": 0,
+      "major_detached_count": 0,
+      "foreground_pixels": 216284,
+      "qa": "pass"
+    }
+  ],
+  "source_sheet": "generated/panel-sheet-01.png"
+}

@@ -16,6 +16,7 @@ from infer_nine_slice import infer_nine_slice
 
 
 SUPPORTED_UNITY_MAJOR = "2022.3"
+UNITY_CANVAS_REFERENCE_PPU = 100.0
 
 
 def read_json(path: Path) -> dict[str, Any]:
@@ -73,6 +74,72 @@ def install_embedded_package(unity_project: Path, package_source: Path) -> str:
     return destination.relative_to(unity_project).as_posix()
 
 
+def collect_layout_target_sizes(screens: list[dict[str, Any]]) -> dict[str, list[list[float]]]:
+    targets: dict[str, list[list[float]]] = {}
+    for screen in screens:
+        for element in screen["elements"]:
+            size = [float(element["size"][0]), float(element["size"][1])]
+            for field in (
+                "asset_id",
+                "highlighted_asset_id",
+                "pressed_asset_id",
+                "disabled_asset_id",
+            ):
+                asset_id = element[field]
+                if asset_id:
+                    targets.setdefault(asset_id, []).append(size)
+    return targets
+
+
+def derive_pixels_per_unit(
+    source_size: tuple[int, int],
+    target_sizes: list[list[float]],
+    default_ppu: float,
+) -> tuple[float, float | None]:
+    source_width, source_height = source_size
+    if source_width <= 0 or source_height <= 0 or default_ppu <= 0:
+        raise ValueError("source dimensions and default pixels_per_unit must be positive")
+    if not target_sizes:
+        return float(default_ppu), None
+    scales = [
+        min(float(size[0]) / source_width, float(size[1]) / source_height)
+        for size in target_sizes
+        if float(size[0]) > 0 and float(size[1]) > 0
+    ]
+    if not scales:
+        return float(default_ppu), None
+    minimum_scale = min(scales)
+    derived = max(float(default_ppu), UNITY_CANVAS_REFERENCE_PPU / minimum_scale)
+    return round(derived, 4), round(minimum_scale, 6)
+
+
+def validate_sliced_layout_geometry(
+    asset_id: str,
+    border: list[int],
+    ppu: float,
+    target_sizes: list[list[float]],
+) -> list[dict[str, Any]]:
+    if not any(border) or not target_sizes:
+        return []
+    horizontal_units = (border[0] + border[2]) * UNITY_CANVAS_REFERENCE_PPU / ppu
+    vertical_units = (border[1] + border[3]) * UNITY_CANVAS_REFERENCE_PPU / ppu
+    issues: list[dict[str, Any]] = []
+    for target_index, size in enumerate(target_sizes):
+        if horizontal_units >= float(size[0]) or vertical_units >= float(size[1]):
+            issues.append(
+                {
+                    "severity": "fail",
+                    "code": "nine-slice-border-exceeds-layout-size",
+                    "asset_id": asset_id,
+                    "target_index": target_index,
+                    "target_size": size,
+                    "border_units": [round(horizontal_units, 4), round(vertical_units, 4)],
+                    "pixels_per_unit": ppu,
+                }
+            )
+    return issues
+
+
 def normalize_layout(layout: dict[str, Any] | None) -> list[dict[str, Any]]:
     if layout is None:
         return []
@@ -118,6 +185,11 @@ def normalize_layout(layout: dict[str, Any] | None) -> list[dict[str, Any]]:
                     )
             if vectors["size"][0] <= 0 or vectors["size"][1] <= 0:
                 raise ValueError(f"screens[{screen_index}].elements[{element_index}].size must be positive")
+            color = element.get("color", [1.0, 1.0, 1.0, 1.0])
+            if not isinstance(color, list) or len(color) != 4 or not all(isinstance(value, (int, float)) for value in color):
+                raise ValueError(f"screens[{screen_index}].elements[{element_index}].color must contain four numbers")
+            if not all(0.0 <= float(value) <= 1.0 for value in color):
+                raise ValueError(f"screens[{screen_index}].elements[{element_index}].color values must be between 0 and 1")
             normalized_elements.append(
                 {
                     "id": element_id,
@@ -129,8 +201,12 @@ def normalize_layout(layout: dict[str, Any] | None) -> list[dict[str, Any]]:
                     "pivot": list(vectors["pivot"]),
                     "anchored_position": list(vectors["anchored_position"]),
                     "size": list(vectors["size"]),
+                    "color": [float(value) for value in color],
                     "preserve_aspect": bool(element.get("preserve_aspect", False)),
                     "raycast_target": bool(element.get("raycast_target", kind == "Button")),
+                    "highlighted_asset_id": str(element.get("highlighted_asset_id", "")),
+                    "pressed_asset_id": str(element.get("pressed_asset_id", "")),
+                    "disabled_asset_id": str(element.get("disabled_asset_id", "")),
                 }
             )
         normalized.append(
@@ -174,6 +250,11 @@ def prepare_unity_export(
     layout = read_json(layout_path) if layout_path else None
     screens = normalize_layout(layout)
     overrides = dict((layout or {}).get("nine_slice_overrides", {}))
+    ppu_overrides = dict((layout or {}).get("pixels_per_unit_overrides", {}))
+    for asset_id, value in ppu_overrides.items():
+        if not isinstance(value, (int, float)) or float(value) <= 0:
+            raise ValueError(f"invalid pixels_per_unit_overrides value for {asset_id}")
+    layout_target_sizes = collect_layout_target_sizes(screens)
     sprites: list[dict[str, Any]] = []
     issues: list[dict[str, Any]] = []
     created_files: list[str] = []
@@ -193,12 +274,27 @@ def prepare_unity_export(
         destination_asset = f"{sprite_root}/{Path(str(entry['output'])).name}"
 
         category = str(entry["category"])
+        with Image.open(source) as image:
+            source_width, source_height = image.size
+        asset_target_sizes = layout_target_sizes.get(asset_id, [])
+        derived_ppu, layout_scale = derive_pixels_per_unit(
+            (source_width, source_height),
+            asset_target_sizes if category in {"Panel", "Button"} else [],
+            pixels_per_unit,
+        )
+        if asset_id in ppu_overrides:
+            resolved_ppu = float(ppu_overrides[asset_id])
+            ppu_origin = "manual-override"
+        elif layout_scale is not None:
+            resolved_ppu = derived_ppu
+            ppu_origin = "layout-derived"
+        else:
+            resolved_ppu = float(pixels_per_unit)
+            ppu_origin = "default"
         border = [0, 0, 0, 0]
         border_origin = "not-applicable"
         confidence = 1.0
         if category in {"Panel", "Button"}:
-            with Image.open(source) as image:
-                source_width, source_height = image.size
             override = overrides.get(asset_id)
             if override is not None:
                 if not isinstance(override, list) or len(override) != 4 or not all(isinstance(value, int) and value >= 0 for value in override):
@@ -224,13 +320,17 @@ def prepare_unity_export(
                             "confidence": confidence,
                         }
                     )
+        issues.extend(validate_sliced_layout_geometry(asset_id, border, resolved_ppu, asset_target_sizes))
         sprites.append(
             {
                 "id": asset_id,
                 "category": category,
                 "source_sha256": sha256(source),
                 "asset_path": destination_asset,
-                "pixels_per_unit": float(pixels_per_unit),
+                "pixels_per_unit": resolved_ppu,
+                "pixels_per_unit_origin": ppu_origin,
+                "layout_scale": layout_scale,
+                "layout_target_sizes": asset_target_sizes,
                 "border": border,
                 "border_origin": border_origin,
                 "border_confidence": confidence,
@@ -239,10 +339,16 @@ def prepare_unity_export(
         )
 
     referenced_asset_ids = {
-        element["asset_id"]
+        asset_id
         for screen in screens
         for element in screen["elements"]
-        if element["asset_id"]
+        for asset_id in (
+            element["asset_id"],
+            element["highlighted_asset_id"],
+            element["pressed_asset_id"],
+            element["disabled_asset_id"],
+        )
+        if asset_id
     }
     missing_ids = sorted(referenced_asset_ids - asset_ids)
     if missing_ids:
@@ -270,6 +376,7 @@ def prepare_unity_export(
         "generated_root": generated_root,
         "prefab_root": prefab_root,
         "report_path": str(report_path),
+        "preview_output_dir": str(unity_dir / "previews"),
         "create_asset_prefabs": True,
         "sprites": sprites,
         "screens": screens,

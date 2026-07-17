@@ -1,0 +1,60 @@
+{
+  "schema_version": 1,
+  "ok": true,
+  "algorithm": "adaptive-soft-matte-with-local-foreground-projection",
+  "chroma_key": "#00FF00",
+  "transparent_threshold": 20.0,
+  "opaque_threshold": 96.0,
+  "despill": true,
+  "width": 2048,
+  "height": 2048,
+  "transparent_pixels": 3188281,
+  "partial_alpha_pixels": 485640,
+  "opaque_pixels": 520383,
+  "visible_near_key_pixels": 0,
+  "discarded_unresolved_chroma_edge_pixels": 1445,
+  "discarded_opaque_chroma_spill_pixels": 0,
+  "fitted_chroma_mix_pixels": 470845,
+  "spill_chroma_mix_pixels": 435855,
+  "adaptive_thresholds_requested": true,
+  "adaptive_thresholds_applied": true,
+  "threshold_diagnostics": {
+    "schema_version": 1,
+    "algorithm": "border-distance-percentile-recommendation",
+    "chroma_key": "#00FF00",
+    "border_width": 8,
+    "sample_count": 65536,
+    "distance_percentiles": {
+      "p50": 10.6771,
+      "p90": 12.6886,
+      "p95": 13.3041,
+      "p99": 14.4568,
+      "p99_5": 15.0333,
+      "max": 35.3977
+    },
+    "distance_spread_p99_5_p50": 4.3562,
+    "suggested_transparent_threshold": 20.0,
+    "suggested_opaque_threshold": 96.0,
+    "confidence": "high",
+    "interior_transition_pixels": 18728,
+    "interior_definite_foreground_pixels": 555933,
+    "interior_transition_fraction": 0.00633,
+    "transition_to_foreground_ratio": 0.033688,
+    "stable_core_support_ratio": 29.68459,
+    "near_key_subject_risk": false,
+    "auto_apply": true,
+    "issues": []
+  },
+  "input": "generated/button-sheet-01.png",
+  "output": "extracted/button-sheet-01-alpha.png",
+  "source_size": [
+    1254,
+    1254
+  ],
+  "processing_size": [
+    2048,
+    2048
+  ],
+  "resized": true,
+  "background_mode": "chroma-key"
+}

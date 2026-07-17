@@ -2,6 +2,55 @@
 
 记录每次正式功能提交的目标、主要改动、验证结果和兼容性影响。按时间倒序维护；纯格式整理或无功能影响的微小修正可以合并记录。
 
+## 2026-07-17｜v0.12.2｜九宫格 PPU 联动修复
+
+提交：待本轮确认后提交。
+
+### 目标
+
+修复九宫格 Border 虽然落在源图结构线上，但固定 PPU=100 导致矮目标控件中固定边框总尺寸超过控件高度、被 Unity 比例压缩变形的问题。
+
+### 主要改动
+
+- Panel/Button 收集全部布局引用尺寸，按最小源图缩放比自动推导 PPU；手工 `pixels_per_unit_overrides` 优先。
+- 新增 Border/PPU/目标尺寸联合几何校验，固定区超过目标宽高时在 Unity 启动前阻断。
+- Unity 计划记录每张 Sprite 的 PPU、来源、布局缩放比和目标尺寸，便于追溯。
+- 新增自动推导及超限阻断测试。
+
+### 验证
+
+- 真实 Unity 重新导入：86 Sprite、86 资源 Prefab、1 Screen Prefab、1 Preview Scene、1 Preview PNG、0 issue。
+- `QuestRowFrame` 实际 `.meta`：Border `[180,95,180,95]`，PPU `447.8261`；修复后 Unity 渲染不再压扁上下边框。
+- 源码与安装态全量 `unittest`：各 99/99 通过；63 个正式 Skill 文件 SHA-256 一致，0 差异。
+
+## 2026-07-17｜v0.12.1｜真实 HUD 拼装与 Unity 视觉验收
+
+提交：待本轮确认后提交。
+
+### 目标
+
+使用 `output/xiuxian-ui-1980x1080-v1` 的 86 件正式资源验证完整 Prefab 拼装，而不是只验证几个单件效果图。
+
+### 主要改动
+
+- Unity 布局新增 RGBA 颜色层及 Button Highlighted/Pressed/Disabled 状态资源引用。
+- 具有状态资源的 Button 自动改用 SpriteSwap，不再只使用 ColorTint。
+- 每个 Screen 自动生成带 Camera、CanvasScaler、GraphicRaycaster 和 EventSystem 的 Preview Scene。
+- Unity batchmode 自动渲染目标分辨率 Preview PNG，作为 Prefab 视觉验收证据。
+- 新增 1980×1080 修仙 HUD 布局：顶部状态栏、迷你地图、活动栏、任务面板、四条任务、聊天区、进度条及五格功能导航。
+
+### 验证
+
+- 真实 Unity 导入：86 Sprite、86 资源 Prefab、1 Screen Prefab、1 Preview Scene、1 Unity Preview PNG、0 issue。
+- Screen Prefab：47 个 BindingId、9 个 Button；9/9 均为 SpriteSwap，Highlighted/Pressed/Disabled 均非空。
+- Unity 日志包含 `GameUIImportComplete`，未发现编译错误或预览渲染失败。
+- 源码与安装态全量 `unittest`：各 97/97 通过；63 个正式 Skill 文件 SHA-256 一致，0 差异。
+
+### 兼容性
+
+- 仍保持 schema v1；新增字段均有默认值，旧布局继续使用 ColorTint。
+- 当前资源不含场景背景和角色，Preview 中央区域按 HUD 用途保留为空。
+
 ## 2026-07-17｜v0.12.0｜Unity 自动导入、九宫格与交互 Prefab
 
 提交：随本记录同提交。

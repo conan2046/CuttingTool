@@ -1,0 +1,769 @@
+{
+  "schema_version": 1,
+  "project_id": "xiuxian-ui-main-v1",
+  "category": "Button",
+  "source_image_size": [
+    2048,
+    2048
+  ],
+  "assignment_mode": "global-components-nearest-slot-center",
+  "fragment_policy": {
+    "merge_distance": 12.0,
+    "merge_distance_ratio": 0.06,
+    "merge_distance_max": 48.0,
+    "major_component_ratio": 0.35,
+    "detached_action": "warning",
+    "small_detached_max_pixels": 0,
+    "small_detached_max_anchor_ratio": 0.0
+  },
+  "expected_count": 12,
+  "exported_count": 12,
+  "assets": [
+    {
+      "id": "02_Button_QuestTab_Normal_013",
+      "category": "Button",
+      "semantic_name": "QuestTab",
+      "state": "Normal",
+      "source_index": 1,
+      "category_index": 13,
+      "source_bbox": [
+        46,
+        289,
+        510,
+        415
+      ],
+      "output": "final/Button/02_Button_QuestTab_Normal_013.png",
+      "width": 488,
+      "height": 150,
+      "component_count": 2,
+      "merged_component_count": 2,
+      "detached_component_count": 0,
+      "accepted_detached_count": 0,
+      "major_detached_count": 0,
+      "foreground_pixels": 47478,
+      "qa": "pass",
+      "normalization": {
+        "source_trim_bbox": [
+          0,
+          0,
+          464,
+          126
+        ],
+        "source_trim_size": [
+          464,
+          126
+        ],
+        "target_size": [
+          488,
+          150
+        ],
+        "content_size": [
+          464,
+          126
+        ],
+        "content_position": [
+          12,
+          12
+        ],
+        "scale": 1.0,
+        "padding": 12,
+        "alignment": "center",
+        "upscaled": false
+      },
+      "source_sheet": "generated/button-sheet-02.png",
+      "padding": 12,
+      "alignment": "center",
+      "pivot": [
+        0.5,
+        0.5
+      ],
+      "chroma_key": "#00FF00",
+      "transparency_mode": "chroma-key",
+      "alpha_origin": "chroma-derived"
+    },
+    {
+      "id": "02_Button_QuestTab_Hover_014",
+      "category": "Button",
+      "semantic_name": "QuestTab",
+      "state": "Hover",
+      "source_index": 2,
+      "category_index": 14,
+      "source_bbox": [
+        537,
+        290,
+        1008,
+        416
+      ],
+      "output": "final/Button/02_Button_QuestTab_Hover_014.png",
+      "width": 495,
+      "height": 150,
+      "component_count": 1,
+      "merged_component_count": 1,
+      "detached_component_count": 0,
+      "accepted_detached_count": 0,
+      "major_detached_count": 0,
+      "foreground_pixels": 48084,
+      "qa": "pass",
+      "normalization": {
+        "source_trim_bbox": [
+          0,
+          0,
+          471,
+          126
+        ],
+        "source_trim_size": [
+          471,
+          126
+        ],
+        "target_size": [
+          495,
+          150
+        ],
+        "content_size": [
+          471,
+          126
+        ],
+        "content_position": [
+          12,
+          12
+        ],
+        "scale": 1.0,
+        "padding": 12,
+        "alignment": "center",
+        "upscaled": false
+      },
+      "source_sheet": "generated/button-sheet-02.png",
+      "padding": 12,
+      "alignment": "center",
+      "pivot": [
+        0.5,
+        0.5
+      ],
+      "chroma_key": "#00FF00",
+      "transparency_mode": "chroma-key",
+      "alpha_origin": "chroma-derived"
+    },
+    {
+      "id": "02_Button_QuestTab_Pressed_015",
+      "category": "Button",
+      "semantic_name": "QuestTab",
+      "state": "Pressed",
+      "source_index": 3,
+      "category_index": 15,
+      "source_bbox": [
+        1034,
+        292,
+        1507,
+        415
+      ],
+      "output": "final/Button/02_Button_QuestTab_Pressed_015.png",
+      "width": 497,
+      "height": 147,
+      "component_count": 1,
+      "merged_component_count": 1,
+      "detached_component_count": 0,
+      "accepted_detached_count": 0,
+      "major_detached_count": 0,
+      "foreground_pixels": 48547,
+      "qa": "pass",
+      "normalization": {
+        "source_trim_bbox": [
+          0,
+          0,
+          473,
+          123
+        ],
+        "source_trim_size": [
+          473,
+          123
+        ],
+        "target_size": [
+          497,
+          147
+        ],
+        "content_size": [
+          473,
+          123
+        ],
+        "content_position": [
+          12,
+          12
+        ],
+        "scale": 1.0,
+        "padding": 12,
+        "alignment": "center",
+        "upscaled": false
+      },
+      "source_sheet": "generated/button-sheet-02.png",
+      "padding": 12,
+      "alignment": "center",
+      "pivot": [
+        0.5,
+        0.5
+      ],
+      "chroma_key": "#00FF00",
+      "transparency_mode": "chroma-key",
+      "alpha_origin": "chroma-derived"
+    },
+    {
+      "id": "02_Button_QuestTab_Disabled_016",
+      "category": "Button",
+      "semantic_name": "QuestTab",
+      "state": "Disabled",
+      "source_index": 4,
+      "category_index": 16,
+      "source_bbox": [
+        1538,
+        293,
+        2008,
+        416
+      ],
+      "output": "final/Button/02_Button_QuestTab_Disabled_016.png",
+      "width": 494,
+      "height": 147,
+      "component_count": 1,
+      "merged_component_count": 1,
+      "detached_component_count": 0,
+      "accepted_detached_count": 0,
+      "major_detached_count": 0,
+      "foreground_pixels": 48142,
+      "qa": "pass",
+      "normalization": {
+        "source_trim_bbox": [
+          0,
+          0,
+          470,
+          123
+        ],
+        "source_trim_size": [
+          470,
+          123
+        ],
+        "target_size": [
+          494,
+          147
+        ],
+        "content_size": [
+          470,
+          123
+        ],
+        "content_position": [
+          12,
+          12
+        ],
+        "scale": 1.0,
+        "padding": 12,
+        "alignment": "center",
+        "upscaled": false
+      },
+      "source_sheet": "generated/button-sheet-02.png",
+      "padding": 12,
+      "alignment": "center",
+      "pivot": [
+        0.5,
+        0.5
+      ],
+      "chroma_key": "#00FF00",
+      "transparency_mode": "chroma-key",
+      "alpha_origin": "chroma-derived"
+    },
+    {
+      "id": "02_Button_QuestComplete_Normal_017",
+      "category": "Button",
+      "semantic_name": "QuestComplete",
+      "state": "Normal",
+      "source_index": 5,
+      "category_index": 17,
+      "source_bbox": [
+        50,
+        855,
+        518,
+        1032
+      ],
+      "output": "final/Button/02_Button_QuestComplete_Normal_017.png",
+      "width": 492,
+      "height": 201,
+      "component_count": 2,
+      "merged_component_count": 2,
+      "detached_component_count": 0,
+      "accepted_detached_count": 0,
+      "major_detached_count": 0,
+      "foreground_pixels": 65776,
+      "qa": "pass",
+      "normalization": {
+        "source_trim_bbox": [
+          0,
+          0,
+          468,
+          177
+        ],
+        "source_trim_size": [
+          468,
+          177
+        ],
+        "target_size": [
+          492,
+          201
+        ],
+        "content_size": [
+          468,
+          177
+        ],
+        "content_position": [
+          12,
+          12
+        ],
+        "scale": 1.0,
+        "padding": 12,
+        "alignment": "center",
+        "upscaled": false
+      },
+      "source_sheet": "generated/button-sheet-02.png",
+      "padding": 12,
+      "alignment": "center",
+      "pivot": [
+        0.5,
+        0.5
+      ],
+      "chroma_key": "#00FF00",
+      "transparency_mode": "chroma-key",
+      "alpha_origin": "chroma-derived"
+    },
+    {
+      "id": "02_Button_QuestComplete_Hover_018",
+      "category": "Button",
+      "semantic_name": "QuestComplete",
+      "state": "Hover",
+      "source_index": 6,
+      "category_index": 18,
+      "source_bbox": [
+        542,
+        860,
+        1005,
+        1032
+      ],
+      "output": "final/Button/02_Button_QuestComplete_Hover_018.png",
+      "width": 487,
+      "height": 196,
+      "component_count": 1,
+      "merged_component_count": 1,
+      "detached_component_count": 0,
+      "accepted_detached_count": 0,
+      "major_detached_count": 0,
+      "foreground_pixels": 65038,
+      "qa": "pass",
+      "normalization": {
+        "source_trim_bbox": [
+          0,
+          0,
+          463,
+          172
+        ],
+        "source_trim_size": [
+          463,
+          172
+        ],
+        "target_size": [
+          487,
+          196
+        ],
+        "content_size": [
+          463,
+          172
+        ],
+        "content_position": [
+          12,
+          12
+        ],
+        "scale": 1.0,
+        "padding": 12,
+        "alignment": "center",
+        "upscaled": false
+      },
+      "source_sheet": "generated/button-sheet-02.png",
+      "padding": 12,
+      "alignment": "center",
+      "pivot": [
+        0.5,
+        0.5
+      ],
+      "chroma_key": "#00FF00",
+      "transparency_mode": "chroma-key",
+      "alpha_origin": "chroma-derived"
+    },
+    {
+      "id": "02_Button_QuestComplete_Pressed_019",
+      "category": "Button",
+      "semantic_name": "QuestComplete",
+      "state": "Pressed",
+      "source_index": 7,
+      "category_index": 19,
+      "source_bbox": [
+        1037,
+        855,
+        1495,
+        1032
+      ],
+      "output": "final/Button/02_Button_QuestComplete_Pressed_019.png",
+      "width": 482,
+      "height": 201,
+      "component_count": 2,
+      "merged_component_count": 2,
+      "detached_component_count": 0,
+      "accepted_detached_count": 0,
+      "major_detached_count": 0,
+      "foreground_pixels": 64483,
+      "qa": "pass",
+      "normalization": {
+        "source_trim_bbox": [
+          0,
+          0,
+          458,
+          177
+        ],
+        "source_trim_size": [
+          458,
+          177
+        ],
+        "target_size": [
+          482,
+          201
+        ],
+        "content_size": [
+          458,
+          177
+        ],
+        "content_position": [
+          12,
+          12
+        ],
+        "scale": 1.0,
+        "padding": 12,
+        "alignment": "center",
+        "upscaled": false
+      },
+      "source_sheet": "generated/button-sheet-02.png",
+      "padding": 12,
+      "alignment": "center",
+      "pivot": [
+        0.5,
+        0.5
+      ],
+      "chroma_key": "#00FF00",
+      "transparency_mode": "chroma-key",
+      "alpha_origin": "chroma-derived"
+    },
+    {
+      "id": "02_Button_QuestComplete_Disabled_020",
+      "category": "Button",
+      "semantic_name": "QuestComplete",
+      "state": "Disabled",
+      "source_index": 8,
+      "category_index": 20,
+      "source_bbox": [
+        1529,
+        862,
+        1996,
+        1032
+      ],
+      "output": "final/Button/02_Button_QuestComplete_Disabled_020.png",
+      "width": 491,
+      "height": 194,
+      "component_count": 3,
+      "merged_component_count": 3,
+      "detached_component_count": 0,
+      "accepted_detached_count": 0,
+      "major_detached_count": 0,
+      "foreground_pixels": 65056,
+      "qa": "pass",
+      "normalization": {
+        "source_trim_bbox": [
+          0,
+          0,
+          467,
+          170
+        ],
+        "source_trim_size": [
+          467,
+          170
+        ],
+        "target_size": [
+          491,
+          194
+        ],
+        "content_size": [
+          467,
+          170
+        ],
+        "content_position": [
+          12,
+          12
+        ],
+        "scale": 1.0,
+        "padding": 12,
+        "alignment": "center",
+        "upscaled": false
+      },
+      "source_sheet": "generated/button-sheet-02.png",
+      "padding": 12,
+      "alignment": "center",
+      "pivot": [
+        0.5,
+        0.5
+      ],
+      "chroma_key": "#00FF00",
+      "transparency_mode": "chroma-key",
+      "alpha_origin": "chroma-derived"
+    },
+    {
+      "id": "02_Button_QuestCompleteAll_Normal_021",
+      "category": "Button",
+      "semantic_name": "QuestCompleteAll",
+      "state": "Normal",
+      "source_index": 9,
+      "category_index": 21,
+      "source_bbox": [
+        29,
+        1468,
+        501,
+        1720
+      ],
+      "output": "final/Button/02_Button_QuestCompleteAll_Normal_021.png",
+      "width": 496,
+      "height": 276,
+      "component_count": 5,
+      "merged_component_count": 5,
+      "detached_component_count": 0,
+      "accepted_detached_count": 0,
+      "major_detached_count": 0,
+      "foreground_pixels": 91824,
+      "qa": "pass",
+      "normalization": {
+        "source_trim_bbox": [
+          0,
+          0,
+          472,
+          252
+        ],
+        "source_trim_size": [
+          472,
+          252
+        ],
+        "target_size": [
+          496,
+          276
+        ],
+        "content_size": [
+          472,
+          252
+        ],
+        "content_position": [
+          12,
+          12
+        ],
+        "scale": 1.0,
+        "padding": 12,
+        "alignment": "center",
+        "upscaled": false
+      },
+      "source_sheet": "generated/button-sheet-02.png",
+      "padding": 12,
+      "alignment": "center",
+      "pivot": [
+        0.5,
+        0.5
+      ],
+      "chroma_key": "#00FF00",
+      "transparency_mode": "chroma-key",
+      "alpha_origin": "chroma-derived"
+    },
+    {
+      "id": "02_Button_QuestCompleteAll_Hover_022",
+      "category": "Button",
+      "semantic_name": "QuestCompleteAll",
+      "state": "Hover",
+      "source_index": 10,
+      "category_index": 22,
+      "source_bbox": [
+        529,
+        1465,
+        997,
+        1720
+      ],
+      "output": "final/Button/02_Button_QuestCompleteAll_Hover_022.png",
+      "width": 492,
+      "height": 279,
+      "component_count": 2,
+      "merged_component_count": 2,
+      "detached_component_count": 0,
+      "accepted_detached_count": 0,
+      "major_detached_count": 0,
+      "foreground_pixels": 92810,
+      "qa": "pass",
+      "normalization": {
+        "source_trim_bbox": [
+          0,
+          0,
+          468,
+          255
+        ],
+        "source_trim_size": [
+          468,
+          255
+        ],
+        "target_size": [
+          492,
+          279
+        ],
+        "content_size": [
+          468,
+          255
+        ],
+        "content_position": [
+          12,
+          12
+        ],
+        "scale": 1.0,
+        "padding": 12,
+        "alignment": "center",
+        "upscaled": false
+      },
+      "source_sheet": "generated/button-sheet-02.png",
+      "padding": 12,
+      "alignment": "center",
+      "pivot": [
+        0.5,
+        0.5
+      ],
+      "chroma_key": "#00FF00",
+      "transparency_mode": "chroma-key",
+      "alpha_origin": "chroma-derived"
+    },
+    {
+      "id": "02_Button_QuestCompleteAll_Pressed_023",
+      "category": "Button",
+      "semantic_name": "QuestCompleteAll",
+      "state": "Pressed",
+      "source_index": 11,
+      "category_index": 23,
+      "source_bbox": [
+        1036,
+        1469,
+        1503,
+        1723
+      ],
+      "output": "final/Button/02_Button_QuestCompleteAll_Pressed_023.png",
+      "width": 491,
+      "height": 278,
+      "component_count": 4,
+      "merged_component_count": 4,
+      "detached_component_count": 0,
+      "accepted_detached_count": 0,
+      "major_detached_count": 0,
+      "foreground_pixels": 93583,
+      "qa": "pass",
+      "normalization": {
+        "source_trim_bbox": [
+          0,
+          0,
+          467,
+          254
+        ],
+        "source_trim_size": [
+          467,
+          254
+        ],
+        "target_size": [
+          491,
+          278
+        ],
+        "content_size": [
+          467,
+          254
+        ],
+        "content_position": [
+          12,
+          12
+        ],
+        "scale": 1.0,
+        "padding": 12,
+        "alignment": "center",
+        "upscaled": false
+      },
+      "source_sheet": "generated/button-sheet-02.png",
+      "padding": 12,
+      "alignment": "center",
+      "pivot": [
+        0.5,
+        0.5
+      ],
+      "chroma_key": "#00FF00",
+      "transparency_mode": "chroma-key",
+      "alpha_origin": "chroma-derived"
+    },
+    {
+      "id": "02_Button_QuestCompleteAll_Disabled_024",
+      "category": "Button",
+      "semantic_name": "QuestCompleteAll",
+      "state": "Disabled",
+      "source_index": 12,
+      "category_index": 24,
+      "source_bbox": [
+        1544,
+        1470,
+        2011,
+        1724
+      ],
+      "output": "final/Button/02_Button_QuestCompleteAll_Disabled_024.png",
+      "width": 491,
+      "height": 278,
+      "component_count": 4,
+      "merged_component_count": 4,
+      "detached_component_count": 0,
+      "accepted_detached_count": 0,
+      "major_detached_count": 0,
+      "foreground_pixels": 92548,
+      "qa": "pass",
+      "normalization": {
+        "source_trim_bbox": [
+          0,
+          0,
+          467,
+          254
+        ],
+        "source_trim_size": [
+          467,
+          254
+        ],
+        "target_size": [
+          491,
+          278
+        ],
+        "content_size": [
+          467,
+          254
+        ],
+        "content_position": [
+          12,
+          12
+        ],
+        "scale": 1.0,
+        "padding": 12,
+        "alignment": "center",
+        "upscaled": false
+      },
+      "source_sheet": "generated/button-sheet-02.png",
+      "padding": 12,
+      "alignment": "center",
+      "pivot": [
+        0.5,
+        0.5
+      ],
+      "chroma_key": "#00FF00",
+      "transparency_mode": "chroma-key",
+      "alpha_origin": "chroma-derived"
+    }
+  ],
+  "source_sheet": "generated/button-sheet-02.png",
+  "stage": "normalized"
+}

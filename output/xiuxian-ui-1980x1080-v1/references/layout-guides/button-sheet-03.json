@@ -1,0 +1,269 @@
+{
+  "schema_version": 1,
+  "purpose": "layout-reference-only",
+  "warning": "Do not copy visible guide lines, labels, colors, or center marks into generated art.",
+  "image": "D:\\CuttingTool\\output\\xiuxian-ui-1980x1080-v1\\references\\layout-guides\\button-sheet-03.png",
+  "layout": {
+    "width": 2048,
+    "height": 2048,
+    "columns": 4,
+    "rows": 3,
+    "outer_margin": 96,
+    "gutter": 48,
+    "safe_padding": 64
+  },
+  "slots": [
+    {
+      "index": 1,
+      "row": 0,
+      "column": 0,
+      "slot": {
+        "left": 96,
+        "top": 96,
+        "right": 524,
+        "bottom": 683
+      },
+      "safe_box": {
+        "left": 160,
+        "top": 160,
+        "right": 460,
+        "bottom": 619
+      },
+      "center": [
+        310,
+        389
+      ]
+    },
+    {
+      "index": 2,
+      "row": 0,
+      "column": 1,
+      "slot": {
+        "left": 572,
+        "top": 96,
+        "right": 1000,
+        "bottom": 683
+      },
+      "safe_box": {
+        "left": 636,
+        "top": 160,
+        "right": 936,
+        "bottom": 619
+      },
+      "center": [
+        786,
+        389
+      ]
+    },
+    {
+      "index": 3,
+      "row": 0,
+      "column": 2,
+      "slot": {
+        "left": 1048,
+        "top": 96,
+        "right": 1476,
+        "bottom": 683
+      },
+      "safe_box": {
+        "left": 1112,
+        "top": 160,
+        "right": 1412,
+        "bottom": 619
+      },
+      "center": [
+        1262,
+        389
+      ]
+    },
+    {
+      "index": 4,
+      "row": 0,
+      "column": 3,
+      "slot": {
+        "left": 1524,
+        "top": 96,
+        "right": 1952,
+        "bottom": 683
+      },
+      "safe_box": {
+        "left": 1588,
+        "top": 160,
+        "right": 1888,
+        "bottom": 619
+      },
+      "center": [
+        1738,
+        389
+      ]
+    },
+    {
+      "index": 5,
+      "row": 1,
+      "column": 0,
+      "slot": {
+        "left": 96,
+        "top": 731,
+        "right": 524,
+        "bottom": 1318
+      },
+      "safe_box": {
+        "left": 160,
+        "top": 795,
+        "right": 460,
+        "bottom": 1254
+      },
+      "center": [
+        310,
+        1024
+      ]
+    },
+    {
+      "index": 6,
+      "row": 1,
+      "column": 1,
+      "slot": {
+        "left": 572,
+        "top": 731,
+        "right": 1000,
+        "bottom": 1318
+      },
+      "safe_box": {
+        "left": 636,
+        "top": 795,
+        "right": 936,
+        "bottom": 1254
+      },
+      "center": [
+        786,
+        1024
+      ]
+    },
+    {
+      "index": 7,
+      "row": 1,
+      "column": 2,
+      "slot": {
+        "left": 1048,
+        "top": 731,
+        "right": 1476,
+        "bottom": 1318
+      },
+      "safe_box": {
+        "left": 1112,
+        "top": 795,
+        "right": 1412,
+        "bottom": 1254
+      },
+      "center": [
+        1262,
+        1024
+      ]
+    },
+    {
+      "index": 8,
+      "row": 1,
+      "column": 3,
+      "slot": {
+        "left": 1524,
+        "top": 731,
+        "right": 1952,
+        "bottom": 1318
+      },
+      "safe_box": {
+        "left": 1588,
+        "top": 795,
+        "right": 1888,
+        "bottom": 1254
+      },
+      "center": [
+        1738,
+        1024
+      ]
+    },
+    {
+      "index": 9,
+      "row": 2,
+      "column": 0,
+      "slot": {
+        "left": 96,
+        "top": 1366,
+        "right": 524,
+        "bottom": 1952
+      },
+      "safe_box": {
+        "left": 160,
+        "top": 1430,
+        "right": 460,
+        "bottom": 1888
+      },
+      "center": [
+        310,
+        1659
+      ]
+    },
+    {
+      "index": 10,
+      "row": 2,
+      "column": 1,
+      "slot": {
+        "left": 572,
+        "top": 1366,
+        "right": 1000,
+        "bottom": 1952
+      },
+      "safe_box": {
+        "left": 636,
+        "top": 1430,
+        "right": 936,
+        "bottom": 1888
+      },
+      "center": [
+        786,
+        1659
+      ]
+    },
+    {
+      "index": 11,
+      "row": 2,
+      "column": 2,
+      "slot": {
+        "left": 1048,
+        "top": 1366,
+        "right": 1476,
+        "bottom": 1952
+      },
+      "safe_box": {
+        "left": 1112,
+        "top": 1430,
+        "right": 1412,
+        "bottom": 1888
+      },
+      "center": [
+        1262,
+        1659
+      ]
+    },
+    {
+      "index": 12,
+      "row": 2,
+      "column": 3,
+      "slot": {
+        "left": 1524,
+        "top": 1366,
+        "right": 1952,
+        "bottom": 1952
+      },
+      "safe_box": {
+        "left": 1588,
+        "top": 1430,
+        "right": 1888,
+        "bottom": 1888
+      },
+      "center": [
+        1738,
+        1659
+      ]
+    }
+  ]
+}

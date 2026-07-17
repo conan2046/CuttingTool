@@ -1,0 +1,17 @@
+{
+  "schema_version": 1,
+  "ok": true,
+  "expected_count": 88,
+  "manifest_count": 88,
+  "valid_assets": 88,
+  "pass_count": 87,
+  "warning_count": 1,
+  "fail_count": 0,
+  "issues": [
+    {
+      "severity": "warning",
+      "code": "no-transparent-padding",
+      "file": "final/Panel/01_Panel_SceneBackground_Default_010.png"
+    }
+  ]
+}

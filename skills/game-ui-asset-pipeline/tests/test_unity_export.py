@@ -48,6 +48,31 @@ class UnityExportTest(unittest.TestCase):
             self.assertGreaterEqual(value, 4)
             self.assertLess(value, 58)
 
+    def test_derives_ppu_from_smallest_layout_scale(self) -> None:
+        ppu, scale = UNITY_EXPORT.derive_pixels_per_unit(
+            (971, 412),
+            [[1880, 120], [350, 92]],
+            100.0,
+        )
+        self.assertAlmostEqual(scale, 92 / 412, places=6)
+        self.assertAlmostEqual(ppu, 100 / (92 / 412), places=3)
+
+    def test_sliced_geometry_rejects_border_larger_than_target_at_ppu(self) -> None:
+        issues = UNITY_EXPORT.validate_sliced_layout_geometry(
+            "QuestRow",
+            [180, 95, 180, 95],
+            100.0,
+            [[1880, 120]],
+        )
+        self.assertEqual(issues[0]["code"], "nine-slice-border-exceeds-layout-size")
+        self.assertEqual(issues[0]["border_units"], [360.0, 190.0])
+        self.assertEqual(
+            UNITY_EXPORT.validate_sliced_layout_geometry(
+                "QuestRow", [180, 95, 180, 95], 448.0, [[1880, 120]]
+            ),
+            [],
+        )
+
     def test_uniform_image_requires_manual_override(self) -> None:
         result = NINE_SLICE.infer_nine_slice(Image.new("RGBA", (128, 128), (255, 255, 255, 255)))
         self.assertFalse(result["apply"])
@@ -122,6 +147,8 @@ class UnityExportTest(unittest.TestCase):
             self.assertTrue((unity_project / "Packages" / "com.hongda.game-ui-asset-pipeline" / "package.json").is_file())
             plan = json.loads((run_dir / "unity" / "unity-import-plan.json").read_text(encoding="utf-8"))
             self.assertEqual(plan["sprites"][0]["border_origin"], "auto-inferred")
+            self.assertEqual(plan["sprites"][0]["pixels_per_unit_origin"], "layout-derived")
+            self.assertEqual(plan["sprites"][0]["pixels_per_unit"], 100.0)
             self.assertEqual(plan["screens"][0]["elements"][0]["id"], "MainPanel")
             rollback = json.loads((run_dir / "unity" / "unity-rollback.json").read_text(encoding="utf-8"))
             self.assertEqual(rollback["generated_root"], "Assets/_Generated/GameUI/commercial-ui")
@@ -219,11 +246,54 @@ class UnityExportTest(unittest.TestCase):
             encoding="utf-8"
         )
         self.assertIn('spritePlan.category, "Button"', importer)
+        self.assertIn("CreatePreviewScenes(plan, issues, out var previewImageCount)", importer)
+        self.assertIn("Selectable.Transition.SpriteSwap", importer)
 
     def test_rejects_missing_or_failed_formal_qa(self) -> None:
         source = (SCRIPTS_DIR / "prepare_unity_export.py").read_text(encoding="utf-8")
         self.assertIn("formal QA report not found", source)
         self.assertIn("formal QA has unresolved failures", source)
+
+    def test_normalizes_color_and_button_sprite_states(self) -> None:
+        layout = {
+            "schema_version": 1,
+            "screens": [
+                {
+                    "id": "interactive",
+                    "reference_size": [1980, 1080],
+                    "elements": [
+                        {"id": "Background", "kind": "Image", "color": [0.1, 0.2, 0.3, 1.0]},
+                        {
+                            "id": "Action",
+                            "kind": "Button",
+                            "asset_id": "Normal",
+                            "highlighted_asset_id": "Hover",
+                            "pressed_asset_id": "Pressed",
+                            "disabled_asset_id": "Disabled",
+                        },
+                    ],
+                }
+            ],
+        }
+        elements = UNITY_EXPORT.normalize_layout(layout)[0]["elements"]
+        self.assertEqual(elements[0]["color"], [0.1, 0.2, 0.3, 1.0])
+        self.assertEqual(elements[1]["highlighted_asset_id"], "Hover")
+        self.assertEqual(elements[1]["pressed_asset_id"], "Pressed")
+        self.assertEqual(elements[1]["disabled_asset_id"], "Disabled")
+
+    def test_rejects_out_of_range_layout_color(self) -> None:
+        layout = {
+            "schema_version": 1,
+            "screens": [
+                {
+                    "id": "bad-color",
+                    "reference_size": [100, 100],
+                    "elements": [{"id": "Background", "kind": "Image", "color": [1, 1, 1, 2]}],
+                }
+            ],
+        }
+        with self.assertRaisesRegex(ValueError, "between 0 and 1"):
+            UNITY_EXPORT.normalize_layout(layout)
 
 
 if __name__ == "__main__":

@@ -1,0 +1,5479 @@
+{
+  "schema_version": 3,
+  "project_id": "xiuxian-ui-main-v1",
+  "stage": "final",
+  "expected_count": 88,
+  "exported_count": 88,
+  "fragment_policies": {
+    "Panel": {
+      "merge_distance": 12.0,
+      "merge_distance_ratio": 0.06,
+      "merge_distance_max": 64.0,
+      "major_component_ratio": 0.35,
+      "detached_action": "warning",
+      "small_detached_max_pixels": 0,
+      "small_detached_max_anchor_ratio": 0.0
+    },
+    "Button": {
+      "merge_distance": 12.0,
+      "merge_distance_ratio": 0.06,
+      "merge_distance_max": 48.0,
+      "major_component_ratio": 0.35,
+      "detached_action": "warning",
+      "small_detached_max_pixels": 0,
+      "small_detached_max_anchor_ratio": 0.0
+    },
+    "Icon_Nav": {
+      "merge_distance": 12.0,
+      "merge_distance_ratio": 0.12,
+      "merge_distance_max": 48.0,
+      "major_component_ratio": 0.35,
+      "detached_action": "warning",
+      "small_detached_max_pixels": 0,
+      "small_detached_max_anchor_ratio": 0.0
+    },
+    "Icon_Status": {
+      "merge_distance": 12.0,
+      "merge_distance_ratio": 0.12,
+      "merge_distance_max": 48.0,
+      "major_component_ratio": 0.35,
+      "detached_action": "warning",
+      "small_detached_max_pixels": 0,
+      "small_detached_max_anchor_ratio": 0.0
+    },
+    "Icon_Effect": {
+      "merge_distance": 12.0,
+      "merge_distance_ratio": 0.18,
+      "merge_distance_max": 128.0,
+      "major_component_ratio": 0.35,
+      "detached_action": "warning",
+      "small_detached_max_pixels": 0,
+      "small_detached_max_anchor_ratio": 0.0
+    }
+  },
+  "native_alpha_verified_sheets": 0,
+  "model_matte_verified_sheets": 1,
+  "assets": [
+    {
+      "id": "01_Panel_PlayerProfileFrame_Default_001",
+      "category": "Panel",
+      "semantic_name": "PlayerProfileFrame",
+      "state": "Default",
+      "source_index": 1,
+      "category_index": 1,
+      "source_bbox": [
+        76,
+        205,
+        1084,
+        1029
+      ],
+      "output": "final/Panel/01_Panel_PlayerProfileFrame_Default_001.png",
+      "width": 1038,
+      "height": 856,
+      "component_count": 40,
+      "merged_component_count": 34,
+      "detached_component_count": 6,
+      "accepted_detached_count": 0,
+      "major_detached_count": 0,
+      "foreground_pixels": 193887,
+      "qa": "warning",
+      "normalization": {
+        "source_trim_bbox": [
+          2,
+          0,
+          1008,
+          824
+        ],
+        "source_trim_size": [
+          1006,
+          824
+        ],
+        "target_size": [
+          1038,
+          856
+        ],
+        "content_size": [
+          1006,
+          824
+        ],
+        "content_position": [
+          16,
+          16
+        ],
+        "scale": 1.0,
+        "padding": 16,
+        "alignment": "center",
+        "upscaled": false
+      },
+      "source_sheet": "generated/panel-sheet-01.png",
+      "padding": 16,
+      "alignment": "center",
+      "pivot": [
+        0.5,
+        0.5
+      ],
+      "chroma_key": "#00FF00",
+      "transparency_mode": "chroma-key",
+      "alpha_origin": "chroma-derived"
+    },
+    {
+      "id": "01_Panel_CurrencyCounterFrame_Default_002",
+      "category": "Panel",
+      "semantic_name": "CurrencyCounterFrame",
+      "state": "Default",
+      "source_index": 2,
+      "category_index": 2,
+      "source_bbox": [
+        1061,
+        298,
+        1925,
+        979
+      ],
+      "output": "final/Panel/01_Panel_CurrencyCounterFrame_Default_002.png",
+      "width": 894,
+      "height": 713,
+      "component_count": 66,
+      "merged_component_count": 51,
+      "detached_component_count": 15,
+      "accepted_detached_count": 0,
+      "major_detached_count": 0,
+      "foreground_pixels": 89460,
+      "qa": "warning",
+      "normalization": {
+        "source_trim_bbox": [
+          0,
+          0,
+          862,
+          681
+        ],
+        "source_trim_size": [
+          862,
+          681
+        ],
+        "target_size": [
+          894,
+          713
+        ],
+        "content_size": [
+          862,
+          681
+        ],
+        "content_position": [
+          16,
+          16
+        ],
+        "scale": 1.0,
+        "padding": 16,
+        "alignment": "center",
+        "upscaled": false
+      },
+      "source_sheet": "generated/panel-sheet-01.png",
+      "padding": 16,
+      "alignment": "center",
+      "pivot": [
+        0.5,
+        0.5
+      ],
+      "chroma_key": "#00FF00",
+      "transparency_mode": "chroma-key",
+      "alpha_origin": "chroma-derived"
+    },
+    {
+      "id": "01_Panel_MinimapFrame_Default_003",
+      "category": "Panel",
+      "semantic_name": "MinimapFrame",
+      "state": "Default",
+      "source_index": 3,
+      "category_index": 3,
+      "source_bbox": [
+        276,
+        805,
+        737,
+        1751
+      ],
+      "output": "final/Panel/01_Panel_MinimapFrame_Default_003.png",
+      "width": 489,
+      "height": 976,
+      "component_count": 24,
+      "merged_component_count": 24,
+      "detached_component_count": 0,
+      "accepted_detached_count": 0,
+      "major_detached_count": 0,
+      "foreground_pixels": 149771,
+      "qa": "pass",
+      "normalization": {
+        "source_trim_bbox": [
+          2,
+          0,
+          459,
+          944
+        ],
+        "source_trim_size": [
+          457,
+          944
+        ],
+        "target_size": [
+          489,
+          976
+        ],
+        "content_size": [
+          457,
+          944
+        ],
+        "content_position": [
+          16,
+          16
+        ],
+        "scale": 1.0,
+        "padding": 16,
+        "alignment": "center",
+        "upscaled": false
+      },
+      "source_sheet": "generated/panel-sheet-01.png",
+      "padding": 16,
+      "alignment": "center",
+      "pivot": [
+        0.5,
+        0.5
+      ],
+      "chroma_key": "#00FF00",
+      "transparency_mode": "chroma-key",
+      "alpha_origin": "chroma-derived"
+    },
+    {
+      "id": "01_Panel_QuestPanel_Default_004",
+      "category": "Panel",
+      "semantic_name": "QuestPanel",
+      "state": "Default",
+      "source_index": 4,
+      "category_index": 4,
+      "source_bbox": [
+        1120,
+        728,
+        1908,
+        1800
+      ],
+      "output": "final/Panel/01_Panel_QuestPanel_Default_004.png",
+      "width": 818,
+      "height": 1102,
+      "component_count": 41,
+      "merged_component_count": 41,
+      "detached_component_count": 0,
+      "accepted_detached_count": 0,
+      "major_detached_count": 0,
+      "foreground_pixels": 216284,
+      "qa": "pass",
+      "normalization": {
+        "source_trim_bbox": [
+          2,
+          0,
+          788,
+          1070
+        ],
+        "source_trim_size": [
+          786,
+          1070
+        ],
+        "target_size": [
+          818,
+          1102
+        ],
+        "content_size": [
+          786,
+          1070
+        ],
+        "content_position": [
+          16,
+          16
+        ],
+        "scale": 1.0,
+        "padding": 16,
+        "alignment": "center",
+        "upscaled": false
+      },
+      "source_sheet": "generated/panel-sheet-01.png",
+      "padding": 16,
+      "alignment": "center",
+      "pivot": [
+        0.5,
+        0.5
+      ],
+      "chroma_key": "#00FF00",
+      "transparency_mode": "chroma-key",
+      "alpha_origin": "chroma-derived"
+    },
+    {
+      "id": "01_Panel_QuestRowFrame_Default_005",
+      "category": "Panel",
+      "semantic_name": "QuestRowFrame",
+      "state": "Default",
+      "source_index": 1,
+      "category_index": 5,
+      "source_bbox": [
+        53,
+        271,
+        992,
+        655
+      ],
+      "output": "final/Panel/01_Panel_QuestRowFrame_Default_005.png",
+      "width": 971,
+      "height": 412,
+      "component_count": 14,
+      "merged_component_count": 14,
+      "detached_component_count": 0,
+      "accepted_detached_count": 0,
+      "major_detached_count": 0,
+      "foreground_pixels": 63445,
+      "qa": "pass",
+      "normalization": {
+        "source_trim_bbox": [
+          0,
+          2,
+          939,
+          382
+        ],
+        "source_trim_size": [
+          939,
+          380
+        ],
+        "target_size": [
+          971,
+          412
+        ],
+        "content_size": [
+          939,
+          380
+        ],
+        "content_position": [
+          16,
+          16
+        ],
+        "scale": 1.0,
+        "padding": 16,
+        "alignment": "center",
+        "upscaled": false
+      },
+      "source_sheet": "generated/panel-sheet-02.png",
+      "padding": 16,
+      "alignment": "center",
+      "pivot": [
+        0.5,
+        0.5
+      ],
+      "chroma_key": "#00FF00",
+      "transparency_mode": "chroma-key",
+      "alpha_origin": "chroma-derived"
+    },
+    {
+      "id": "01_Panel_ChatPanel_Default_006",
+      "category": "Panel",
+      "semantic_name": "ChatPanel",
+      "state": "Default",
+      "source_index": 2,
+      "category_index": 6,
+      "source_bbox": [
+        1091,
+        114,
+        1985,
+        856
+      ],
+      "output": "final/Panel/01_Panel_ChatPanel_Default_006.png",
+      "width": 926,
+      "height": 774,
+      "component_count": 35,
+      "merged_component_count": 35,
+      "detached_component_count": 0,
+      "accepted_detached_count": 0,
+      "major_detached_count": 0,
+      "foreground_pixels": 86335,
+      "qa": "pass",
+      "normalization": {
+        "source_trim_bbox": [
+          0,
+          0,
+          894,
+          742
+        ],
+        "source_trim_size": [
+          894,
+          742
+        ],
+        "target_size": [
+          926,
+          774
+        ],
+        "content_size": [
+          894,
+          742
+        ],
+        "content_position": [
+          16,
+          16
+        ],
+        "scale": 1.0,
+        "padding": 16,
+        "alignment": "center",
+        "upscaled": false
+      },
+      "source_sheet": "generated/panel-sheet-02.png",
+      "padding": 16,
+      "alignment": "center",
+      "pivot": [
+        0.5,
+        0.5
+      ],
+      "chroma_key": "#00FF00",
+      "transparency_mode": "chroma-key",
+      "alpha_origin": "chroma-derived"
+    },
+    {
+      "id": "01_Panel_BottomNavSlotFrame_Default_007",
+      "category": "Panel",
+      "semantic_name": "BottomNavSlotFrame",
+      "state": "Default",
+      "source_index": 3,
+      "category_index": 7,
+      "source_bbox": [
+        179,
+        1131,
+        853,
+        1775
+      ],
+      "output": "final/Panel/01_Panel_BottomNavSlotFrame_Default_007.png",
+      "width": 706,
+      "height": 676,
+      "component_count": 28,
+      "merged_component_count": 28,
+      "detached_component_count": 0,
+      "accepted_detached_count": 0,
+      "major_detached_count": 0,
+      "foreground_pixels": 68472,
+      "qa": "pass",
+      "normalization": {
+        "source_trim_bbox": [
+          0,
+          0,
+          674,
+          644
+        ],
+        "source_trim_size": [
+          674,
+          644
+        ],
+        "target_size": [
+          706,
+          676
+        ],
+        "content_size": [
+          674,
+          644
+        ],
+        "content_position": [
+          16,
+          16
+        ],
+        "scale": 1.0,
+        "padding": 16,
+        "alignment": "center",
+        "upscaled": false
+      },
+      "source_sheet": "generated/panel-sheet-02.png",
+      "padding": 16,
+      "alignment": "center",
+      "pivot": [
+        0.5,
+        0.5
+      ],
+      "chroma_key": "#00FF00",
+      "transparency_mode": "chroma-key",
+      "alpha_origin": "chroma-derived"
+    },
+    {
+      "id": "01_Panel_VerticalOrnamentBanner_Default_008",
+      "category": "Panel",
+      "semantic_name": "VerticalOrnamentBanner",
+      "state": "Default",
+      "source_index": 4,
+      "category_index": 8,
+      "source_bbox": [
+        1381,
+        1021,
+        1693,
+        1986
+      ],
+      "output": "final/Panel/01_Panel_VerticalOrnamentBanner_Default_008.png",
+      "width": 344,
+      "height": 997,
+      "component_count": 24,
+      "merged_component_count": 24,
+      "detached_component_count": 0,
+      "accepted_detached_count": 0,
+      "major_detached_count": 0,
+      "foreground_pixels": 170669,
+      "qa": "pass",
+      "normalization": {
+        "source_trim_bbox": [
+          0,
+          0,
+          312,
+          965
+        ],
+        "source_trim_size": [
+          312,
+          965
+        ],
+        "target_size": [
+          344,
+          997
+        ],
+        "content_size": [
+          312,
+          965
+        ],
+        "content_position": [
+          16,
+          16
+        ],
+        "scale": 1.0,
+        "padding": 16,
+        "alignment": "center",
+        "upscaled": false
+      },
+      "source_sheet": "generated/panel-sheet-02.png",
+      "padding": 16,
+      "alignment": "center",
+      "pivot": [
+        0.5,
+        0.5
+      ],
+      "chroma_key": "#00FF00",
+      "transparency_mode": "chroma-key",
+      "alpha_origin": "chroma-derived"
+    },
+    {
+      "id": "01_Panel_ProgressBarFrame_Default_009",
+      "category": "Panel",
+      "semantic_name": "ProgressBarFrame",
+      "state": "Default",
+      "source_index": 1,
+      "category_index": 9,
+      "source_bbox": [
+        81,
+        450,
+        984,
+        571
+      ],
+      "output": "final/Panel/01_Panel_ProgressBarFrame_Default_009.png",
+      "width": 935,
+      "height": 153,
+      "component_count": 22,
+      "merged_component_count": 22,
+      "detached_component_count": 0,
+      "accepted_detached_count": 0,
+      "major_detached_count": 0,
+      "foreground_pixels": 43130,
+      "qa": "pass",
+      "normalization": {
+        "source_trim_bbox": [
+          0,
+          0,
+          903,
+          121
+        ],
+        "source_trim_size": [
+          903,
+          121
+        ],
+        "target_size": [
+          935,
+          153
+        ],
+        "content_size": [
+          903,
+          121
+        ],
+        "content_position": [
+          16,
+          16
+        ],
+        "scale": 1.0,
+        "padding": 16,
+        "alignment": "center",
+        "upscaled": false
+      },
+      "source_sheet": "generated/panel-sheet-03.png",
+      "padding": 16,
+      "alignment": "center",
+      "pivot": [
+        0.5,
+        0.5
+      ],
+      "chroma_key": "#00FF00",
+      "transparency_mode": "chroma-key",
+      "alpha_origin": "chroma-derived"
+    },
+    {
+      "id": "02_Button_AddCurrency_Normal_001",
+      "category": "Button",
+      "semantic_name": "AddCurrency",
+      "state": "Normal",
+      "source_index": 1,
+      "category_index": 1,
+      "source_bbox": [
+        145,
+        306,
+        433,
+        589
+      ],
+      "output": "final/Button/02_Button_AddCurrency_Normal_001.png",
+      "width": 312,
+      "height": 307,
+      "component_count": 3,
+      "merged_component_count": 3,
+      "detached_component_count": 0,
+      "accepted_detached_count": 0,
+      "major_detached_count": 0,
+      "foreground_pixels": 53518,
+      "qa": "pass",
+      "normalization": {
+        "source_trim_bbox": [
+          0,
+          0,
+          288,
+          283
+        ],
+        "source_trim_size": [
+          288,
+          283
+        ],
+        "target_size": [
+          312,
+          307
+        ],
+        "content_size": [
+          288,
+          283
+        ],
+        "content_position": [
+          12,
+          12
+        ],
+        "scale": 1.0,
+        "padding": 12,
+        "alignment": "center",
+        "upscaled": false
+      },
+      "source_sheet": "generated/button-sheet-01.png",
+      "padding": 12,
+      "alignment": "center",
+      "pivot": [
+        0.5,
+        0.5
+      ],
+      "chroma_key": "#00FF00",
+      "transparency_mode": "chroma-key",
+      "alpha_origin": "chroma-derived"
+    },
+    {
+      "id": "02_Button_AddCurrency_Hover_002",
+      "category": "Button",
+      "semantic_name": "AddCurrency",
+      "state": "Hover",
+      "source_index": 2,
+      "category_index": 2,
+      "source_bbox": [
+        636,
+        305,
+        925,
+        589
+      ],
+      "output": "final/Button/02_Button_AddCurrency_Hover_002.png",
+      "width": 313,
+      "height": 308,
+      "component_count": 6,
+      "merged_component_count": 6,
+      "detached_component_count": 0,
+      "accepted_detached_count": 0,
+      "major_detached_count": 0,
+      "foreground_pixels": 53462,
+      "qa": "pass",
+      "normalization": {
+        "source_trim_bbox": [
+          0,
+          0,
+          289,
+          284
+        ],
+        "source_trim_size": [
+          289,
+          284
+        ],
+        "target_size": [
+          313,
+          308
+        ],
+        "content_size": [
+          289,
+          284
+        ],
+        "content_position": [
+          12,
+          12
+        ],
+        "scale": 1.0,
+        "padding": 12,
+        "alignment": "center",
+        "upscaled": false
+      },
+      "source_sheet": "generated/button-sheet-01.png",
+      "padding": 12,
+      "alignment": "center",
+      "pivot": [
+        0.5,
+        0.5
+      ],
+      "chroma_key": "#00FF00",
+      "transparency_mode": "chroma-key",
+      "alpha_origin": "chroma-derived"
+    },
+    {
+      "id": "02_Button_AddCurrency_Pressed_003",
+      "category": "Button",
+      "semantic_name": "AddCurrency",
+      "state": "Pressed",
+      "source_index": 3,
+      "category_index": 3,
+      "source_bbox": [
+        1127,
+        305,
+        1415,
+        590
+      ],
+      "output": "final/Button/02_Button_AddCurrency_Pressed_003.png",
+      "width": 312,
+      "height": 309,
+      "component_count": 1,
+      "merged_component_count": 1,
+      "detached_component_count": 0,
+      "accepted_detached_count": 0,
+      "major_detached_count": 0,
+      "foreground_pixels": 53160,
+      "qa": "pass",
+      "normalization": {
+        "source_trim_bbox": [
+          0,
+          0,
+          288,
+          285
+        ],
+        "source_trim_size": [
+          288,
+          285
+        ],
+        "target_size": [
+          312,
+          309
+        ],
+        "content_size": [
+          288,
+          285
+        ],
+        "content_position": [
+          12,
+          12
+        ],
+        "scale": 1.0,
+        "padding": 12,
+        "alignment": "center",
+        "upscaled": false
+      },
+      "source_sheet": "generated/button-sheet-01.png",
+      "padding": 12,
+      "alignment": "center",
+      "pivot": [
+        0.5,
+        0.5
+      ],
+      "chroma_key": "#00FF00",
+      "transparency_mode": "chroma-key",
+      "alpha_origin": "chroma-derived"
+    },
+    {
+      "id": "02_Button_AddCurrency_Disabled_004",
+      "category": "Button",
+      "semantic_name": "AddCurrency",
+      "state": "Disabled",
+      "source_index": 4,
+      "category_index": 4,
+      "source_bbox": [
+        1616,
+        307,
+        1901,
+        588
+      ],
+      "output": "final/Button/02_Button_AddCurrency_Disabled_004.png",
+      "width": 309,
+      "height": 305,
+      "component_count": 2,
+      "merged_component_count": 2,
+      "detached_component_count": 0,
+      "accepted_detached_count": 0,
+      "major_detached_count": 0,
+      "foreground_pixels": 52286,
+      "qa": "pass",
+      "normalization": {
+        "source_trim_bbox": [
+          0,
+          0,
+          285,
+          281
+        ],
+        "source_trim_size": [
+          285,
+          281
+        ],
+        "target_size": [
+          309,
+          305
+        ],
+        "content_size": [
+          285,
+          281
+        ],
+        "content_position": [
+          12,
+          12
+        ],
+        "scale": 1.0,
+        "padding": 12,
+        "alignment": "center",
+        "upscaled": false
+      },
+      "source_sheet": "generated/button-sheet-01.png",
+      "padding": 12,
+      "alignment": "center",
+      "pivot": [
+        0.5,
+        0.5
+      ],
+      "chroma_key": "#00FF00",
+      "transparency_mode": "chroma-key",
+      "alpha_origin": "chroma-derived"
+    },
+    {
+      "id": "02_Button_ExitGame_Normal_005",
+      "category": "Button",
+      "semantic_name": "ExitGame",
+      "state": "Normal",
+      "source_index": 5,
+      "category_index": 5,
+      "source_bbox": [
+        82,
+        923,
+        499,
+        1081
+      ],
+      "output": "final/Button/02_Button_ExitGame_Normal_005.png",
+      "width": 441,
+      "height": 182,
+      "component_count": 3,
+      "merged_component_count": 3,
+      "detached_component_count": 0,
+      "accepted_detached_count": 0,
+      "major_detached_count": 0,
+      "foreground_pixels": 49173,
+      "qa": "pass",
+      "normalization": {
+        "source_trim_bbox": [
+          0,
+          0,
+          417,
+          158
+        ],
+        "source_trim_size": [
+          417,
+          158
+        ],
+        "target_size": [
+          441,
+          182
+        ],
+        "content_size": [
+          417,
+          158
+        ],
+        "content_position": [
+          12,
+          12
+        ],
+        "scale": 1.0,
+        "padding": 12,
+        "alignment": "center",
+        "upscaled": false
+      },
+      "source_sheet": "generated/button-sheet-01.png",
+      "padding": 12,
+      "alignment": "center",
+      "pivot": [
+        0.5,
+        0.5
+      ],
+      "chroma_key": "#00FF00",
+      "transparency_mode": "chroma-key",
+      "alpha_origin": "chroma-derived"
+    },
+    {
+      "id": "02_Button_ExitGame_Hover_006",
+      "category": "Button",
+      "semantic_name": "ExitGame",
+      "state": "Hover",
+      "source_index": 6,
+      "category_index": 6,
+      "source_bbox": [
+        569,
+        922,
+        980,
+        1082
+      ],
+      "output": "final/Button/02_Button_ExitGame_Hover_006.png",
+      "width": 435,
+      "height": 184,
+      "component_count": 4,
+      "merged_component_count": 4,
+      "detached_component_count": 0,
+      "accepted_detached_count": 0,
+      "major_detached_count": 0,
+      "foreground_pixels": 49121,
+      "qa": "pass",
+      "normalization": {
+        "source_trim_bbox": [
+          0,
+          0,
+          411,
+          160
+        ],
+        "source_trim_size": [
+          411,
+          160
+        ],
+        "target_size": [
+          435,
+          184
+        ],
+        "content_size": [
+          411,
+          160
+        ],
+        "content_position": [
+          12,
+          12
+        ],
+        "scale": 1.0,
+        "padding": 12,
+        "alignment": "center",
+        "upscaled": false
+      },
+      "source_sheet": "generated/button-sheet-01.png",
+      "padding": 12,
+      "alignment": "center",
+      "pivot": [
+        0.5,
+        0.5
+      ],
+      "chroma_key": "#00FF00",
+      "transparency_mode": "chroma-key",
+      "alpha_origin": "chroma-derived"
+    },
+    {
+      "id": "02_Button_ExitGame_Pressed_007",
+      "category": "Button",
+      "semantic_name": "ExitGame",
+      "state": "Pressed",
+      "source_index": 7,
+      "category_index": 7,
+      "source_bbox": [
+        1065,
+        922,
+        1473,
+        1087
+      ],
+      "output": "final/Button/02_Button_ExitGame_Pressed_007.png",
+      "width": 432,
+      "height": 189,
+      "component_count": 5,
+      "merged_component_count": 5,
+      "detached_component_count": 0,
+      "accepted_detached_count": 0,
+      "major_detached_count": 0,
+      "foreground_pixels": 49173,
+      "qa": "pass",
+      "normalization": {
+        "source_trim_bbox": [
+          0,
+          0,
+          408,
+          165
+        ],
+        "source_trim_size": [
+          408,
+          165
+        ],
+        "target_size": [
+          432,
+          189
+        ],
+        "content_size": [
+          408,
+          165
+        ],
+        "content_position": [
+          12,
+          12
+        ],
+        "scale": 1.0,
+        "padding": 12,
+        "alignment": "center",
+        "upscaled": false
+      },
+      "source_sheet": "generated/button-sheet-01.png",
+      "padding": 12,
+      "alignment": "center",
+      "pivot": [
+        0.5,
+        0.5
+      ],
+      "chroma_key": "#00FF00",
+      "transparency_mode": "chroma-key",
+      "alpha_origin": "chroma-derived"
+    },
+    {
+      "id": "02_Button_ExitGame_Disabled_008",
+      "category": "Button",
+      "semantic_name": "ExitGame",
+      "state": "Disabled",
+      "source_index": 8,
+      "category_index": 8,
+      "source_bbox": [
+        1559,
+        920,
+        1967,
+        1084
+      ],
+      "output": "final/Button/02_Button_ExitGame_Disabled_008.png",
+      "width": 432,
+      "height": 188,
+      "component_count": 6,
+      "merged_component_count": 6,
+      "detached_component_count": 0,
+      "accepted_detached_count": 0,
+      "major_detached_count": 0,
+      "foreground_pixels": 48981,
+      "qa": "pass",
+      "normalization": {
+        "source_trim_bbox": [
+          0,
+          0,
+          408,
+          164
+        ],
+        "source_trim_size": [
+          408,
+          164
+        ],
+        "target_size": [
+          432,
+          188
+        ],
+        "content_size": [
+          408,
+          164
+        ],
+        "content_position": [
+          12,
+          12
+        ],
+        "scale": 1.0,
+        "padding": 12,
+        "alignment": "center",
+        "upscaled": false
+      },
+      "source_sheet": "generated/button-sheet-01.png",
+      "padding": 12,
+      "alignment": "center",
+      "pivot": [
+        0.5,
+        0.5
+      ],
+      "chroma_key": "#00FF00",
+      "transparency_mode": "chroma-key",
+      "alpha_origin": "chroma-derived"
+    },
+    {
+      "id": "02_Button_WorldMap_Normal_009",
+      "category": "Button",
+      "semantic_name": "WorldMap",
+      "state": "Normal",
+      "source_index": 9,
+      "category_index": 9,
+      "source_bbox": [
+        82,
+        1489,
+        493,
+        1650
+      ],
+      "output": "final/Button/02_Button_WorldMap_Normal_009.png",
+      "width": 435,
+      "height": 185,
+      "component_count": 1,
+      "merged_component_count": 1,
+      "detached_component_count": 0,
+      "accepted_detached_count": 0,
+      "major_detached_count": 0,
+      "foreground_pixels": 49668,
+      "qa": "pass",
+      "normalization": {
+        "source_trim_bbox": [
+          0,
+          0,
+          411,
+          161
+        ],
+        "source_trim_size": [
+          411,
+          161
+        ],
+        "target_size": [
+          435,
+          185
+        ],
+        "content_size": [
+          411,
+          161
+        ],
+        "content_position": [
+          12,
+          12
+        ],
+        "scale": 1.0,
+        "padding": 12,
+        "alignment": "center",
+        "upscaled": false
+      },
+      "source_sheet": "generated/button-sheet-01.png",
+      "padding": 12,
+      "alignment": "center",
+      "pivot": [
+        0.5,
+        0.5
+      ],
+      "chroma_key": "#00FF00",
+      "transparency_mode": "chroma-key",
+      "alpha_origin": "chroma-derived"
+    },
+    {
+      "id": "02_Button_WorldMap_Hover_010",
+      "category": "Button",
+      "semantic_name": "WorldMap",
+      "state": "Hover",
+      "source_index": 10,
+      "category_index": 10,
+      "source_bbox": [
+        569,
+        1494,
+        985,
+        1652
+      ],
+      "output": "final/Button/02_Button_WorldMap_Hover_010.png",
+      "width": 440,
+      "height": 182,
+      "component_count": 2,
+      "merged_component_count": 2,
+      "detached_component_count": 0,
+      "accepted_detached_count": 0,
+      "major_detached_count": 0,
+      "foreground_pixels": 49173,
+      "qa": "pass",
+      "normalization": {
+        "source_trim_bbox": [
+          0,
+          0,
+          416,
+          158
+        ],
+        "source_trim_size": [
+          416,
+          158
+        ],
+        "target_size": [
+          440,
+          182
+        ],
+        "content_size": [
+          416,
+          158
+        ],
+        "content_position": [
+          12,
+          12
+        ],
+        "scale": 1.0,
+        "padding": 12,
+        "alignment": "center",
+        "upscaled": false
+      },
+      "source_sheet": "generated/button-sheet-01.png",
+      "padding": 12,
+      "alignment": "center",
+      "pivot": [
+        0.5,
+        0.5
+      ],
+      "chroma_key": "#00FF00",
+      "transparency_mode": "chroma-key",
+      "alpha_origin": "chroma-derived"
+    },
+    {
+      "id": "02_Button_WorldMap_Pressed_011",
+      "category": "Button",
+      "semantic_name": "WorldMap",
+      "state": "Pressed",
+      "source_index": 11,
+      "category_index": 11,
+      "source_bbox": [
+        1065,
+        1495,
+        1473,
+        1653
+      ],
+      "output": "final/Button/02_Button_WorldMap_Pressed_011.png",
+      "width": 432,
+      "height": 182,
+      "component_count": 4,
+      "merged_component_count": 4,
+      "detached_component_count": 0,
+      "accepted_detached_count": 0,
+      "major_detached_count": 0,
+      "foreground_pixels": 49438,
+      "qa": "pass",
+      "normalization": {
+        "source_trim_bbox": [
+          0,
+          0,
+          408,
+          158
+        ],
+        "source_trim_size": [
+          408,
+          158
+        ],
+        "target_size": [
+          432,
+          182
+        ],
+        "content_size": [
+          408,
+          158
+        ],
+        "content_position": [
+          12,
+          12
+        ],
+        "scale": 1.0,
+        "padding": 12,
+        "alignment": "center",
+        "upscaled": false
+      },
+      "source_sheet": "generated/button-sheet-01.png",
+      "padding": 12,
+      "alignment": "center",
+      "pivot": [
+        0.5,
+        0.5
+      ],
+      "chroma_key": "#00FF00",
+      "transparency_mode": "chroma-key",
+      "alpha_origin": "chroma-derived"
+    },
+    {
+      "id": "02_Button_WorldMap_Disabled_012",
+      "category": "Button",
+      "semantic_name": "WorldMap",
+      "state": "Disabled",
+      "source_index": 12,
+      "category_index": 12,
+      "source_bbox": [
+        1559,
+        1494,
+        1968,
+        1653
+      ],
+      "output": "final/Button/02_Button_WorldMap_Disabled_012.png",
+      "width": 433,
+      "height": 183,
+      "component_count": 1,
+      "merged_component_count": 1,
+      "detached_component_count": 0,
+      "accepted_detached_count": 0,
+      "major_detached_count": 0,
+      "foreground_pixels": 49059,
+      "qa": "pass",
+      "normalization": {
+        "source_trim_bbox": [
+          0,
+          0,
+          409,
+          159
+        ],
+        "source_trim_size": [
+          409,
+          159
+        ],
+        "target_size": [
+          433,
+          183
+        ],
+        "content_size": [
+          409,
+          159
+        ],
+        "content_position": [
+          12,
+          12
+        ],
+        "scale": 1.0,
+        "padding": 12,
+        "alignment": "center",
+        "upscaled": false
+      },
+      "source_sheet": "generated/button-sheet-01.png",
+      "padding": 12,
+      "alignment": "center",
+      "pivot": [
+        0.5,
+        0.5
+      ],
+      "chroma_key": "#00FF00",
+      "transparency_mode": "chroma-key",
+      "alpha_origin": "chroma-derived"
+    },
+    {
+      "id": "02_Button_QuestTab_Normal_013",
+      "category": "Button",
+      "semantic_name": "QuestTab",
+      "state": "Normal",
+      "source_index": 1,
+      "category_index": 13,
+      "source_bbox": [
+        46,
+        289,
+        510,
+        415
+      ],
+      "output": "final/Button/02_Button_QuestTab_Normal_013.png",
+      "width": 488,
+      "height": 150,
+      "component_count": 2,
+      "merged_component_count": 2,
+      "detached_component_count": 0,
+      "accepted_detached_count": 0,
+      "major_detached_count": 0,
+      "foreground_pixels": 47478,
+      "qa": "pass",
+      "normalization": {
+        "source_trim_bbox": [
+          0,
+          0,
+          464,
+          126
+        ],
+        "source_trim_size": [
+          464,
+          126
+        ],
+        "target_size": [
+          488,
+          150
+        ],
+        "content_size": [
+          464,
+          126
+        ],
+        "content_position": [
+          12,
+          12
+        ],
+        "scale": 1.0,
+        "padding": 12,
+        "alignment": "center",
+        "upscaled": false
+      },
+      "source_sheet": "generated/button-sheet-02.png",
+      "padding": 12,
+      "alignment": "center",
+      "pivot": [
+        0.5,
+        0.5
+      ],
+      "chroma_key": "#00FF00",
+      "transparency_mode": "chroma-key",
+      "alpha_origin": "chroma-derived"
+    },
+    {
+      "id": "02_Button_QuestTab_Hover_014",
+      "category": "Button",
+      "semantic_name": "QuestTab",
+      "state": "Hover",
+      "source_index": 2,
+      "category_index": 14,
+      "source_bbox": [
+        537,
+        290,
+        1008,
+        416
+      ],
+      "output": "final/Button/02_Button_QuestTab_Hover_014.png",
+      "width": 495,
+      "height": 150,
+      "component_count": 1,
+      "merged_component_count": 1,
+      "detached_component_count": 0,
+      "accepted_detached_count": 0,
+      "major_detached_count": 0,
+      "foreground_pixels": 48084,
+      "qa": "pass",
+      "normalization": {
+        "source_trim_bbox": [
+          0,
+          0,
+          471,
+          126
+        ],
+        "source_trim_size": [
+          471,
+          126
+        ],
+        "target_size": [
+          495,
+          150
+        ],
+        "content_size": [
+          471,
+          126
+        ],
+        "content_position": [
+          12,
+          12
+        ],
+        "scale": 1.0,
+        "padding": 12,
+        "alignment": "center",
+        "upscaled": false
+      },
+      "source_sheet": "generated/button-sheet-02.png",
+      "padding": 12,
+      "alignment": "center",
+      "pivot": [
+        0.5,
+        0.5
+      ],
+      "chroma_key": "#00FF00",
+      "transparency_mode": "chroma-key",
+      "alpha_origin": "chroma-derived"
+    },
+    {
+      "id": "02_Button_QuestTab_Pressed_015",
+      "category": "Button",
+      "semantic_name": "QuestTab",
+      "state": "Pressed",
+      "source_index": 3,
+      "category_index": 15,
+      "source_bbox": [
+        1034,
+        292,
+        1507,
+        415
+      ],
+      "output": "final/Button/02_Button_QuestTab_Pressed_015.png",
+      "width": 497,
+      "height": 147,
+      "component_count": 1,
+      "merged_component_count": 1,
+      "detached_component_count": 0,
+      "accepted_detached_count": 0,
+      "major_detached_count": 0,
+      "foreground_pixels": 48547,
+      "qa": "pass",
+      "normalization": {
+        "source_trim_bbox": [
+          0,
+          0,
+          473,
+          123
+        ],
+        "source_trim_size": [
+          473,
+          123
+        ],
+        "target_size": [
+          497,
+          147
+        ],
+        "content_size": [
+          473,
+          123
+        ],
+        "content_position": [
+          12,
+          12
+        ],
+        "scale": 1.0,
+        "padding": 12,
+        "alignment": "center",
+        "upscaled": false
+      },
+      "source_sheet": "generated/button-sheet-02.png",
+      "padding": 12,
+      "alignment": "center",
+      "pivot": [
+        0.5,
+        0.5
+      ],
+      "chroma_key": "#00FF00",
+      "transparency_mode": "chroma-key",
+      "alpha_origin": "chroma-derived"
+    },
+    {
+      "id": "02_Button_QuestTab_Disabled_016",
+      "category": "Button",
+      "semantic_name": "QuestTab",
+      "state": "Disabled",
+      "source_index": 4,
+      "category_index": 16,
+      "source_bbox": [
+        1538,
+        293,
+        2008,
+        416
+      ],
+      "output": "final/Button/02_Button_QuestTab_Disabled_016.png",
+      "width": 494,
+      "height": 147,
+      "component_count": 1,
+      "merged_component_count": 1,
+      "detached_component_count": 0,
+      "accepted_detached_count": 0,
+      "major_detached_count": 0,
+      "foreground_pixels": 48142,
+      "qa": "pass",
+      "normalization": {
+        "source_trim_bbox": [
+          0,
+          0,
+          470,
+          123
+        ],
+        "source_trim_size": [
+          470,
+          123
+        ],
+        "target_size": [
+          494,
+          147
+        ],
+        "content_size": [
+          470,
+          123
+        ],
+        "content_position": [
+          12,
+          12
+        ],
+        "scale": 1.0,
+        "padding": 12,
+        "alignment": "center",
+        "upscaled": false
+      },
+      "source_sheet": "generated/button-sheet-02.png",
+      "padding": 12,
+      "alignment": "center",
+      "pivot": [
+        0.5,
+        0.5
+      ],
+      "chroma_key": "#00FF00",
+      "transparency_mode": "chroma-key",
+      "alpha_origin": "chroma-derived"
+    },
+    {
+      "id": "02_Button_QuestComplete_Normal_017",
+      "category": "Button",
+      "semantic_name": "QuestComplete",
+      "state": "Normal",
+      "source_index": 5,
+      "category_index": 17,
+      "source_bbox": [
+        50,
+        855,
+        518,
+        1032
+      ],
+      "output": "final/Button/02_Button_QuestComplete_Normal_017.png",
+      "width": 492,
+      "height": 201,
+      "component_count": 2,
+      "merged_component_count": 2,
+      "detached_component_count": 0,
+      "accepted_detached_count": 0,
+      "major_detached_count": 0,
+      "foreground_pixels": 65776,
+      "qa": "pass",
+      "normalization": {
+        "source_trim_bbox": [
+          0,
+          0,
+          468,
+          177
+        ],
+        "source_trim_size": [
+          468,
+          177
+        ],
+        "target_size": [
+          492,
+          201
+        ],
+        "content_size": [
+          468,
+          177
+        ],
+        "content_position": [
+          12,
+          12
+        ],
+        "scale": 1.0,
+        "padding": 12,
+        "alignment": "center",
+        "upscaled": false
+      },
+      "source_sheet": "generated/button-sheet-02.png",
+      "padding": 12,
+      "alignment": "center",
+      "pivot": [
+        0.5,
+        0.5
+      ],
+      "chroma_key": "#00FF00",
+      "transparency_mode": "chroma-key",
+      "alpha_origin": "chroma-derived"
+    },
+    {
+      "id": "02_Button_QuestComplete_Hover_018",
+      "category": "Button",
+      "semantic_name": "QuestComplete",
+      "state": "Hover",
+      "source_index": 6,
+      "category_index": 18,
+      "source_bbox": [
+        542,
+        860,
+        1005,
+        1032
+      ],
+      "output": "final/Button/02_Button_QuestComplete_Hover_018.png",
+      "width": 487,
+      "height": 196,
+      "component_count": 1,
+      "merged_component_count": 1,
+      "detached_component_count": 0,
+      "accepted_detached_count": 0,
+      "major_detached_count": 0,
+      "foreground_pixels": 65038,
+      "qa": "pass",
+      "normalization": {
+        "source_trim_bbox": [
+          0,
+          0,
+          463,
+          172
+        ],
+        "source_trim_size": [
+          463,
+          172
+        ],
+        "target_size": [
+          487,
+          196
+        ],
+        "content_size": [
+          463,
+          172
+        ],
+        "content_position": [
+          12,
+          12
+        ],
+        "scale": 1.0,
+        "padding": 12,
+        "alignment": "center",
+        "upscaled": false
+      },
+      "source_sheet": "generated/button-sheet-02.png",
+      "padding": 12,
+      "alignment": "center",
+      "pivot": [
+        0.5,
+        0.5
+      ],
+      "chroma_key": "#00FF00",
+      "transparency_mode": "chroma-key",
+      "alpha_origin": "chroma-derived"
+    },
+    {
+      "id": "02_Button_QuestComplete_Pressed_019",
+      "category": "Button",
+      "semantic_name": "QuestComplete",
+      "state": "Pressed",
+      "source_index": 7,
+      "category_index": 19,
+      "source_bbox": [
+        1037,
+        855,
+        1495,
+        1032
+      ],
+      "output": "final/Button/02_Button_QuestComplete_Pressed_019.png",
+      "width": 482,
+      "height": 201,
+      "component_count": 2,
+      "merged_component_count": 2,
+      "detached_component_count": 0,
+      "accepted_detached_count": 0,
+      "major_detached_count": 0,
+      "foreground_pixels": 64483,
+      "qa": "pass",
+      "normalization": {
+        "source_trim_bbox": [
+          0,
+          0,
+          458,
+          177
+        ],
+        "source_trim_size": [
+          458,
+          177
+        ],
+        "target_size": [
+          482,
+          201
+        ],
+        "content_size": [
+          458,
+          177
+        ],
+        "content_position": [
+          12,
+          12
+        ],
+        "scale": 1.0,
+        "padding": 12,
+        "alignment": "center",
+        "upscaled": false
+      },
+      "source_sheet": "generated/button-sheet-02.png",
+      "padding": 12,
+      "alignment": "center",
+      "pivot": [
+        0.5,
+        0.5
+      ],
+      "chroma_key": "#00FF00",
+      "transparency_mode": "chroma-key",
+      "alpha_origin": "chroma-derived"
+    },
+    {
+      "id": "02_Button_QuestComplete_Disabled_020",
+      "category": "Button",
+      "semantic_name": "QuestComplete",
+      "state": "Disabled",
+      "source_index": 8,
+      "category_index": 20,
+      "source_bbox": [
+        1529,
+        862,
+        1996,
+        1032
+      ],
+      "output": "final/Button/02_Button_QuestComplete_Disabled_020.png",
+      "width": 491,
+      "height": 194,
+      "component_count": 3,
+      "merged_component_count": 3,
+      "detached_component_count": 0,
+      "accepted_detached_count": 0,
+      "major_detached_count": 0,
+      "foreground_pixels": 65056,
+      "qa": "pass",
+      "normalization": {
+        "source_trim_bbox": [
+          0,
+          0,
+          467,
+          170
+        ],
+        "source_trim_size": [
+          467,
+          170
+        ],
+        "target_size": [
+          491,
+          194
+        ],
+        "content_size": [
+          467,
+          170
+        ],
+        "content_position": [
+          12,
+          12
+        ],
+        "scale": 1.0,
+        "padding": 12,
+        "alignment": "center",
+        "upscaled": false
+      },
+      "source_sheet": "generated/button-sheet-02.png",
+      "padding": 12,
+      "alignment": "center",
+      "pivot": [
+        0.5,
+        0.5
+      ],
+      "chroma_key": "#00FF00",
+      "transparency_mode": "chroma-key",
+      "alpha_origin": "chroma-derived"
+    },
+    {
+      "id": "02_Button_QuestCompleteAll_Normal_021",
+      "category": "Button",
+      "semantic_name": "QuestCompleteAll",
+      "state": "Normal",
+      "source_index": 9,
+      "category_index": 21,
+      "source_bbox": [
+        29,
+        1468,
+        501,
+        1720
+      ],
+      "output": "final/Button/02_Button_QuestCompleteAll_Normal_021.png",
+      "width": 496,
+      "height": 276,
+      "component_count": 5,
+      "merged_component_count": 5,
+      "detached_component_count": 0,
+      "accepted_detached_count": 0,
+      "major_detached_count": 0,
+      "foreground_pixels": 91824,
+      "qa": "pass",
+      "normalization": {
+        "source_trim_bbox": [
+          0,
+          0,
+          472,
+          252
+        ],
+        "source_trim_size": [
+          472,
+          252
+        ],
+        "target_size": [
+          496,
+          276
+        ],
+        "content_size": [
+          472,
+          252
+        ],
+        "content_position": [
+          12,
+          12
+        ],
+        "scale": 1.0,
+        "padding": 12,
+        "alignment": "center",
+        "upscaled": false
+      },
+      "source_sheet": "generated/button-sheet-02.png",
+      "padding": 12,
+      "alignment": "center",
+      "pivot": [
+        0.5,
+        0.5
+      ],
+      "chroma_key": "#00FF00",
+      "transparency_mode": "chroma-key",
+      "alpha_origin": "chroma-derived"
+    },
+    {
+      "id": "02_Button_QuestCompleteAll_Hover_022",
+      "category": "Button",
+      "semantic_name": "QuestCompleteAll",
+      "state": "Hover",
+      "source_index": 10,
+      "category_index": 22,
+      "source_bbox": [
+        529,
+        1465,
+        997,
+        1720
+      ],
+      "output": "final/Button/02_Button_QuestCompleteAll_Hover_022.png",
+      "width": 492,
+      "height": 279,
+      "component_count": 2,
+      "merged_component_count": 2,
+      "detached_component_count": 0,
+      "accepted_detached_count": 0,
+      "major_detached_count": 0,
+      "foreground_pixels": 92810,
+      "qa": "pass",
+      "normalization": {
+        "source_trim_bbox": [
+          0,
+          0,
+          468,
+          255
+        ],
+        "source_trim_size": [
+          468,
+          255
+        ],
+        "target_size": [
+          492,
+          279
+        ],
+        "content_size": [
+          468,
+          255
+        ],
+        "content_position": [
+          12,
+          12
+        ],
+        "scale": 1.0,
+        "padding": 12,
+        "alignment": "center",
+        "upscaled": false
+      },
+      "source_sheet": "generated/button-sheet-02.png",
+      "padding": 12,
+      "alignment": "center",
+      "pivot": [
+        0.5,
+        0.5
+      ],
+      "chroma_key": "#00FF00",
+      "transparency_mode": "chroma-key",
+      "alpha_origin": "chroma-derived"
+    },
+    {
+      "id": "02_Button_QuestCompleteAll_Pressed_023",
+      "category": "Button",
+      "semantic_name": "QuestCompleteAll",
+      "state": "Pressed",
+      "source_index": 11,
+      "category_index": 23,
+      "source_bbox": [
+        1036,
+        1469,
+        1503,
+        1723
+      ],
+      "output": "final/Button/02_Button_QuestCompleteAll_Pressed_023.png",
+      "width": 491,
+      "height": 278,
+      "component_count": 4,
+      "merged_component_count": 4,
+      "detached_component_count": 0,
+      "accepted_detached_count": 0,
+      "major_detached_count": 0,
+      "foreground_pixels": 93583,
+      "qa": "pass",
+      "normalization": {
+        "source_trim_bbox": [
+          0,
+          0,
+          467,
+          254
+        ],
+        "source_trim_size": [
+          467,
+          254
+        ],
+        "target_size": [
+          491,
+          278
+        ],
+        "content_size": [
+          467,
+          254
+        ],
+        "content_position": [
+          12,
+          12
+        ],
+        "scale": 1.0,
+        "padding": 12,
+        "alignment": "center",
+        "upscaled": false
+      },
+      "source_sheet": "generated/button-sheet-02.png",
+      "padding": 12,
+      "alignment": "center",
+      "pivot": [
+        0.5,
+        0.5
+      ],
+      "chroma_key": "#00FF00",
+      "transparency_mode": "chroma-key",
+      "alpha_origin": "chroma-derived"
+    },
+    {
+      "id": "02_Button_QuestCompleteAll_Disabled_024",
+      "category": "Button",
+      "semantic_name": "QuestCompleteAll",
+      "state": "Disabled",
+      "source_index": 12,
+      "category_index": 24,
+      "source_bbox": [
+        1544,
+        1470,
+        2011,
+        1724
+      ],
+      "output": "final/Button/02_Button_QuestCompleteAll_Disabled_024.png",
+      "width": 491,
+      "height": 278,
+      "component_count": 4,
+      "merged_component_count": 4,
+      "detached_component_count": 0,
+      "accepted_detached_count": 0,
+      "major_detached_count": 0,
+      "foreground_pixels": 92548,
+      "qa": "pass",
+      "normalization": {
+        "source_trim_bbox": [
+          0,
+          0,
+          467,
+          254
+        ],
+        "source_trim_size": [
+          467,
+          254
+        ],
+        "target_size": [
+          491,
+          278
+        ],
+        "content_size": [
+          467,
+          254
+        ],
+        "content_position": [
+          12,
+          12
+        ],
+        "scale": 1.0,
+        "padding": 12,
+        "alignment": "center",
+        "upscaled": false
+      },
+      "source_sheet": "generated/button-sheet-02.png",
+      "padding": 12,
+      "alignment": "center",
+      "pivot": [
+        0.5,
+        0.5
+      ],
+      "chroma_key": "#00FF00",
+      "transparency_mode": "chroma-key",
+      "alpha_origin": "chroma-derived"
+    },
+    {
+      "id": "02_Button_ChatTab_Normal_025",
+      "category": "Button",
+      "semantic_name": "ChatTab",
+      "state": "Normal",
+      "source_index": 1,
+      "category_index": 25,
+      "source_bbox": [
+        24,
+        305,
+        499,
+        456
+      ],
+      "output": "final/Button/02_Button_ChatTab_Normal_025.png",
+      "width": 499,
+      "height": 175,
+      "component_count": 2,
+      "merged_component_count": 2,
+      "detached_component_count": 0,
+      "accepted_detached_count": 0,
+      "major_detached_count": 0,
+      "foreground_pixels": 57982,
+      "qa": "pass",
+      "normalization": {
+        "source_trim_bbox": [
+          0,
+          0,
+          475,
+          151
+        ],
+        "source_trim_size": [
+          475,
+          151
+        ],
+        "target_size": [
+          499,
+          175
+        ],
+        "content_size": [
+          475,
+          151
+        ],
+        "content_position": [
+          12,
+          12
+        ],
+        "scale": 1.0,
+        "padding": 12,
+        "alignment": "center",
+        "upscaled": false
+      },
+      "source_sheet": "generated/button-sheet-03.png",
+      "padding": 12,
+      "alignment": "center",
+      "pivot": [
+        0.5,
+        0.5
+      ],
+      "chroma_key": "#00FF00",
+      "transparency_mode": "chroma-key",
+      "alpha_origin": "chroma-derived"
+    },
+    {
+      "id": "02_Button_ChatTab_Hover_026",
+      "category": "Button",
+      "semantic_name": "ChatTab",
+      "state": "Hover",
+      "source_index": 2,
+      "category_index": 26,
+      "source_bbox": [
+        532,
+        305,
+        1013,
+        460
+      ],
+      "output": "final/Button/02_Button_ChatTab_Hover_026.png",
+      "width": 505,
+      "height": 179,
+      "component_count": 1,
+      "merged_component_count": 1,
+      "detached_component_count": 0,
+      "accepted_detached_count": 0,
+      "major_detached_count": 0,
+      "foreground_pixels": 62014,
+      "qa": "pass",
+      "normalization": {
+        "source_trim_bbox": [
+          0,
+          0,
+          481,
+          155
+        ],
+        "source_trim_size": [
+          481,
+          155
+        ],
+        "target_size": [
+          505,
+          179
+        ],
+        "content_size": [
+          481,
+          155
+        ],
+        "content_position": [
+          12,
+          12
+        ],
+        "scale": 1.0,
+        "padding": 12,
+        "alignment": "center",
+        "upscaled": false
+      },
+      "source_sheet": "generated/button-sheet-03.png",
+      "padding": 12,
+      "alignment": "center",
+      "pivot": [
+        0.5,
+        0.5
+      ],
+      "chroma_key": "#00FF00",
+      "transparency_mode": "chroma-key",
+      "alpha_origin": "chroma-derived"
+    },
+    {
+      "id": "02_Button_ChatTab_Pressed_027",
+      "category": "Button",
+      "semantic_name": "ChatTab",
+      "state": "Pressed",
+      "source_index": 3,
+      "category_index": 27,
+      "source_bbox": [
+        1043,
+        307,
+        1520,
+        457
+      ],
+      "output": "final/Button/02_Button_ChatTab_Pressed_027.png",
+      "width": 501,
+      "height": 174,
+      "component_count": 1,
+      "merged_component_count": 1,
+      "detached_component_count": 0,
+      "accepted_detached_count": 0,
+      "major_detached_count": 0,
+      "foreground_pixels": 58537,
+      "qa": "pass",
+      "normalization": {
+        "source_trim_bbox": [
+          0,
+          0,
+          477,
+          150
+        ],
+        "source_trim_size": [
+          477,
+          150
+        ],
+        "target_size": [
+          501,
+          174
+        ],
+        "content_size": [
+          477,
+          150
+        ],
+        "content_position": [
+          12,
+          12
+        ],
+        "scale": 1.0,
+        "padding": 12,
+        "alignment": "center",
+        "upscaled": false
+      },
+      "source_sheet": "generated/button-sheet-03.png",
+      "padding": 12,
+      "alignment": "center",
+      "pivot": [
+        0.5,
+        0.5
+      ],
+      "chroma_key": "#00FF00",
+      "transparency_mode": "chroma-key",
+      "alpha_origin": "chroma-derived"
+    },
+    {
+      "id": "02_Button_ChatTab_Disabled_028",
+      "category": "Button",
+      "semantic_name": "ChatTab",
+      "state": "Disabled",
+      "source_index": 4,
+      "category_index": 28,
+      "source_bbox": [
+        1547,
+        307,
+        2020,
+        457
+      ],
+      "output": "final/Button/02_Button_ChatTab_Disabled_028.png",
+      "width": 497,
+      "height": 174,
+      "component_count": 1,
+      "merged_component_count": 1,
+      "detached_component_count": 0,
+      "accepted_detached_count": 0,
+      "major_detached_count": 0,
+      "foreground_pixels": 57969,
+      "qa": "pass",
+      "normalization": {
+        "source_trim_bbox": [
+          0,
+          0,
+          473,
+          150
+        ],
+        "source_trim_size": [
+          473,
+          150
+        ],
+        "target_size": [
+          497,
+          174
+        ],
+        "content_size": [
+          473,
+          150
+        ],
+        "content_position": [
+          12,
+          12
+        ],
+        "scale": 1.0,
+        "padding": 12,
+        "alignment": "center",
+        "upscaled": false
+      },
+      "source_sheet": "generated/button-sheet-03.png",
+      "padding": 12,
+      "alignment": "center",
+      "pivot": [
+        0.5,
+        0.5
+      ],
+      "chroma_key": "#00FF00",
+      "transparency_mode": "chroma-key",
+      "alpha_origin": "chroma-derived"
+    },
+    {
+      "id": "02_Button_VoiceChat_Normal_029",
+      "category": "Button",
+      "semantic_name": "VoiceChat",
+      "state": "Normal",
+      "source_index": 5,
+      "category_index": 29,
+      "source_bbox": [
+        92,
+        808,
+        419,
+        1139
+      ],
+      "output": "final/Button/02_Button_VoiceChat_Normal_029.png",
+      "width": 351,
+      "height": 355,
+      "component_count": 1,
+      "merged_component_count": 1,
+      "detached_component_count": 0,
+      "accepted_detached_count": 0,
+      "major_detached_count": 0,
+      "foreground_pixels": 65596,
+      "qa": "pass",
+      "normalization": {
+        "source_trim_bbox": [
+          0,
+          0,
+          327,
+          331
+        ],
+        "source_trim_size": [
+          327,
+          331
+        ],
+        "target_size": [
+          351,
+          355
+        ],
+        "content_size": [
+          327,
+          331
+        ],
+        "content_position": [
+          12,
+          12
+        ],
+        "scale": 1.0,
+        "padding": 12,
+        "alignment": "center",
+        "upscaled": false
+      },
+      "source_sheet": "generated/button-sheet-03.png",
+      "padding": 12,
+      "alignment": "center",
+      "pivot": [
+        0.5,
+        0.5
+      ],
+      "chroma_key": "#00FF00",
+      "transparency_mode": "chroma-key",
+      "alpha_origin": "chroma-derived"
+    },
+    {
+      "id": "02_Button_VoiceChat_Hover_030",
+      "category": "Button",
+      "semantic_name": "VoiceChat",
+      "state": "Hover",
+      "source_index": 6,
+      "category_index": 30,
+      "source_bbox": [
+        602,
+        805,
+        935,
+        1142
+      ],
+      "output": "final/Button/02_Button_VoiceChat_Hover_030.png",
+      "width": 357,
+      "height": 361,
+      "component_count": 1,
+      "merged_component_count": 1,
+      "detached_component_count": 0,
+      "accepted_detached_count": 0,
+      "major_detached_count": 0,
+      "foreground_pixels": 69097,
+      "qa": "pass",
+      "normalization": {
+        "source_trim_bbox": [
+          0,
+          0,
+          333,
+          337
+        ],
+        "source_trim_size": [
+          333,
+          337
+        ],
+        "target_size": [
+          357,
+          361
+        ],
+        "content_size": [
+          333,
+          337
+        ],
+        "content_position": [
+          12,
+          12
+        ],
+        "scale": 1.0,
+        "padding": 12,
+        "alignment": "center",
+        "upscaled": false
+      },
+      "source_sheet": "generated/button-sheet-03.png",
+      "padding": 12,
+      "alignment": "center",
+      "pivot": [
+        0.5,
+        0.5
+      ],
+      "chroma_key": "#00FF00",
+      "transparency_mode": "chroma-key",
+      "alpha_origin": "chroma-derived"
+    },
+    {
+      "id": "02_Button_VoiceChat_Pressed_031",
+      "category": "Button",
+      "semantic_name": "VoiceChat",
+      "state": "Pressed",
+      "source_index": 7,
+      "category_index": 31,
+      "source_bbox": [
+        1115,
+        808,
+        1441,
+        1139
+      ],
+      "output": "final/Button/02_Button_VoiceChat_Pressed_031.png",
+      "width": 350,
+      "height": 355,
+      "component_count": 2,
+      "merged_component_count": 2,
+      "detached_component_count": 0,
+      "accepted_detached_count": 0,
+      "major_detached_count": 0,
+      "foreground_pixels": 65439,
+      "qa": "pass",
+      "normalization": {
+        "source_trim_bbox": [
+          0,
+          0,
+          326,
+          331
+        ],
+        "source_trim_size": [
+          326,
+          331
+        ],
+        "target_size": [
+          350,
+          355
+        ],
+        "content_size": [
+          326,
+          331
+        ],
+        "content_position": [
+          12,
+          12
+        ],
+        "scale": 1.0,
+        "padding": 12,
+        "alignment": "center",
+        "upscaled": false
+      },
+      "source_sheet": "generated/button-sheet-03.png",
+      "padding": 12,
+      "alignment": "center",
+      "pivot": [
+        0.5,
+        0.5
+      ],
+      "chroma_key": "#00FF00",
+      "transparency_mode": "chroma-key",
+      "alpha_origin": "chroma-derived"
+    },
+    {
+      "id": "02_Button_VoiceChat_Disabled_032",
+      "category": "Button",
+      "semantic_name": "VoiceChat",
+      "state": "Disabled",
+      "source_index": 8,
+      "category_index": 32,
+      "source_bbox": [
+        1625,
+        808,
+        1952,
+        1139
+      ],
+      "output": "final/Button/02_Button_VoiceChat_Disabled_032.png",
+      "width": 351,
+      "height": 355,
+      "component_count": 2,
+      "merged_component_count": 2,
+      "detached_component_count": 0,
+      "accepted_detached_count": 0,
+      "major_detached_count": 0,
+      "foreground_pixels": 65574,
+      "qa": "pass",
+      "normalization": {
+        "source_trim_bbox": [
+          0,
+          0,
+          327,
+          331
+        ],
+        "source_trim_size": [
+          327,
+          331
+        ],
+        "target_size": [
+          351,
+          355
+        ],
+        "content_size": [
+          327,
+          331
+        ],
+        "content_position": [
+          12,
+          12
+        ],
+        "scale": 1.0,
+        "padding": 12,
+        "alignment": "center",
+        "upscaled": false
+      },
+      "source_sheet": "generated/button-sheet-03.png",
+      "padding": 12,
+      "alignment": "center",
+      "pivot": [
+        0.5,
+        0.5
+      ],
+      "chroma_key": "#00FF00",
+      "transparency_mode": "chroma-key",
+      "alpha_origin": "chroma-derived"
+    },
+    {
+      "id": "02_Button_SendChat_Normal_033",
+      "category": "Button",
+      "semantic_name": "SendChat",
+      "state": "Normal",
+      "source_index": 9,
+      "category_index": 33,
+      "source_bbox": [
+        11,
+        1476,
+        501,
+        1695
+      ],
+      "output": "final/Button/02_Button_SendChat_Normal_033.png",
+      "width": 514,
+      "height": 243,
+      "component_count": 3,
+      "merged_component_count": 3,
+      "detached_component_count": 0,
+      "accepted_detached_count": 0,
+      "major_detached_count": 0,
+      "foreground_pixels": 85012,
+      "qa": "pass",
+      "normalization": {
+        "source_trim_bbox": [
+          0,
+          0,
+          490,
+          219
+        ],
+        "source_trim_size": [
+          490,
+          219
+        ],
+        "target_size": [
+          514,
+          243
+        ],
+        "content_size": [
+          490,
+          219
+        ],
+        "content_position": [
+          12,
+          12
+        ],
+        "scale": 1.0,
+        "padding": 12,
+        "alignment": "center",
+        "upscaled": false
+      },
+      "source_sheet": "generated/button-sheet-03.png",
+      "padding": 12,
+      "alignment": "center",
+      "pivot": [
+        0.5,
+        0.5
+      ],
+      "chroma_key": "#00FF00",
+      "transparency_mode": "chroma-key",
+      "alpha_origin": "chroma-derived"
+    },
+    {
+      "id": "02_Button_SendChat_Hover_034",
+      "category": "Button",
+      "semantic_name": "SendChat",
+      "state": "Hover",
+      "source_index": 10,
+      "category_index": 34,
+      "source_bbox": [
+        521,
+        1473,
+        1014,
+        1699
+      ],
+      "output": "final/Button/02_Button_SendChat_Hover_034.png",
+      "width": 517,
+      "height": 250,
+      "component_count": 1,
+      "merged_component_count": 1,
+      "detached_component_count": 0,
+      "accepted_detached_count": 0,
+      "major_detached_count": 0,
+      "foreground_pixels": 88331,
+      "qa": "pass",
+      "normalization": {
+        "source_trim_bbox": [
+          0,
+          0,
+          493,
+          226
+        ],
+        "source_trim_size": [
+          493,
+          226
+        ],
+        "target_size": [
+          517,
+          250
+        ],
+        "content_size": [
+          493,
+          226
+        ],
+        "content_position": [
+          12,
+          12
+        ],
+        "scale": 1.0,
+        "padding": 12,
+        "alignment": "center",
+        "upscaled": false
+      },
+      "source_sheet": "generated/button-sheet-03.png",
+      "padding": 12,
+      "alignment": "center",
+      "pivot": [
+        0.5,
+        0.5
+      ],
+      "chroma_key": "#00FF00",
+      "transparency_mode": "chroma-key",
+      "alpha_origin": "chroma-derived"
+    },
+    {
+      "id": "02_Button_SendChat_Pressed_035",
+      "category": "Button",
+      "semantic_name": "SendChat",
+      "state": "Pressed",
+      "source_index": 11,
+      "category_index": 35,
+      "source_bbox": [
+        1033,
+        1476,
+        1520,
+        1695
+      ],
+      "output": "final/Button/02_Button_SendChat_Pressed_035.png",
+      "width": 511,
+      "height": 243,
+      "component_count": 1,
+      "merged_component_count": 1,
+      "detached_component_count": 0,
+      "accepted_detached_count": 0,
+      "major_detached_count": 0,
+      "foreground_pixels": 84044,
+      "qa": "pass",
+      "normalization": {
+        "source_trim_bbox": [
+          0,
+          0,
+          487,
+          219
+        ],
+        "source_trim_size": [
+          487,
+          219
+        ],
+        "target_size": [
+          511,
+          243
+        ],
+        "content_size": [
+          487,
+          219
+        ],
+        "content_position": [
+          12,
+          12
+        ],
+        "scale": 1.0,
+        "padding": 12,
+        "alignment": "center",
+        "upscaled": false
+      },
+      "source_sheet": "generated/button-sheet-03.png",
+      "padding": 12,
+      "alignment": "center",
+      "pivot": [
+        0.5,
+        0.5
+      ],
+      "chroma_key": "#00FF00",
+      "transparency_mode": "chroma-key",
+      "alpha_origin": "chroma-derived"
+    },
+    {
+      "id": "02_Button_SendChat_Disabled_036",
+      "category": "Button",
+      "semantic_name": "SendChat",
+      "state": "Disabled",
+      "source_index": 12,
+      "category_index": 36,
+      "source_bbox": [
+        1541,
+        1475,
+        2032,
+        1695
+      ],
+      "output": "final/Button/02_Button_SendChat_Disabled_036.png",
+      "width": 515,
+      "height": 244,
+      "component_count": 2,
+      "merged_component_count": 2,
+      "detached_component_count": 0,
+      "accepted_detached_count": 0,
+      "major_detached_count": 0,
+      "foreground_pixels": 84995,
+      "qa": "pass",
+      "normalization": {
+        "source_trim_bbox": [
+          0,
+          0,
+          491,
+          220
+        ],
+        "source_trim_size": [
+          491,
+          220
+        ],
+        "target_size": [
+          515,
+          244
+        ],
+        "content_size": [
+          491,
+          220
+        ],
+        "content_position": [
+          12,
+          12
+        ],
+        "scale": 1.0,
+        "padding": 12,
+        "alignment": "center",
+        "upscaled": false
+      },
+      "source_sheet": "generated/button-sheet-03.png",
+      "padding": 12,
+      "alignment": "center",
+      "pivot": [
+        0.5,
+        0.5
+      ],
+      "chroma_key": "#00FF00",
+      "transparency_mode": "chroma-key",
+      "alpha_origin": "chroma-derived"
+    },
+    {
+      "id": "03_Icon_Nav_GiftLotus_Default_001",
+      "category": "Icon_Nav",
+      "semantic_name": "GiftLotus",
+      "state": "Default",
+      "source_index": 1,
+      "category_index": 1,
+      "source_bbox": [
+        69,
+        99,
+        496,
+        499
+      ],
+      "output": "final/Icon_Nav/03_Icon_Nav_GiftLotus_Default_001.png",
+      "width": 128,
+      "height": 128,
+      "component_count": 4,
+      "merged_component_count": 4,
+      "detached_component_count": 0,
+      "accepted_detached_count": 0,
+      "major_detached_count": 0,
+      "foreground_pixels": 93396,
+      "qa": "pass",
+      "normalization": {
+        "source_trim_bbox": [
+          0,
+          0,
+          427,
+          400
+        ],
+        "source_trim_size": [
+          427,
+          400
+        ],
+        "target_size": [
+          128,
+          128
+        ],
+        "content_size": [
+          108,
+          101
+        ],
+        "content_position": [
+          10,
+          13
+        ],
+        "scale": 0.2529274004683841,
+        "padding": 10,
+        "alignment": "center",
+        "upscaled": false
+      },
+      "source_sheet": "generated/icon-nav-sheet-01.png",
+      "padding": 10,
+      "alignment": "center",
+      "pivot": [
+        0.5,
+        0.5
+      ],
+      "chroma_key": "#FF00FF",
+      "transparency_mode": "chroma-key",
+      "alpha_origin": "chroma-derived"
+    },
+    {
+      "id": "03_Icon_Nav_GiftBox_Default_002",
+      "category": "Icon_Nav",
+      "semantic_name": "GiftBox",
+      "state": "Default",
+      "source_index": 2,
+      "category_index": 2,
+      "source_bbox": [
+        586,
+        92,
+        963,
+        495
+      ],
+      "output": "final/Icon_Nav/03_Icon_Nav_GiftBox_Default_002.png",
+      "width": 128,
+      "height": 128,
+      "component_count": 7,
+      "merged_component_count": 7,
+      "detached_component_count": 0,
+      "accepted_detached_count": 0,
+      "major_detached_count": 0,
+      "foreground_pixels": 119189,
+      "qa": "pass",
+      "normalization": {
+        "source_trim_bbox": [
+          0,
+          0,
+          377,
+          403
+        ],
+        "source_trim_size": [
+          377,
+          403
+        ],
+        "target_size": [
+          128,
+          128
+        ],
+        "content_size": [
+          101,
+          108
+        ],
+        "content_position": [
+          13,
+          10
+        ],
+        "scale": 0.2679900744416873,
+        "padding": 10,
+        "alignment": "center",
+        "upscaled": false
+      },
+      "source_sheet": "generated/icon-nav-sheet-01.png",
+      "padding": 10,
+      "alignment": "center",
+      "pivot": [
+        0.5,
+        0.5
+      ],
+      "chroma_key": "#FF00FF",
+      "transparency_mode": "chroma-key",
+      "alpha_origin": "chroma-derived"
+    },
+    {
+      "id": "03_Icon_Nav_GiftPavilion_Default_003",
+      "category": "Icon_Nav",
+      "semantic_name": "GiftPavilion",
+      "state": "Default",
+      "source_index": 3,
+      "category_index": 3,
+      "source_bbox": [
+        1063,
+        63,
+        1498,
+        489
+      ],
+      "output": "final/Icon_Nav/03_Icon_Nav_GiftPavilion_Default_003.png",
+      "width": 128,
+      "height": 128,
+      "component_count": 21,
+      "merged_component_count": 21,
+      "detached_component_count": 0,
+      "accepted_detached_count": 0,
+      "major_detached_count": 0,
+      "foreground_pixels": 111009,
+      "qa": "pass",
+      "normalization": {
+        "source_trim_bbox": [
+          0,
+          0,
+          435,
+          426
+        ],
+        "source_trim_size": [
+          435,
+          426
+        ],
+        "target_size": [
+          128,
+          128
+        ],
+        "content_size": [
+          108,
+          106
+        ],
+        "content_position": [
+          10,
+          11
+        ],
+        "scale": 0.2482758620689655,
+        "padding": 10,
+        "alignment": "center",
+        "upscaled": false
+      },
+      "source_sheet": "generated/icon-nav-sheet-01.png",
+      "padding": 10,
+      "alignment": "center",
+      "pivot": [
+        0.5,
+        0.5
+      ],
+      "chroma_key": "#FF00FF",
+      "transparency_mode": "chroma-key",
+      "alpha_origin": "chroma-derived"
+    },
+    {
+      "id": "03_Icon_Nav_GiftMedallion_Default_004",
+      "category": "Icon_Nav",
+      "semantic_name": "GiftMedallion",
+      "state": "Default",
+      "source_index": 4,
+      "category_index": 4,
+      "source_bbox": [
+        1575,
+        91,
+        1981,
+        497
+      ],
+      "output": "final/Icon_Nav/03_Icon_Nav_GiftMedallion_Default_004.png",
+      "width": 128,
+      "height": 128,
+      "component_count": 7,
+      "merged_component_count": 7,
+      "detached_component_count": 0,
+      "accepted_detached_count": 0,
+      "major_detached_count": 0,
+      "foreground_pixels": 100960,
+      "qa": "pass",
+      "normalization": {
+        "source_trim_bbox": [
+          0,
+          0,
+          406,
+          406
+        ],
+        "source_trim_size": [
+          406,
+          406
+        ],
+        "target_size": [
+          128,
+          128
+        ],
+        "content_size": [
+          108,
+          108
+        ],
+        "content_position": [
+          10,
+          10
+        ],
+        "scale": 0.2660098522167488,
+        "padding": 10,
+        "alignment": "center",
+        "upscaled": false
+      },
+      "source_sheet": "generated/icon-nav-sheet-01.png",
+      "padding": 10,
+      "alignment": "center",
+      "pivot": [
+        0.5,
+        0.5
+      ],
+      "chroma_key": "#FF00FF",
+      "transparency_mode": "chroma-key",
+      "alpha_origin": "chroma-derived"
+    },
+    {
+      "id": "03_Icon_Nav_GiftClock_Default_005",
+      "category": "Icon_Nav",
+      "semantic_name": "GiftClock",
+      "state": "Default",
+      "source_index": 5,
+      "category_index": 5,
+      "source_bbox": [
+        84,
+        554,
+        478,
+        990
+      ],
+      "output": "final/Icon_Nav/03_Icon_Nav_GiftClock_Default_005.png",
+      "width": 128,
+      "height": 128,
+      "component_count": 7,
+      "merged_component_count": 7,
+      "detached_component_count": 0,
+      "accepted_detached_count": 0,
+      "major_detached_count": 0,
+      "foreground_pixels": 108484,
+      "qa": "pass",
+      "normalization": {
+        "source_trim_bbox": [
+          0,
+          0,
+          394,
+          436
+        ],
+        "source_trim_size": [
+          394,
+          436
+        ],
+        "target_size": [
+          128,
+          128
+        ],
+        "content_size": [
+          98,
+          108
+        ],
+        "content_position": [
+          15,
+          10
+        ],
+        "scale": 0.24770642201834864,
+        "padding": 10,
+        "alignment": "center",
+        "upscaled": false
+      },
+      "source_sheet": "generated/icon-nav-sheet-01.png",
+      "padding": 10,
+      "alignment": "center",
+      "pivot": [
+        0.5,
+        0.5
+      ],
+      "chroma_key": "#FF00FF",
+      "transparency_mode": "chroma-key",
+      "alpha_origin": "chroma-derived"
+    },
+    {
+      "id": "03_Icon_Nav_GiftTarget_Default_006",
+      "category": "Icon_Nav",
+      "semantic_name": "GiftTarget",
+      "state": "Default",
+      "source_index": 6,
+      "category_index": 6,
+      "source_bbox": [
+        562,
+        563,
+        978,
+        978
+      ],
+      "output": "final/Icon_Nav/03_Icon_Nav_GiftTarget_Default_006.png",
+      "width": 128,
+      "height": 128,
+      "component_count": 3,
+      "merged_component_count": 3,
+      "detached_component_count": 0,
+      "accepted_detached_count": 0,
+      "major_detached_count": 0,
+      "foreground_pixels": 93361,
+      "qa": "pass",
+      "normalization": {
+        "source_trim_bbox": [
+          0,
+          0,
+          416,
+          415
+        ],
+        "source_trim_size": [
+          416,
+          415
+        ],
+        "target_size": [
+          128,
+          128
+        ],
+        "content_size": [
+          108,
+          108
+        ],
+        "content_position": [
+          10,
+          10
+        ],
+        "scale": 0.25961538461538464,
+        "padding": 10,
+        "alignment": "center",
+        "upscaled": false
+      },
+      "source_sheet": "generated/icon-nav-sheet-01.png",
+      "padding": 10,
+      "alignment": "center",
+      "pivot": [
+        0.5,
+        0.5
+      ],
+      "chroma_key": "#FF00FF",
+      "transparency_mode": "chroma-key",
+      "alpha_origin": "chroma-derived"
+    },
+    {
+      "id": "03_Icon_Nav_GiftLotusReward_Default_007",
+      "category": "Icon_Nav",
+      "semantic_name": "GiftLotusReward",
+      "state": "Default",
+      "source_index": 7,
+      "category_index": 7,
+      "source_bbox": [
+        1053,
+        578,
+        1506,
+        973
+      ],
+      "output": "final/Icon_Nav/03_Icon_Nav_GiftLotusReward_Default_007.png",
+      "width": 128,
+      "height": 128,
+      "component_count": 4,
+      "merged_component_count": 4,
+      "detached_component_count": 0,
+      "accepted_detached_count": 0,
+      "major_detached_count": 0,
+      "foreground_pixels": 97595,
+      "qa": "pass",
+      "normalization": {
+        "source_trim_bbox": [
+          0,
+          0,
+          453,
+          395
+        ],
+        "source_trim_size": [
+          453,
+          395
+        ],
+        "target_size": [
+          128,
+          128
+        ],
+        "content_size": [
+          108,
+          94
+        ],
+        "content_position": [
+          10,
+          17
+        ],
+        "scale": 0.23841059602649006,
+        "padding": 10,
+        "alignment": "center",
+        "upscaled": false
+      },
+      "source_sheet": "generated/icon-nav-sheet-01.png",
+      "padding": 10,
+      "alignment": "center",
+      "pivot": [
+        0.5,
+        0.5
+      ],
+      "chroma_key": "#FF00FF",
+      "transparency_mode": "chroma-key",
+      "alpha_origin": "chroma-derived"
+    },
+    {
+      "id": "03_Icon_Nav_GiftCauldron_Default_008",
+      "category": "Icon_Nav",
+      "semantic_name": "GiftCauldron",
+      "state": "Default",
+      "source_index": 8,
+      "category_index": 8,
+      "source_bbox": [
+        1573,
+        565,
+        1977,
+        976
+      ],
+      "output": "final/Icon_Nav/03_Icon_Nav_GiftCauldron_Default_008.png",
+      "width": 128,
+      "height": 128,
+      "component_count": 8,
+      "merged_component_count": 8,
+      "detached_component_count": 0,
+      "accepted_detached_count": 0,
+      "major_detached_count": 0,
+      "foreground_pixels": 109079,
+      "qa": "pass",
+      "normalization": {
+        "source_trim_bbox": [
+          0,
+          0,
+          404,
+          411
+        ],
+        "source_trim_size": [
+          404,
+          411
+        ],
+        "target_size": [
+          128,
+          128
+        ],
+        "content_size": [
+          106,
+          108
+        ],
+        "content_position": [
+          11,
+          10
+        ],
+        "scale": 0.26277372262773724,
+        "padding": 10,
+        "alignment": "center",
+        "upscaled": false
+      },
+      "source_sheet": "generated/icon-nav-sheet-01.png",
+      "padding": 10,
+      "alignment": "center",
+      "pivot": [
+        0.5,
+        0.5
+      ],
+      "chroma_key": "#FF00FF",
+      "transparency_mode": "chroma-key",
+      "alpha_origin": "chroma-derived"
+    },
+    {
+      "id": "03_Icon_Nav_GiftBattle_Default_009",
+      "category": "Icon_Nav",
+      "semantic_name": "GiftBattle",
+      "state": "Default",
+      "source_index": 9,
+      "category_index": 9,
+      "source_bbox": [
+        76,
+        1049,
+        489,
+        1457
+      ],
+      "output": "final/Icon_Nav/03_Icon_Nav_GiftBattle_Default_009.png",
+      "width": 128,
+      "height": 128,
+      "component_count": 6,
+      "merged_component_count": 6,
+      "detached_component_count": 0,
+      "accepted_detached_count": 0,
+      "major_detached_count": 0,
+      "foreground_pixels": 72283,
+      "qa": "pass",
+      "normalization": {
+        "source_trim_bbox": [
+          0,
+          0,
+          413,
+          408
+        ],
+        "source_trim_size": [
+          413,
+          408
+        ],
+        "target_size": [
+          128,
+          128
+        ],
+        "content_size": [
+          108,
+          107
+        ],
+        "content_position": [
+          10,
+          10
+        ],
+        "scale": 0.26150121065375304,
+        "padding": 10,
+        "alignment": "center",
+        "upscaled": false
+      },
+      "source_sheet": "generated/icon-nav-sheet-01.png",
+      "padding": 10,
+      "alignment": "center",
+      "pivot": [
+        0.5,
+        0.5
+      ],
+      "chroma_key": "#FF00FF",
+      "transparency_mode": "chroma-key",
+      "alpha_origin": "chroma-derived"
+    },
+    {
+      "id": "03_Icon_Nav_GiftShield_Default_010",
+      "category": "Icon_Nav",
+      "semantic_name": "GiftShield",
+      "state": "Default",
+      "source_index": 10,
+      "category_index": 10,
+      "source_bbox": [
+        601,
+        1059,
+        944,
+        1467
+      ],
+      "output": "final/Icon_Nav/03_Icon_Nav_GiftShield_Default_010.png",
+      "width": 128,
+      "height": 128,
+      "component_count": 3,
+      "merged_component_count": 3,
+      "detached_component_count": 0,
+      "accepted_detached_count": 0,
+      "major_detached_count": 0,
+      "foreground_pixels": 90374,
+      "qa": "pass",
+      "normalization": {
+        "source_trim_bbox": [
+          0,
+          0,
+          343,
+          408
+        ],
+        "source_trim_size": [
+          343,
+          408
+        ],
+        "target_size": [
+          128,
+          128
+        ],
+        "content_size": [
+          91,
+          108
+        ],
+        "content_position": [
+          18,
+          10
+        ],
+        "scale": 0.2647058823529412,
+        "padding": 10,
+        "alignment": "center",
+        "upscaled": false
+      },
+      "source_sheet": "generated/icon-nav-sheet-01.png",
+      "padding": 10,
+      "alignment": "center",
+      "pivot": [
+        0.5,
+        0.5
+      ],
+      "chroma_key": "#FF00FF",
+      "transparency_mode": "chroma-key",
+      "alpha_origin": "chroma-derived"
+    },
+    {
+      "id": "03_Icon_Nav_GiftPouch_Default_011",
+      "category": "Icon_Nav",
+      "semantic_name": "GiftPouch",
+      "state": "Default",
+      "source_index": 11,
+      "category_index": 11,
+      "source_bbox": [
+        1110,
+        1062,
+        1460,
+        1446
+      ],
+      "output": "final/Icon_Nav/03_Icon_Nav_GiftPouch_Default_011.png",
+      "width": 128,
+      "height": 128,
+      "component_count": 4,
+      "merged_component_count": 4,
+      "detached_component_count": 0,
+      "accepted_detached_count": 0,
+      "major_detached_count": 0,
+      "foreground_pixels": 93721,
+      "qa": "pass",
+      "normalization": {
+        "source_trim_bbox": [
+          0,
+          0,
+          350,
+          384
+        ],
+        "source_trim_size": [
+          350,
+          384
+        ],
+        "target_size": [
+          128,
+          128
+        ],
+        "content_size": [
+          98,
+          108
+        ],
+        "content_position": [
+          15,
+          10
+        ],
+        "scale": 0.28125,
+        "padding": 10,
+        "alignment": "center",
+        "upscaled": false
+      },
+      "source_sheet": "generated/icon-nav-sheet-01.png",
+      "padding": 10,
+      "alignment": "center",
+      "pivot": [
+        0.5,
+        0.5
+      ],
+      "chroma_key": "#FF00FF",
+      "transparency_mode": "chroma-key",
+      "alpha_origin": "chroma-derived"
+    },
+    {
+      "id": "03_Icon_Nav_ActivityShield_Default_012",
+      "category": "Icon_Nav",
+      "semantic_name": "ActivityShield",
+      "state": "Default",
+      "source_index": 12,
+      "category_index": 12,
+      "source_bbox": [
+        1550,
+        1077,
+        2000,
+        1459
+      ],
+      "output": "final/Icon_Nav/03_Icon_Nav_ActivityShield_Default_012.png",
+      "width": 128,
+      "height": 128,
+      "component_count": 4,
+      "merged_component_count": 4,
+      "detached_component_count": 0,
+      "accepted_detached_count": 0,
+      "major_detached_count": 0,
+      "foreground_pixels": 88041,
+      "qa": "pass",
+      "normalization": {
+        "source_trim_bbox": [
+          0,
+          0,
+          450,
+          382
+        ],
+        "source_trim_size": [
+          450,
+          382
+        ],
+        "target_size": [
+          128,
+          128
+        ],
+        "content_size": [
+          108,
+          92
+        ],
+        "content_position": [
+          10,
+          18
+        ],
+        "scale": 0.24,
+        "padding": 10,
+        "alignment": "center",
+        "upscaled": false
+      },
+      "source_sheet": "generated/icon-nav-sheet-01.png",
+      "padding": 10,
+      "alignment": "center",
+      "pivot": [
+        0.5,
+        0.5
+      ],
+      "chroma_key": "#FF00FF",
+      "transparency_mode": "chroma-key",
+      "alpha_origin": "chroma-derived"
+    },
+    {
+      "id": "03_Icon_Nav_ActivityEmblem_Default_013",
+      "category": "Icon_Nav",
+      "semantic_name": "ActivityEmblem",
+      "state": "Default",
+      "source_index": 13,
+      "category_index": 13,
+      "source_bbox": [
+        89,
+        1533,
+        491,
+        1949
+      ],
+      "output": "final/Icon_Nav/03_Icon_Nav_ActivityEmblem_Default_013.png",
+      "width": 128,
+      "height": 128,
+      "component_count": 5,
+      "merged_component_count": 5,
+      "detached_component_count": 0,
+      "accepted_detached_count": 0,
+      "major_detached_count": 0,
+      "foreground_pixels": 108599,
+      "qa": "pass",
+      "normalization": {
+        "source_trim_bbox": [
+          0,
+          0,
+          402,
+          416
+        ],
+        "source_trim_size": [
+          402,
+          416
+        ],
+        "target_size": [
+          128,
+          128
+        ],
+        "content_size": [
+          104,
+          108
+        ],
+        "content_position": [
+          12,
+          10
+        ],
+        "scale": 0.25961538461538464,
+        "padding": 10,
+        "alignment": "center",
+        "upscaled": false
+      },
+      "source_sheet": "generated/icon-nav-sheet-01.png",
+      "padding": 10,
+      "alignment": "center",
+      "pivot": [
+        0.5,
+        0.5
+      ],
+      "chroma_key": "#FF00FF",
+      "transparency_mode": "chroma-key",
+      "alpha_origin": "chroma-derived"
+    },
+    {
+      "id": "03_Icon_Nav_ActivityTwinBlades_Default_014",
+      "category": "Icon_Nav",
+      "semantic_name": "ActivityTwinBlades",
+      "state": "Default",
+      "source_index": 14,
+      "category_index": 14,
+      "source_bbox": [
+        590,
+        1531,
+        956,
+        1958
+      ],
+      "output": "final/Icon_Nav/03_Icon_Nav_ActivityTwinBlades_Default_014.png",
+      "width": 128,
+      "height": 128,
+      "component_count": 5,
+      "merged_component_count": 5,
+      "detached_component_count": 0,
+      "accepted_detached_count": 0,
+      "major_detached_count": 0,
+      "foreground_pixels": 70306,
+      "qa": "pass",
+      "normalization": {
+        "source_trim_bbox": [
+          0,
+          0,
+          366,
+          427
+        ],
+        "source_trim_size": [
+          366,
+          427
+        ],
+        "target_size": [
+          128,
+          128
+        ],
+        "content_size": [
+          93,
+          108
+        ],
+        "content_position": [
+          17,
+          10
+        ],
+        "scale": 0.2529274004683841,
+        "padding": 10,
+        "alignment": "center",
+        "upscaled": false
+      },
+      "source_sheet": "generated/icon-nav-sheet-01.png",
+      "padding": 10,
+      "alignment": "center",
+      "pivot": [
+        0.5,
+        0.5
+      ],
+      "chroma_key": "#FF00FF",
+      "transparency_mode": "chroma-key",
+      "alpha_origin": "chroma-derived"
+    },
+    {
+      "id": "03_Icon_Nav_ActivityCrossedSwords_Default_015",
+      "category": "Icon_Nav",
+      "semantic_name": "ActivityCrossedSwords",
+      "state": "Default",
+      "source_index": 15,
+      "category_index": 15,
+      "source_bbox": [
+        1077,
+        1552,
+        1451,
+        1951
+      ],
+      "output": "final/Icon_Nav/03_Icon_Nav_ActivityCrossedSwords_Default_015.png",
+      "width": 128,
+      "height": 128,
+      "component_count": 6,
+      "merged_component_count": 6,
+      "detached_component_count": 0,
+      "accepted_detached_count": 0,
+      "major_detached_count": 0,
+      "foreground_pixels": 71556,
+      "qa": "pass",
+      "normalization": {
+        "source_trim_bbox": [
+          0,
+          0,
+          374,
+          399
+        ],
+        "source_trim_size": [
+          374,
+          399
+        ],
+        "target_size": [
+          128,
+          128
+        ],
+        "content_size": [
+          101,
+          108
+        ],
+        "content_position": [
+          13,
+          10
+        ],
+        "scale": 0.2706766917293233,
+        "padding": 10,
+        "alignment": "center",
+        "upscaled": false
+      },
+      "source_sheet": "generated/icon-nav-sheet-01.png",
+      "padding": 10,
+      "alignment": "center",
+      "pivot": [
+        0.5,
+        0.5
+      ],
+      "chroma_key": "#FF00FF",
+      "transparency_mode": "chroma-key",
+      "alpha_origin": "chroma-derived"
+    },
+    {
+      "id": "03_Icon_Nav_ActivityGate_Default_016",
+      "category": "Icon_Nav",
+      "semantic_name": "ActivityGate",
+      "state": "Default",
+      "source_index": 16,
+      "category_index": 16,
+      "source_bbox": [
+        1578,
+        1501,
+        1996,
+        1959
+      ],
+      "output": "final/Icon_Nav/03_Icon_Nav_ActivityGate_Default_016.png",
+      "width": 128,
+      "height": 128,
+      "component_count": 9,
+      "merged_component_count": 9,
+      "detached_component_count": 0,
+      "accepted_detached_count": 0,
+      "major_detached_count": 0,
+      "foreground_pixels": 144881,
+      "qa": "pass",
+      "normalization": {
+        "source_trim_bbox": [
+          0,
+          0,
+          418,
+          458
+        ],
+        "source_trim_size": [
+          418,
+          458
+        ],
+        "target_size": [
+          128,
+          128
+        ],
+        "content_size": [
+          99,
+          108
+        ],
+        "content_position": [
+          14,
+          10
+        ],
+        "scale": 0.23580786026200873,
+        "padding": 10,
+        "alignment": "center",
+        "upscaled": false
+      },
+      "source_sheet": "generated/icon-nav-sheet-01.png",
+      "padding": 10,
+      "alignment": "center",
+      "pivot": [
+        0.5,
+        0.5
+      ],
+      "chroma_key": "#FF00FF",
+      "transparency_mode": "chroma-key",
+      "alpha_origin": "chroma-derived"
+    },
+    {
+      "id": "03_Icon_Nav_ActivityDrum_Default_017",
+      "category": "Icon_Nav",
+      "semantic_name": "ActivityDrum",
+      "state": "Default",
+      "source_index": 1,
+      "category_index": 17,
+      "source_bbox": [
+        73,
+        86,
+        472,
+        494
+      ],
+      "output": "final/Icon_Nav/03_Icon_Nav_ActivityDrum_Default_017.png",
+      "width": 128,
+      "height": 128,
+      "component_count": 9,
+      "merged_component_count": 9,
+      "detached_component_count": 0,
+      "accepted_detached_count": 0,
+      "major_detached_count": 0,
+      "foreground_pixels": 119648,
+      "qa": "pass",
+      "normalization": {
+        "source_trim_bbox": [
+          0,
+          0,
+          399,
+          408
+        ],
+        "source_trim_size": [
+          399,
+          408
+        ],
+        "target_size": [
+          128,
+          128
+        ],
+        "content_size": [
+          106,
+          108
+        ],
+        "content_position": [
+          11,
+          10
+        ],
+        "scale": 0.2647058823529412,
+        "padding": 10,
+        "alignment": "center",
+        "upscaled": false
+      },
+      "source_sheet": "generated/icon-nav-sheet-02.png",
+      "padding": 10,
+      "alignment": "center",
+      "pivot": [
+        0.5,
+        0.5
+      ],
+      "chroma_key": "#FF00FF",
+      "transparency_mode": "chroma-key",
+      "alpha_origin": "chroma-derived"
+    },
+    {
+      "id": "03_Icon_Nav_ActivityAchievement_Default_018",
+      "category": "Icon_Nav",
+      "semantic_name": "ActivityAchievement",
+      "state": "Default",
+      "source_index": 2,
+      "category_index": 18,
+      "source_bbox": [
+        585,
+        69,
+        959,
+        499
+      ],
+      "output": "final/Icon_Nav/03_Icon_Nav_ActivityAchievement_Default_018.png",
+      "width": 128,
+      "height": 128,
+      "component_count": 3,
+      "merged_component_count": 3,
+      "detached_component_count": 0,
+      "accepted_detached_count": 0,
+      "major_detached_count": 0,
+      "foreground_pixels": 99249,
+      "qa": "pass",
+      "normalization": {
+        "source_trim_bbox": [
+          0,
+          0,
+          374,
+          430
+        ],
+        "source_trim_size": [
+          374,
+          430
+        ],
+        "target_size": [
+          128,
+          128
+        ],
+        "content_size": [
+          94,
+          108
+        ],
+        "content_position": [
+          17,
+          10
+        ],
+        "scale": 0.25116279069767444,
+        "padding": 10,
+        "alignment": "center",
+        "upscaled": false
+      },
+      "source_sheet": "generated/icon-nav-sheet-02.png",
+      "padding": 10,
+      "alignment": "center",
+      "pivot": [
+        0.5,
+        0.5
+      ],
+      "chroma_key": "#FF00FF",
+      "transparency_mode": "chroma-key",
+      "alpha_origin": "chroma-derived"
+    },
+    {
+      "id": "03_Icon_Nav_ActivityAlliance_Default_019",
+      "category": "Icon_Nav",
+      "semantic_name": "ActivityAlliance",
+      "state": "Default",
+      "source_index": 3,
+      "category_index": 19,
+      "source_bbox": [
+        1062,
+        69,
+        1468,
+        510
+      ],
+      "output": "final/Icon_Nav/03_Icon_Nav_ActivityAlliance_Default_019.png",
+      "width": 128,
+      "height": 128,
+      "component_count": 2,
+      "merged_component_count": 2,
+      "detached_component_count": 0,
+      "accepted_detached_count": 0,
+      "major_detached_count": 0,
+      "foreground_pixels": 114406,
+      "qa": "pass",
+      "normalization": {
+        "source_trim_bbox": [
+          0,
+          0,
+          406,
+          441
+        ],
+        "source_trim_size": [
+          406,
+          441
+        ],
+        "target_size": [
+          128,
+          128
+        ],
+        "content_size": [
+          99,
+          108
+        ],
+        "content_position": [
+          14,
+          10
+        ],
+        "scale": 0.24489795918367346,
+        "padding": 10,
+        "alignment": "center",
+        "upscaled": false
+      },
+      "source_sheet": "generated/icon-nav-sheet-02.png",
+      "padding": 10,
+      "alignment": "center",
+      "pivot": [
+        0.5,
+        0.5
+      ],
+      "chroma_key": "#FF00FF",
+      "transparency_mode": "chroma-key",
+      "alpha_origin": "chroma-derived"
+    },
+    {
+      "id": "03_Icon_Nav_ActivityBanner_Default_020",
+      "category": "Icon_Nav",
+      "semantic_name": "ActivityBanner",
+      "state": "Default",
+      "source_index": 4,
+      "category_index": 20,
+      "source_bbox": [
+        1567,
+        33,
+        1984,
+        527
+      ],
+      "output": "final/Icon_Nav/03_Icon_Nav_ActivityBanner_Default_020.png",
+      "width": 128,
+      "height": 128,
+      "component_count": 8,
+      "merged_component_count": 8,
+      "detached_component_count": 0,
+      "accepted_detached_count": 0,
+      "major_detached_count": 0,
+      "foreground_pixels": 100113,
+      "qa": "pass",
+      "normalization": {
+        "source_trim_bbox": [
+          0,
+          0,
+          417,
+          494
+        ],
+        "source_trim_size": [
+          417,
+          494
+        ],
+        "target_size": [
+          128,
+          128
+        ],
+        "content_size": [
+          91,
+          108
+        ],
+        "content_position": [
+          18,
+          10
+        ],
+        "scale": 0.21862348178137653,
+        "padding": 10,
+        "alignment": "center",
+        "upscaled": false
+      },
+      "source_sheet": "generated/icon-nav-sheet-02.png",
+      "padding": 10,
+      "alignment": "center",
+      "pivot": [
+        0.5,
+        0.5
+      ],
+      "chroma_key": "#FF00FF",
+      "transparency_mode": "chroma-key",
+      "alpha_origin": "chroma-derived"
+    },
+    {
+      "id": "03_Icon_Nav_ActivityRanking_Default_021",
+      "category": "Icon_Nav",
+      "semantic_name": "ActivityRanking",
+      "state": "Default",
+      "source_index": 5,
+      "category_index": 21,
+      "source_bbox": [
+        22,
+        731,
+        478,
+        1011
+      ],
+      "output": "final/Icon_Nav/03_Icon_Nav_ActivityRanking_Default_021.png",
+      "width": 128,
+      "height": 128,
+      "component_count": 5,
+      "merged_component_count": 5,
+      "detached_component_count": 0,
+      "accepted_detached_count": 0,
+      "major_detached_count": 0,
+      "foreground_pixels": 86976,
+      "qa": "pass",
+      "normalization": {
+        "source_trim_bbox": [
+          0,
+          0,
+          456,
+          280
+        ],
+        "source_trim_size": [
+          456,
+          280
+        ],
+        "target_size": [
+          128,
+          128
+        ],
+        "content_size": [
+          108,
+          66
+        ],
+        "content_position": [
+          10,
+          31
+        ],
+        "scale": 0.23684210526315788,
+        "padding": 10,
+        "alignment": "center",
+        "upscaled": false
+      },
+      "source_sheet": "generated/icon-nav-sheet-02.png",
+      "padding": 10,
+      "alignment": "center",
+      "pivot": [
+        0.5,
+        0.5
+      ],
+      "chroma_key": "#FF00FF",
+      "transparency_mode": "chroma-key",
+      "alpha_origin": "chroma-derived"
+    },
+    {
+      "id": "03_Icon_Nav_FunctionPavilion_Default_022",
+      "category": "Icon_Nav",
+      "semantic_name": "FunctionPavilion",
+      "state": "Default",
+      "source_index": 6,
+      "category_index": 22,
+      "source_bbox": [
+        565,
+        554,
+        983,
+        1019
+      ],
+      "output": "final/Icon_Nav/03_Icon_Nav_FunctionPavilion_Default_022.png",
+      "width": 128,
+      "height": 128,
+      "component_count": 12,
+      "merged_component_count": 12,
+      "detached_component_count": 0,
+      "accepted_detached_count": 0,
+      "major_detached_count": 0,
+      "foreground_pixels": 115389,
+      "qa": "pass",
+      "normalization": {
+        "source_trim_bbox": [
+          0,
+          0,
+          418,
+          465
+        ],
+        "source_trim_size": [
+          418,
+          465
+        ],
+        "target_size": [
+          128,
+          128
+        ],
+        "content_size": [
+          97,
+          108
+        ],
+        "content_position": [
+          15,
+          10
+        ],
+        "scale": 0.23225806451612904,
+        "padding": 10,
+        "alignment": "center",
+        "upscaled": false
+      },
+      "source_sheet": "generated/icon-nav-sheet-02.png",
+      "padding": 10,
+      "alignment": "center",
+      "pivot": [
+        0.5,
+        0.5
+      ],
+      "chroma_key": "#FF00FF",
+      "transparency_mode": "chroma-key",
+      "alpha_origin": "chroma-derived"
+    },
+    {
+      "id": "03_Icon_Nav_FunctionTreasure_Default_023",
+      "category": "Icon_Nav",
+      "semantic_name": "FunctionTreasure",
+      "state": "Default",
+      "source_index": 7,
+      "category_index": 23,
+      "source_bbox": [
+        1062,
+        557,
+        1505,
+        1014
+      ],
+      "output": "final/Icon_Nav/03_Icon_Nav_FunctionTreasure_Default_023.png",
+      "width": 128,
+      "height": 128,
+      "component_count": 6,
+      "merged_component_count": 6,
+      "detached_component_count": 0,
+      "accepted_detached_count": 0,
+      "major_detached_count": 0,
+      "foreground_pixels": 138000,
+      "qa": "pass",
+      "normalization": {
+        "source_trim_bbox": [
+          0,
+          0,
+          443,
+          457
+        ],
+        "source_trim_size": [
+          443,
+          457
+        ],
+        "target_size": [
+          128,
+          128
+        ],
+        "content_size": [
+          105,
+          108
+        ],
+        "content_position": [
+          11,
+          10
+        ],
+        "scale": 0.2363238512035011,
+        "padding": 10,
+        "alignment": "center",
+        "upscaled": false
+      },
+      "source_sheet": "generated/icon-nav-sheet-02.png",
+      "padding": 10,
+      "alignment": "center",
+      "pivot": [
+        0.5,
+        0.5
+      ],
+      "chroma_key": "#FF00FF",
+      "transparency_mode": "chroma-key",
+      "alpha_origin": "chroma-derived"
+    },
+    {
+      "id": "03_Icon_Nav_FunctionTalisman_Default_024",
+      "category": "Icon_Nav",
+      "semantic_name": "FunctionTalisman",
+      "state": "Default",
+      "source_index": 8,
+      "category_index": 24,
+      "source_bbox": [
+        1563,
+        580,
+        1970,
+        1016
+      ],
+      "output": "final/Icon_Nav/03_Icon_Nav_FunctionTalisman_Default_024.png",
+      "width": 128,
+      "height": 128,
+      "component_count": 11,
+      "merged_component_count": 11,
+      "detached_component_count": 0,
+      "accepted_detached_count": 0,
+      "major_detached_count": 0,
+      "foreground_pixels": 119311,
+      "qa": "pass",
+      "normalization": {
+        "source_trim_bbox": [
+          0,
+          0,
+          407,
+          436
+        ],
+        "source_trim_size": [
+          407,
+          436
+        ],
+        "target_size": [
+          128,
+          128
+        ],
+        "content_size": [
+          101,
+          108
+        ],
+        "content_position": [
+          13,
+          10
+        ],
+        "scale": 0.24770642201834864,
+        "padding": 10,
+        "alignment": "center",
+        "upscaled": false
+      },
+      "source_sheet": "generated/icon-nav-sheet-02.png",
+      "padding": 10,
+      "alignment": "center",
+      "pivot": [
+        0.5,
+        0.5
+      ],
+      "chroma_key": "#FF00FF",
+      "transparency_mode": "chroma-key",
+      "alpha_origin": "chroma-derived"
+    },
+    {
+      "id": "03_Icon_Nav_FunctionShop_Default_025",
+      "category": "Icon_Nav",
+      "semantic_name": "FunctionShop",
+      "state": "Default",
+      "source_index": 9,
+      "category_index": 25,
+      "source_bbox": [
+        38,
+        1083,
+        495,
+        1509
+      ],
+      "output": "final/Icon_Nav/03_Icon_Nav_FunctionShop_Default_025.png",
+      "width": 128,
+      "height": 128,
+      "component_count": 8,
+      "merged_component_count": 8,
+      "detached_component_count": 0,
+      "accepted_detached_count": 0,
+      "major_detached_count": 0,
+      "foreground_pixels": 122436,
+      "qa": "pass",
+      "normalization": {
+        "source_trim_bbox": [
+          0,
+          0,
+          457,
+          426
+        ],
+        "source_trim_size": [
+          457,
+          426
+        ],
+        "target_size": [
+          128,
+          128
+        ],
+        "content_size": [
+          108,
+          101
+        ],
+        "content_position": [
+          10,
+          13
+        ],
+        "scale": 0.2363238512035011,
+        "padding": 10,
+        "alignment": "center",
+        "upscaled": false
+      },
+      "source_sheet": "generated/icon-nav-sheet-02.png",
+      "padding": 10,
+      "alignment": "center",
+      "pivot": [
+        0.5,
+        0.5
+      ],
+      "chroma_key": "#FF00FF",
+      "transparency_mode": "chroma-key",
+      "alpha_origin": "chroma-derived"
+    },
+    {
+      "id": "03_Icon_Nav_FunctionScroll_Default_026",
+      "category": "Icon_Nav",
+      "semantic_name": "FunctionScroll",
+      "state": "Default",
+      "source_index": 10,
+      "category_index": 26,
+      "source_bbox": [
+        611,
+        1102,
+        967,
+        1490
+      ],
+      "output": "final/Icon_Nav/03_Icon_Nav_FunctionScroll_Default_026.png",
+      "width": 128,
+      "height": 128,
+      "component_count": 10,
+      "merged_component_count": 10,
+      "detached_component_count": 0,
+      "accepted_detached_count": 0,
+      "major_detached_count": 0,
+      "foreground_pixels": 103138,
+      "qa": "pass",
+      "normalization": {
+        "source_trim_bbox": [
+          0,
+          0,
+          356,
+          388
+        ],
+        "source_trim_size": [
+          356,
+          388
+        ],
+        "target_size": [
+          128,
+          128
+        ],
+        "content_size": [
+          99,
+          108
+        ],
+        "content_position": [
+          14,
+          10
+        ],
+        "scale": 0.27835051546391754,
+        "padding": 10,
+        "alignment": "center",
+        "upscaled": false
+      },
+      "source_sheet": "generated/icon-nav-sheet-02.png",
+      "padding": 10,
+      "alignment": "center",
+      "pivot": [
+        0.5,
+        0.5
+      ],
+      "chroma_key": "#FF00FF",
+      "transparency_mode": "chroma-key",
+      "alpha_origin": "chroma-derived"
+    },
+    {
+      "id": "03_Icon_Nav_FunctionWealth_Default_027",
+      "category": "Icon_Nav",
+      "semantic_name": "FunctionWealth",
+      "state": "Default",
+      "source_index": 11,
+      "category_index": 27,
+      "source_bbox": [
+        1057,
+        1066,
+        1466,
+        1517
+      ],
+      "output": "final/Icon_Nav/03_Icon_Nav_FunctionWealth_Default_027.png",
+      "width": 128,
+      "height": 128,
+      "component_count": 5,
+      "merged_component_count": 5,
+      "detached_component_count": 0,
+      "accepted_detached_count": 0,
+      "major_detached_count": 0,
+      "foreground_pixels": 118985,
+      "qa": "pass",
+      "normalization": {
+        "source_trim_bbox": [
+          0,
+          0,
+          409,
+          451
+        ],
+        "source_trim_size": [
+          409,
+          451
+        ],
+        "target_size": [
+          128,
+          128
+        ],
+        "content_size": [
+          98,
+          108
+        ],
+        "content_position": [
+          15,
+          10
+        ],
+        "scale": 0.2394678492239468,
+        "padding": 10,
+        "alignment": "center",
+        "upscaled": false
+      },
+      "source_sheet": "generated/icon-nav-sheet-02.png",
+      "padding": 10,
+      "alignment": "center",
+      "pivot": [
+        0.5,
+        0.5
+      ],
+      "chroma_key": "#FF00FF",
+      "transparency_mode": "chroma-key",
+      "alpha_origin": "chroma-derived"
+    },
+    {
+      "id": "03_Icon_Nav_FunctionCompanion_Default_028",
+      "category": "Icon_Nav",
+      "semantic_name": "FunctionCompanion",
+      "state": "Default",
+      "source_index": 12,
+      "category_index": 28,
+      "source_bbox": [
+        1547,
+        1066,
+        2009,
+        1508
+      ],
+      "output": "final/Icon_Nav/03_Icon_Nav_FunctionCompanion_Default_028.png",
+      "width": 128,
+      "height": 128,
+      "component_count": 8,
+      "merged_component_count": 8,
+      "detached_component_count": 0,
+      "accepted_detached_count": 0,
+      "major_detached_count": 0,
+      "foreground_pixels": 142291,
+      "qa": "pass",
+      "normalization": {
+        "source_trim_bbox": [
+          0,
+          0,
+          462,
+          442
+        ],
+        "source_trim_size": [
+          462,
+          442
+        ],
+        "target_size": [
+          128,
+          128
+        ],
+        "content_size": [
+          108,
+          103
+        ],
+        "content_position": [
+          10,
+          12
+        ],
+        "scale": 0.23376623376623376,
+        "padding": 10,
+        "alignment": "center",
+        "upscaled": false
+      },
+      "source_sheet": "generated/icon-nav-sheet-02.png",
+      "padding": 10,
+      "alignment": "center",
+      "pivot": [
+        0.5,
+        0.5
+      ],
+      "chroma_key": "#FF00FF",
+      "transparency_mode": "chroma-key",
+      "alpha_origin": "chroma-derived"
+    },
+    {
+      "id": "03_Icon_Nav_FunctionCharacter_Default_029",
+      "category": "Icon_Nav",
+      "semantic_name": "FunctionCharacter",
+      "state": "Default",
+      "source_index": 13,
+      "category_index": 29,
+      "source_bbox": [
+        85,
+        1551,
+        473,
+        2004
+      ],
+      "output": "final/Icon_Nav/03_Icon_Nav_FunctionCharacter_Default_029.png",
+      "width": 128,
+      "height": 128,
+      "component_count": 6,
+      "merged_component_count": 6,
+      "detached_component_count": 0,
+      "accepted_detached_count": 0,
+      "major_detached_count": 0,
+      "foreground_pixels": 101153,
+      "qa": "pass",
+      "normalization": {
+        "source_trim_bbox": [
+          0,
+          0,
+          388,
+          453
+        ],
+        "source_trim_size": [
+          388,
+          453
+        ],
+        "target_size": [
+          128,
+          128
+        ],
+        "content_size": [
+          93,
+          108
+        ],
+        "content_position": [
+          17,
+          10
+        ],
+        "scale": 0.23841059602649006,
+        "padding": 10,
+        "alignment": "center",
+        "upscaled": false
+      },
+      "source_sheet": "generated/icon-nav-sheet-02.png",
+      "padding": 10,
+      "alignment": "center",
+      "pivot": [
+        0.5,
+        0.5
+      ],
+      "chroma_key": "#FF00FF",
+      "transparency_mode": "chroma-key",
+      "alpha_origin": "chroma-derived"
+    },
+    {
+      "id": "04_Icon_Status_CurrencyJade_Default_001",
+      "category": "Icon_Status",
+      "semantic_name": "CurrencyJade",
+      "state": "Default",
+      "source_index": 1,
+      "category_index": 1,
+      "source_bbox": [
+        88,
+        441,
+        468,
+        861
+      ],
+      "output": "final/Icon_Status/04_Icon_Status_CurrencyJade_Default_001.png",
+      "width": 128,
+      "height": 128,
+      "component_count": 2,
+      "merged_component_count": 2,
+      "detached_component_count": 0,
+      "accepted_detached_count": 0,
+      "major_detached_count": 0,
+      "foreground_pixels": 105099,
+      "qa": "pass",
+      "normalization": {
+        "source_trim_bbox": [
+          0,
+          0,
+          380,
+          420
+        ],
+        "source_trim_size": [
+          380,
+          420
+        ],
+        "target_size": [
+          128,
+          128
+        ],
+        "content_size": [
+          98,
+          108
+        ],
+        "content_position": [
+          15,
+          10
+        ],
+        "scale": 0.2571428571428571,
+        "padding": 10,
+        "alignment": "center",
+        "upscaled": false
+      },
+      "source_sheet": "generated/icon-status-sheet-01.png",
+      "padding": 10,
+      "alignment": "center",
+      "pivot": [
+        0.5,
+        0.5
+      ],
+      "chroma_key": "#FF00FF",
+      "transparency_mode": "chroma-key",
+      "alpha_origin": "chroma-derived"
+    },
+    {
+      "id": "04_Icon_Status_CurrencyEssence_Default_002",
+      "category": "Icon_Status",
+      "semantic_name": "CurrencyEssence",
+      "state": "Default",
+      "source_index": 2,
+      "category_index": 2,
+      "source_bbox": [
+        586,
+        431,
+        975,
+        874
+      ],
+      "output": "final/Icon_Status/04_Icon_Status_CurrencyEssence_Default_002.png",
+      "width": 128,
+      "height": 128,
+      "component_count": 2,
+      "merged_component_count": 2,
+      "detached_component_count": 0,
+      "accepted_detached_count": 0,
+      "major_detached_count": 0,
+      "foreground_pixels": 111396,
+      "qa": "pass",
+      "normalization": {
+        "source_trim_bbox": [
+          0,
+          0,
+          389,
+          443
+        ],
+        "source_trim_size": [
+          389,
+          443
+        ],
+        "target_size": [
+          128,
+          128
+        ],
+        "content_size": [
+          95,
+          108
+        ],
+        "content_position": [
+          16,
+          10
+        ],
+        "scale": 0.24379232505643342,
+        "padding": 10,
+        "alignment": "center",
+        "upscaled": false
+      },
+      "source_sheet": "generated/icon-status-sheet-01.png",
+      "padding": 10,
+      "alignment": "center",
+      "pivot": [
+        0.5,
+        0.5
+      ],
+      "chroma_key": "#FF00FF",
+      "transparency_mode": "chroma-key",
+      "alpha_origin": "chroma-derived"
+    },
+    {
+      "id": "04_Icon_Status_CurrencyVoucher_Default_003",
+      "category": "Icon_Status",
+      "semantic_name": "CurrencyVoucher",
+      "state": "Default",
+      "source_index": 3,
+      "category_index": 3,
+      "source_bbox": [
+        1102,
+        440,
+        1471,
+        855
+      ],
+      "output": "final/Icon_Status/04_Icon_Status_CurrencyVoucher_Default_003.png",
+      "width": 128,
+      "height": 128,
+      "component_count": 4,
+      "merged_component_count": 4,
+      "detached_component_count": 0,
+      "accepted_detached_count": 0,
+      "major_detached_count": 0,
+      "foreground_pixels": 95487,
+      "qa": "pass",
+      "normalization": {
+        "source_trim_bbox": [
+          0,
+          0,
+          369,
+          415
+        ],
+        "source_trim_size": [
+          369,
+          415
+        ],
+        "target_size": [
+          128,
+          128
+        ],
+        "content_size": [
+          96,
+          108
+        ],
+        "content_position": [
+          16,
+          10
+        ],
+        "scale": 0.26024096385542167,
+        "padding": 10,
+        "alignment": "center",
+        "upscaled": false
+      },
+      "source_sheet": "generated/icon-status-sheet-01.png",
+      "padding": 10,
+      "alignment": "center",
+      "pivot": [
+        0.5,
+        0.5
+      ],
+      "chroma_key": "#FF00FF",
+      "transparency_mode": "chroma-key",
+      "alpha_origin": "chroma-derived"
+    },
+    {
+      "id": "04_Icon_Status_PlayerLevelBadge_Default_004",
+      "category": "Icon_Status",
+      "semantic_name": "PlayerLevelBadge",
+      "state": "Default",
+      "source_index": 4,
+      "category_index": 4,
+      "source_bbox": [
+        1609,
+        445,
+        1972,
+        859
+      ],
+      "output": "final/Icon_Status/04_Icon_Status_PlayerLevelBadge_Default_004.png",
+      "width": 128,
+      "height": 128,
+      "component_count": 1,
+      "merged_component_count": 1,
+      "detached_component_count": 0,
+      "accepted_detached_count": 0,
+      "major_detached_count": 0,
+      "foreground_pixels": 89743,
+      "qa": "pass",
+      "normalization": {
+        "source_trim_bbox": [
+          0,
+          0,
+          363,
+          414
+        ],
+        "source_trim_size": [
+          363,
+          414
+        ],
+        "target_size": [
+          128,
+          128
+        ],
+        "content_size": [
+          95,
+          108
+        ],
+        "content_position": [
+          16,
+          10
+        ],
+        "scale": 0.2608695652173913,
+        "padding": 10,
+        "alignment": "center",
+        "upscaled": false
+      },
+      "source_sheet": "generated/icon-status-sheet-01.png",
+      "padding": 10,
+      "alignment": "center",
+      "pivot": [
+        0.5,
+        0.5
+      ],
+      "chroma_key": "#FF00FF",
+      "transparency_mode": "chroma-key",
+      "alpha_origin": "chroma-derived"
+    },
+    {
+      "id": "04_Icon_Status_VipBadge_Default_005",
+      "category": "Icon_Status",
+      "semantic_name": "VipBadge",
+      "state": "Default",
+      "source_index": 5,
+      "category_index": 5,
+      "source_bbox": [
+        95,
+        1215,
+        479,
+        1656
+      ],
+      "output": "final/Icon_Status/04_Icon_Status_VipBadge_Default_005.png",
+      "width": 128,
+      "height": 128,
+      "component_count": 2,
+      "merged_component_count": 2,
+      "detached_component_count": 0,
+      "accepted_detached_count": 0,
+      "major_detached_count": 0,
+      "foreground_pixels": 106416,
+      "qa": "pass",
+      "normalization": {
+        "source_trim_bbox": [
+          0,
+          0,
+          384,
+          441
+        ],
+        "source_trim_size": [
+          384,
+          441
+        ],
+        "target_size": [
+          128,
+          128
+        ],
+        "content_size": [
+          94,
+          108
+        ],
+        "content_position": [
+          17,
+          10
+        ],
+        "scale": 0.24489795918367346,
+        "padding": 10,
+        "alignment": "center",
+        "upscaled": false
+      },
+      "source_sheet": "generated/icon-status-sheet-01.png",
+      "padding": 10,
+      "alignment": "center",
+      "pivot": [
+        0.5,
+        0.5
+      ],
+      "chroma_key": "#FF00FF",
+      "transparency_mode": "chroma-key",
+      "alpha_origin": "chroma-derived"
+    },
+    {
+      "id": "04_Icon_Status_BuffBadge_Default_006",
+      "category": "Icon_Status",
+      "semantic_name": "BuffBadge",
+      "state": "Default",
+      "source_index": 6,
+      "category_index": 6,
+      "source_bbox": [
+        614,
+        1233,
+        948,
+        1660
+      ],
+      "output": "final/Icon_Status/04_Icon_Status_BuffBadge_Default_006.png",
+      "width": 128,
+      "height": 128,
+      "component_count": 1,
+      "merged_component_count": 1,
+      "detached_component_count": 0,
+      "accepted_detached_count": 0,
+      "major_detached_count": 0,
+      "foreground_pixels": 85395,
+      "qa": "pass",
+      "normalization": {
+        "source_trim_bbox": [
+          0,
+          0,
+          334,
+          427
+        ],
+        "source_trim_size": [
+          334,
+          427
+        ],
+        "target_size": [
+          128,
+          128
+        ],
+        "content_size": [
+          84,
+          108
+        ],
+        "content_position": [
+          22,
+          10
+        ],
+        "scale": 0.2529274004683841,
+        "padding": 10,
+        "alignment": "center",
+        "upscaled": false
+      },
+      "source_sheet": "generated/icon-status-sheet-01.png",
+      "padding": 10,
+      "alignment": "center",
+      "pivot": [
+        0.5,
+        0.5
+      ],
+      "chroma_key": "#FF00FF",
+      "transparency_mode": "chroma-key",
+      "alpha_origin": "chroma-derived"
+    },
+    {
+      "id": "04_Icon_Status_QuestCompleted_Default_007",
+      "category": "Icon_Status",
+      "semantic_name": "QuestCompleted",
+      "state": "Default",
+      "source_index": 7,
+      "category_index": 7,
+      "source_bbox": [
+        1093,
+        1248,
+        1479,
+        1663
+      ],
+      "output": "final/Icon_Status/04_Icon_Status_QuestCompleted_Default_007.png",
+      "width": 128,
+      "height": 128,
+      "component_count": 1,
+      "merged_component_count": 1,
+      "detached_component_count": 0,
+      "accepted_detached_count": 0,
+      "major_detached_count": 0,
+      "foreground_pixels": 89611,
+      "qa": "pass",
+      "normalization": {
+        "source_trim_bbox": [
+          0,
+          0,
+          386,
+          415
+        ],
+        "source_trim_size": [
+          386,
+          415
+        ],
+        "target_size": [
+          128,
+          128
+        ],
+        "content_size": [
+          100,
+          108
+        ],
+        "content_position": [
+          14,
+          10
+        ],
+        "scale": 0.26024096385542167,
+        "padding": 10,
+        "alignment": "center",
+        "upscaled": false
+      },
+      "source_sheet": "generated/icon-status-sheet-01.png",
+      "padding": 10,
+      "alignment": "center",
+      "pivot": [
+        0.5,
+        0.5
+      ],
+      "chroma_key": "#FF00FF",
+      "transparency_mode": "chroma-key",
+      "alpha_origin": "chroma-derived"
+    },
+    {
+      "id": "04_Icon_Status_NotificationDot_Default_008",
+      "category": "Icon_Status",
+      "semantic_name": "NotificationDot",
+      "state": "Default",
+      "source_index": 8,
+      "category_index": 8,
+      "source_bbox": [
+        1637,
+        1292,
+        1931,
+        1630
+      ],
+      "output": "final/Icon_Status/04_Icon_Status_NotificationDot_Default_008.png",
+      "width": 128,
+      "height": 128,
+      "component_count": 2,
+      "merged_component_count": 2,
+      "detached_component_count": 0,
+      "accepted_detached_count": 0,
+      "major_detached_count": 0,
+      "foreground_pixels": 66630,
+      "qa": "pass",
+      "normalization": {
+        "source_trim_bbox": [
+          0,
+          0,
+          294,
+          338
+        ],
+        "source_trim_size": [
+          294,
+          338
+        ],
+        "target_size": [
+          128,
+          128
+        ],
+        "content_size": [
+          94,
+          108
+        ],
+        "content_position": [
+          17,
+          10
+        ],
+        "scale": 0.31952662721893493,
+        "padding": 10,
+        "alignment": "center",
+        "upscaled": false
+      },
+      "source_sheet": "generated/icon-status-sheet-01.png",
+      "padding": 10,
+      "alignment": "center",
+      "pivot": [
+        0.5,
+        0.5
+      ],
+      "chroma_key": "#FF00FF",
+      "transparency_mode": "chroma-key",
+      "alpha_origin": "chroma-derived"
+    },
+    {
+      "id": "09_Icon_Effect_SoftBlueGlow_Default_001",
+      "category": "Icon_Effect",
+      "semantic_name": "SoftBlueGlow",
+      "state": "Default",
+      "source_index": 1,
+      "category_index": 1,
+      "source_bbox": [
+        85,
+        77,
+        1022,
+        984
+      ],
+      "output": "final/Icon_Effect/09_Icon_Effect_SoftBlueGlow_Default_001.png",
+      "width": 256,
+      "height": 256,
+      "component_count": 2,
+      "merged_component_count": 2,
+      "detached_component_count": 0,
+      "accepted_detached_count": 0,
+      "major_detached_count": 0,
+      "foreground_pixels": 644441,
+      "qa": "pass",
+      "normalization": {
+        "source_trim_bbox": [
+          0,
+          0,
+          937,
+          907
+        ],
+        "source_trim_size": [
+          937,
+          907
+        ],
+        "target_size": [
+          256,
+          256
+        ],
+        "content_size": [
+          224,
+          217
+        ],
+        "content_position": [
+          16,
+          19
+        ],
+        "scale": 0.2390608324439701,
+        "padding": 16,
+        "alignment": "center",
+        "upscaled": false
+      },
+      "source_sheet": "generated/icon-effect-sheet-01.png",
+      "padding": 16,
+      "alignment": "center",
+      "pivot": [
+        0.5,
+        0.5
+      ],
+      "chroma_key": null,
+      "transparency_mode": "model-matte-derived",
+      "alpha_origin": "gpt-image-2-matte-derived",
+      "source_sha256": "ae289de060ce13cb1df459a8ad4b336b18ed339a48465baf76acf277a60d7e1a",
+      "alpha_matte": "generated/icon-effect-sheet-01-alpha-matte.png",
+      "alpha_matte_sha256": "f908ae24df947b94988dcd8721c1862f9a52b58ca98fa571b7de55fab0b0d40c"
+    },
+    {
+      "id": "09_Icon_Effect_GoldSelectedGlow_Default_002",
+      "category": "Icon_Effect",
+      "semantic_name": "GoldSelectedGlow",
+      "state": "Default",
+      "source_index": 2,
+      "category_index": 2,
+      "source_bbox": [
+        1106,
+        138,
+        1942,
+        936
+      ],
+      "output": "final/Icon_Effect/09_Icon_Effect_GoldSelectedGlow_Default_002.png",
+      "width": 256,
+      "height": 256,
+      "component_count": 5,
+      "merged_component_count": 5,
+      "detached_component_count": 0,
+      "accepted_detached_count": 0,
+      "major_detached_count": 0,
+      "foreground_pixels": 461213,
+      "qa": "pass",
+      "normalization": {
+        "source_trim_bbox": [
+          0,
+          0,
+          836,
+          798
+        ],
+        "source_trim_size": [
+          836,
+          798
+        ],
+        "target_size": [
+          256,
+          256
+        ],
+        "content_size": [
+          224,
+          214
+        ],
+        "content_position": [
+          16,
+          21
+        ],
+        "scale": 0.2679425837320574,
+        "padding": 16,
+        "alignment": "center",
+        "upscaled": false
+      },
+      "source_sheet": "generated/icon-effect-sheet-01.png",
+      "padding": 16,
+      "alignment": "center",
+      "pivot": [
+        0.5,
+        0.5
+      ],
+      "chroma_key": null,
+      "transparency_mode": "model-matte-derived",
+      "alpha_origin": "gpt-image-2-matte-derived",
+      "source_sha256": "ae289de060ce13cb1df459a8ad4b336b18ed339a48465baf76acf277a60d7e1a",
+      "alpha_matte": "generated/icon-effect-sheet-01-alpha-matte.png",
+      "alpha_matte_sha256": "f908ae24df947b94988dcd8721c1862f9a52b58ca98fa571b7de55fab0b0d40c"
+    },
+    {
+      "id": "09_Icon_Effect_StarSparkle_Default_003",
+      "category": "Icon_Effect",
+      "semantic_name": "StarSparkle",
+      "state": "Default",
+      "source_index": 3,
+      "category_index": 3,
+      "source_bbox": [
+        178,
+        1123,
+        923,
+        1853
+      ],
+      "output": "final/Icon_Effect/09_Icon_Effect_StarSparkle_Default_003.png",
+      "width": 256,
+      "height": 256,
+      "component_count": 27,
+      "merged_component_count": 27,
+      "detached_component_count": 0,
+      "accepted_detached_count": 0,
+      "major_detached_count": 0,
+      "foreground_pixels": 259015,
+      "qa": "pass",
+      "normalization": {
+        "source_trim_bbox": [
+          0,
+          0,
+          745,
+          730
+        ],
+        "source_trim_size": [
+          745,
+          730
+        ],
+        "target_size": [
+          256,
+          256
+        ],
+        "content_size": [
+          224,
+          219
+        ],
+        "content_position": [
+          16,
+          18
+        ],
+        "scale": 0.3006711409395973,
+        "padding": 16,
+        "alignment": "center",
+        "upscaled": false
+      },
+      "source_sheet": "generated/icon-effect-sheet-01.png",
+      "padding": 16,
+      "alignment": "center",
+      "pivot": [
+        0.5,
+        0.5
+      ],
+      "chroma_key": null,
+      "transparency_mode": "model-matte-derived",
+      "alpha_origin": "gpt-image-2-matte-derived",
+      "source_sha256": "ae289de060ce13cb1df459a8ad4b336b18ed339a48465baf76acf277a60d7e1a",
+      "alpha_matte": "generated/icon-effect-sheet-01-alpha-matte.png",
+      "alpha_matte_sha256": "f908ae24df947b94988dcd8721c1862f9a52b58ca98fa571b7de55fab0b0d40c"
+    },
+    {
+      "id": "09_Icon_Effect_NotificationPulse_Default_004",
+      "category": "Icon_Effect",
+      "semantic_name": "NotificationPulse",
+      "state": "Default",
+      "source_index": 4,
+      "category_index": 4,
+      "source_bbox": [
+        1164,
+        1146,
+        1891,
+        1856
+      ],
+      "output": "final/Icon_Effect/09_Icon_Effect_NotificationPulse_Default_004.png",
+      "width": 256,
+      "height": 256,
+      "component_count": 2,
+      "merged_component_count": 2,
+      "detached_component_count": 0,
+      "accepted_detached_count": 0,
+      "major_detached_count": 0,
+      "foreground_pixels": 390654,
+      "qa": "pass",
+      "normalization": {
+        "source_trim_bbox": [
+          0,
+          0,
+          727,
+          710
+        ],
+        "source_trim_size": [
+          727,
+          710
+        ],
+        "target_size": [
+          256,
+          256
+        ],
+        "content_size": [
+          224,
+          219
+        ],
+        "content_position": [
+          16,
+          18
+        ],
+        "scale": 0.3081155433287483,
+        "padding": 16,
+        "alignment": "center",
+        "upscaled": false
+      },
+      "source_sheet": "generated/icon-effect-sheet-01.png",
+      "padding": 16,
+      "alignment": "center",
+      "pivot": [
+        0.5,
+        0.5
+      ],
+      "chroma_key": null,
+      "transparency_mode": "model-matte-derived",
+      "alpha_origin": "gpt-image-2-matte-derived",
+      "source_sha256": "ae289de060ce13cb1df459a8ad4b336b18ed339a48465baf76acf277a60d7e1a",
+      "alpha_matte": "generated/icon-effect-sheet-01-alpha-matte.png",
+      "alpha_matte_sha256": "f908ae24df947b94988dcd8721c1862f9a52b58ca98fa571b7de55fab0b0d40c"
+    },
+    {
+      "id": "01_Panel_SceneBackground_Default_010",
+      "category": "Panel",
+      "semantic_name": "SceneBackground",
+      "state": "Default",
+      "source_index": 1,
+      "category_index": 10,
+      "source_bbox": [0, 0, 1672, 941],
+      "output": "final/Panel/01_Panel_SceneBackground_Default_010.png",
+      "width": 1980,
+      "height": 1080,
+      "component_count": 1,
+      "merged_component_count": 0,
+      "detached_component_count": 0,
+      "accepted_detached_count": 0,
+      "major_detached_count": 0,
+      "foreground_pixels": 2138400,
+      "qa": "warning",
+      "normalization": {
+        "source_trim_bbox": [0, 0, 1672, 941],
+        "source_trim_size": [1672, 941],
+        "target_size": [1980, 1080],
+        "content_size": [1980, 1080],
+        "content_position": [0, 0],
+        "scale": 1.1837057416267943,
+        "padding": 0,
+        "alignment": "center",
+        "upscaled": true
+      },
+      "source_sheet": "generated/scene-background-raw.png",
+      "prompt": "prompts/scene-background.md",
+      "padding": 0,
+      "alignment": "center",
+      "pivot": [0.5, 0.5],
+      "chroma_key": null,
+      "transparency_mode": "opaque-background",
+      "alpha_origin": "opaque-source"
+    },
+    {
+      "id": "03_Icon_Nav_PlayerAvatar_Default_030",
+      "category": "Icon_Nav",
+      "semantic_name": "PlayerAvatar",
+      "state": "Default",
+      "source_index": 1,
+      "category_index": 30,
+      "source_bbox": [1, 0, 1254, 1254],
+      "output": "final/Icon_Nav/03_Icon_Nav_PlayerAvatar_Default_030.png",
+      "width": 128,
+      "height": 128,
+      "component_count": 1,
+      "merged_component_count": 0,
+      "detached_component_count": 0,
+      "accepted_detached_count": 0,
+      "major_detached_count": 0,
+      "foreground_pixels": 7521,
+      "qa": "pass",
+      "normalization": {
+        "source_trim_bbox": [1, 0, 1254, 1254],
+        "source_trim_size": [1253, 1254],
+        "target_size": [128, 128],
+        "content_size": [112, 112],
+        "content_position": [8, 8],
+        "scale": 0.08931419457735247,
+        "padding": 8,
+        "alignment": "center",
+        "upscaled": false
+      },
+      "source_sheet": "generated/player-avatar-raw.png",
+      "prompt": "prompts/player-avatar.md",
+      "background_report": "qa/player-avatar-background.json",
+      "padding": 8,
+      "alignment": "center",
+      "pivot": [0.5, 0.5],
+      "chroma_key": "#FF00FF",
+      "transparency_mode": "chroma-key",
+      "alpha_origin": "chroma-derived"
+    }
+  ]
+}

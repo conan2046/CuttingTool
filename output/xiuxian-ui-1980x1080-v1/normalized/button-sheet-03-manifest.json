@@ -1,0 +1,769 @@
+{
+  "schema_version": 1,
+  "project_id": "xiuxian-ui-main-v1",
+  "category": "Button",
+  "source_image_size": [
+    2048,
+    2048
+  ],
+  "assignment_mode": "global-components-nearest-slot-center",
+  "fragment_policy": {
+    "merge_distance": 12.0,
+    "merge_distance_ratio": 0.06,
+    "merge_distance_max": 48.0,
+    "major_component_ratio": 0.35,
+    "detached_action": "warning",
+    "small_detached_max_pixels": 0,
+    "small_detached_max_anchor_ratio": 0.0
+  },
+  "expected_count": 12,
+  "exported_count": 12,
+  "assets": [
+    {
+      "id": "02_Button_ChatTab_Normal_025",
+      "category": "Button",
+      "semantic_name": "ChatTab",
+      "state": "Normal",
+      "source_index": 1,
+      "category_index": 25,
+      "source_bbox": [
+        24,
+        305,
+        499,
+        456
+      ],
+      "output": "final/Button/02_Button_ChatTab_Normal_025.png",
+      "width": 499,
+      "height": 175,
+      "component_count": 2,
+      "merged_component_count": 2,
+      "detached_component_count": 0,
+      "accepted_detached_count": 0,
+      "major_detached_count": 0,
+      "foreground_pixels": 57982,
+      "qa": "pass",
+      "normalization": {
+        "source_trim_bbox": [
+          0,
+          0,
+          475,
+          151
+        ],
+        "source_trim_size": [
+          475,
+          151
+        ],
+        "target_size": [
+          499,
+          175
+        ],
+        "content_size": [
+          475,
+          151
+        ],
+        "content_position": [
+          12,
+          12
+        ],
+        "scale": 1.0,
+        "padding": 12,
+        "alignment": "center",
+        "upscaled": false
+      },
+      "source_sheet": "generated/button-sheet-03.png",
+      "padding": 12,
+      "alignment": "center",
+      "pivot": [
+        0.5,
+        0.5
+      ],
+      "chroma_key": "#00FF00",
+      "transparency_mode": "chroma-key",
+      "alpha_origin": "chroma-derived"
+    },
+    {
+      "id": "02_Button_ChatTab_Hover_026",
+      "category": "Button",
+      "semantic_name": "ChatTab",
+      "state": "Hover",
+      "source_index": 2,
+      "category_index": 26,
+      "source_bbox": [
+        532,
+        305,
+        1013,
+        460
+      ],
+      "output": "final/Button/02_Button_ChatTab_Hover_026.png",
+      "width": 505,
+      "height": 179,
+      "component_count": 1,
+      "merged_component_count": 1,
+      "detached_component_count": 0,
+      "accepted_detached_count": 0,
+      "major_detached_count": 0,
+      "foreground_pixels": 62014,
+      "qa": "pass",
+      "normalization": {
+        "source_trim_bbox": [
+          0,
+          0,
+          481,
+          155
+        ],
+        "source_trim_size": [
+          481,
+          155
+        ],
+        "target_size": [
+          505,
+          179
+        ],
+        "content_size": [
+          481,
+          155
+        ],
+        "content_position": [
+          12,
+          12
+        ],
+        "scale": 1.0,
+        "padding": 12,
+        "alignment": "center",
+        "upscaled": false
+      },
+      "source_sheet": "generated/button-sheet-03.png",
+      "padding": 12,
+      "alignment": "center",
+      "pivot": [
+        0.5,
+        0.5
+      ],
+      "chroma_key": "#00FF00",
+      "transparency_mode": "chroma-key",
+      "alpha_origin": "chroma-derived"
+    },
+    {
+      "id": "02_Button_ChatTab_Pressed_027",
+      "category": "Button",
+      "semantic_name": "ChatTab",
+      "state": "Pressed",
+      "source_index": 3,
+      "category_index": 27,
+      "source_bbox": [
+        1043,
+        307,
+        1520,
+        457
+      ],
+      "output": "final/Button/02_Button_ChatTab_Pressed_027.png",
+      "width": 501,
+      "height": 174,
+      "component_count": 1,
+      "merged_component_count": 1,
+      "detached_component_count": 0,
+      "accepted_detached_count": 0,
+      "major_detached_count": 0,
+      "foreground_pixels": 58537,
+      "qa": "pass",
+      "normalization": {
+        "source_trim_bbox": [
+          0,
+          0,
+          477,
+          150
+        ],
+        "source_trim_size": [
+          477,
+          150
+        ],
+        "target_size": [
+          501,
+          174
+        ],
+        "content_size": [
+          477,
+          150
+        ],
+        "content_position": [
+          12,
+          12
+        ],
+        "scale": 1.0,
+        "padding": 12,
+        "alignment": "center",
+        "upscaled": false
+      },
+      "source_sheet": "generated/button-sheet-03.png",
+      "padding": 12,
+      "alignment": "center",
+      "pivot": [
+        0.5,
+        0.5
+      ],
+      "chroma_key": "#00FF00",
+      "transparency_mode": "chroma-key",
+      "alpha_origin": "chroma-derived"
+    },
+    {
+      "id": "02_Button_ChatTab_Disabled_028",
+      "category": "Button",
+      "semantic_name": "ChatTab",
+      "state": "Disabled",
+      "source_index": 4,
+      "category_index": 28,
+      "source_bbox": [
+        1547,
+        307,
+        2020,
+        457
+      ],
+      "output": "final/Button/02_Button_ChatTab_Disabled_028.png",
+      "width": 497,
+      "height": 174,
+      "component_count": 1,
+      "merged_component_count": 1,
+      "detached_component_count": 0,
+      "accepted_detached_count": 0,
+      "major_detached_count": 0,
+      "foreground_pixels": 57969,
+      "qa": "pass",
+      "normalization": {
+        "source_trim_bbox": [
+          0,
+          0,
+          473,
+          150
+        ],
+        "source_trim_size": [
+          473,
+          150
+        ],
+        "target_size": [
+          497,
+          174
+        ],
+        "content_size": [
+          473,
+          150
+        ],
+        "content_position": [
+          12,
+          12
+        ],
+        "scale": 1.0,
+        "padding": 12,
+        "alignment": "center",
+        "upscaled": false
+      },
+      "source_sheet": "generated/button-sheet-03.png",
+      "padding": 12,
+      "alignment": "center",
+      "pivot": [
+        0.5,
+        0.5
+      ],
+      "chroma_key": "#00FF00",
+      "transparency_mode": "chroma-key",
+      "alpha_origin": "chroma-derived"
+    },
+    {
+      "id": "02_Button_VoiceChat_Normal_029",
+      "category": "Button",
+      "semantic_name": "VoiceChat",
+      "state": "Normal",
+      "source_index": 5,
+      "category_index": 29,
+      "source_bbox": [
+        92,
+        808,
+        419,
+        1139
+      ],
+      "output": "final/Button/02_Button_VoiceChat_Normal_029.png",
+      "width": 351,
+      "height": 355,
+      "component_count": 1,
+      "merged_component_count": 1,
+      "detached_component_count": 0,
+      "accepted_detached_count": 0,
+      "major_detached_count": 0,
+      "foreground_pixels": 65596,
+      "qa": "pass",
+      "normalization": {
+        "source_trim_bbox": [
+          0,
+          0,
+          327,
+          331
+        ],
+        "source_trim_size": [
+          327,
+          331
+        ],
+        "target_size": [
+          351,
+          355
+        ],
+        "content_size": [
+          327,
+          331
+        ],
+        "content_position": [
+          12,
+          12
+        ],
+        "scale": 1.0,
+        "padding": 12,
+        "alignment": "center",
+        "upscaled": false
+      },
+      "source_sheet": "generated/button-sheet-03.png",
+      "padding": 12,
+      "alignment": "center",
+      "pivot": [
+        0.5,
+        0.5
+      ],
+      "chroma_key": "#00FF00",
+      "transparency_mode": "chroma-key",
+      "alpha_origin": "chroma-derived"
+    },
+    {
+      "id": "02_Button_VoiceChat_Hover_030",
+      "category": "Button",
+      "semantic_name": "VoiceChat",
+      "state": "Hover",
+      "source_index": 6,
+      "category_index": 30,
+      "source_bbox": [
+        602,
+        805,
+        935,
+        1142
+      ],
+      "output": "final/Button/02_Button_VoiceChat_Hover_030.png",
+      "width": 357,
+      "height": 361,
+      "component_count": 1,
+      "merged_component_count": 1,
+      "detached_component_count": 0,
+      "accepted_detached_count": 0,
+      "major_detached_count": 0,
+      "foreground_pixels": 69097,
+      "qa": "pass",
+      "normalization": {
+        "source_trim_bbox": [
+          0,
+          0,
+          333,
+          337
+        ],
+        "source_trim_size": [
+          333,
+          337
+        ],
+        "target_size": [
+          357,
+          361
+        ],
+        "content_size": [
+          333,
+          337
+        ],
+        "content_position": [
+          12,
+          12
+        ],
+        "scale": 1.0,
+        "padding": 12,
+        "alignment": "center",
+        "upscaled": false
+      },
+      "source_sheet": "generated/button-sheet-03.png",
+      "padding": 12,
+      "alignment": "center",
+      "pivot": [
+        0.5,
+        0.5
+      ],
+      "chroma_key": "#00FF00",
+      "transparency_mode": "chroma-key",
+      "alpha_origin": "chroma-derived"
+    },
+    {
+      "id": "02_Button_VoiceChat_Pressed_031",
+      "category": "Button",
+      "semantic_name": "VoiceChat",
+      "state": "Pressed",
+      "source_index": 7,
+      "category_index": 31,
+      "source_bbox": [
+        1115,
+        808,
+        1441,
+        1139
+      ],
+      "output": "final/Button/02_Button_VoiceChat_Pressed_031.png",
+      "width": 350,
+      "height": 355,
+      "component_count": 2,
+      "merged_component_count": 2,
+      "detached_component_count": 0,
+      "accepted_detached_count": 0,
+      "major_detached_count": 0,
+      "foreground_pixels": 65439,
+      "qa": "pass",
+      "normalization": {
+        "source_trim_bbox": [
+          0,
+          0,
+          326,
+          331
+        ],
+        "source_trim_size": [
+          326,
+          331
+        ],
+        "target_size": [
+          350,
+          355
+        ],
+        "content_size": [
+          326,
+          331
+        ],
+        "content_position": [
+          12,
+          12
+        ],
+        "scale": 1.0,
+        "padding": 12,
+        "alignment": "center",
+        "upscaled": false
+      },
+      "source_sheet": "generated/button-sheet-03.png",
+      "padding": 12,
+      "alignment": "center",
+      "pivot": [
+        0.5,
+        0.5
+      ],
+      "chroma_key": "#00FF00",
+      "transparency_mode": "chroma-key",
+      "alpha_origin": "chroma-derived"
+    },
+    {
+      "id": "02_Button_VoiceChat_Disabled_032",
+      "category": "Button",
+      "semantic_name": "VoiceChat",
+      "state": "Disabled",
+      "source_index": 8,
+      "category_index": 32,
+      "source_bbox": [
+        1625,
+        808,
+        1952,
+        1139
+      ],
+      "output": "final/Button/02_Button_VoiceChat_Disabled_032.png",
+      "width": 351,
+      "height": 355,
+      "component_count": 2,
+      "merged_component_count": 2,
+      "detached_component_count": 0,
+      "accepted_detached_count": 0,
+      "major_detached_count": 0,
+      "foreground_pixels": 65574,
+      "qa": "pass",
+      "normalization": {
+        "source_trim_bbox": [
+          0,
+          0,
+          327,
+          331
+        ],
+        "source_trim_size": [
+          327,
+          331
+        ],
+        "target_size": [
+          351,
+          355
+        ],
+        "content_size": [
+          327,
+          331
+        ],
+        "content_position": [
+          12,
+          12
+        ],
+        "scale": 1.0,
+        "padding": 12,
+        "alignment": "center",
+        "upscaled": false
+      },
+      "source_sheet": "generated/button-sheet-03.png",
+      "padding": 12,
+      "alignment": "center",
+      "pivot": [
+        0.5,
+        0.5
+      ],
+      "chroma_key": "#00FF00",
+      "transparency_mode": "chroma-key",
+      "alpha_origin": "chroma-derived"
+    },
+    {
+      "id": "02_Button_SendChat_Normal_033",
+      "category": "Button",
+      "semantic_name": "SendChat",
+      "state": "Normal",
+      "source_index": 9,
+      "category_index": 33,
+      "source_bbox": [
+        11,
+        1476,
+        501,
+        1695
+      ],
+      "output": "final/Button/02_Button_SendChat_Normal_033.png",
+      "width": 514,
+      "height": 243,
+      "component_count": 3,
+      "merged_component_count": 3,
+      "detached_component_count": 0,
+      "accepted_detached_count": 0,
+      "major_detached_count": 0,
+      "foreground_pixels": 85012,
+      "qa": "pass",
+      "normalization": {
+        "source_trim_bbox": [
+          0,
+          0,
+          490,
+          219
+        ],
+        "source_trim_size": [
+          490,
+          219
+        ],
+        "target_size": [
+          514,
+          243
+        ],
+        "content_size": [
+          490,
+          219
+        ],
+        "content_position": [
+          12,
+          12
+        ],
+        "scale": 1.0,
+        "padding": 12,
+        "alignment": "center",
+        "upscaled": false
+      },
+      "source_sheet": "generated/button-sheet-03.png",
+      "padding": 12,
+      "alignment": "center",
+      "pivot": [
+        0.5,
+        0.5
+      ],
+      "chroma_key": "#00FF00",
+      "transparency_mode": "chroma-key",
+      "alpha_origin": "chroma-derived"
+    },
+    {
+      "id": "02_Button_SendChat_Hover_034",
+      "category": "Button",
+      "semantic_name": "SendChat",
+      "state": "Hover",
+      "source_index": 10,
+      "category_index": 34,
+      "source_bbox": [
+        521,
+        1473,
+        1014,
+        1699
+      ],
+      "output": "final/Button/02_Button_SendChat_Hover_034.png",
+      "width": 517,
+      "height": 250,
+      "component_count": 1,
+      "merged_component_count": 1,
+      "detached_component_count": 0,
+      "accepted_detached_count": 0,
+      "major_detached_count": 0,
+      "foreground_pixels": 88331,
+      "qa": "pass",
+      "normalization": {
+        "source_trim_bbox": [
+          0,
+          0,
+          493,
+          226
+        ],
+        "source_trim_size": [
+          493,
+          226
+        ],
+        "target_size": [
+          517,
+          250
+        ],
+        "content_size": [
+          493,
+          226
+        ],
+        "content_position": [
+          12,
+          12
+        ],
+        "scale": 1.0,
+        "padding": 12,
+        "alignment": "center",
+        "upscaled": false
+      },
+      "source_sheet": "generated/button-sheet-03.png",
+      "padding": 12,
+      "alignment": "center",
+      "pivot": [
+        0.5,
+        0.5
+      ],
+      "chroma_key": "#00FF00",
+      "transparency_mode": "chroma-key",
+      "alpha_origin": "chroma-derived"
+    },
+    {
+      "id": "02_Button_SendChat_Pressed_035",
+      "category": "Button",
+      "semantic_name": "SendChat",
+      "state": "Pressed",
+      "source_index": 11,
+      "category_index": 35,
+      "source_bbox": [
+        1033,
+        1476,
+        1520,
+        1695
+      ],
+      "output": "final/Button/02_Button_SendChat_Pressed_035.png",
+      "width": 511,
+      "height": 243,
+      "component_count": 1,
+      "merged_component_count": 1,
+      "detached_component_count": 0,
+      "accepted_detached_count": 0,
+      "major_detached_count": 0,
+      "foreground_pixels": 84044,
+      "qa": "pass",
+      "normalization": {
+        "source_trim_bbox": [
+          0,
+          0,
+          487,
+          219
+        ],
+        "source_trim_size": [
+          487,
+          219
+        ],
+        "target_size": [
+          511,
+          243
+        ],
+        "content_size": [
+          487,
+          219
+        ],
+        "content_position": [
+          12,
+          12
+        ],
+        "scale": 1.0,
+        "padding": 12,
+        "alignment": "center",
+        "upscaled": false
+      },
+      "source_sheet": "generated/button-sheet-03.png",
+      "padding": 12,
+      "alignment": "center",
+      "pivot": [
+        0.5,
+        0.5
+      ],
+      "chroma_key": "#00FF00",
+      "transparency_mode": "chroma-key",
+      "alpha_origin": "chroma-derived"
+    },
+    {
+      "id": "02_Button_SendChat_Disabled_036",
+      "category": "Button",
+      "semantic_name": "SendChat",
+      "state": "Disabled",
+      "source_index": 12,
+      "category_index": 36,
+      "source_bbox": [
+        1541,
+        1475,
+        2032,
+        1695
+      ],
+      "output": "final/Button/02_Button_SendChat_Disabled_036.png",
+      "width": 515,
+      "height": 244,
+      "component_count": 2,
+      "merged_component_count": 2,
+      "detached_component_count": 0,
+      "accepted_detached_count": 0,
+      "major_detached_count": 0,
+      "foreground_pixels": 84995,
+      "qa": "pass",
+      "normalization": {
+        "source_trim_bbox": [
+          0,
+          0,
+          491,
+          220
+        ],
+        "source_trim_size": [
+          491,
+          220
+        ],
+        "target_size": [
+          515,
+          244
+        ],
+        "content_size": [
+          491,
+          220
+        ],
+        "content_position": [
+          12,
+          12
+        ],
+        "scale": 1.0,
+        "padding": 12,
+        "alignment": "center",
+        "upscaled": false
+      },
+      "source_sheet": "generated/button-sheet-03.png",
+      "padding": 12,
+      "alignment": "center",
+      "pivot": [
+        0.5,
+        0.5
+      ],
+      "chroma_key": "#00FF00",
+      "transparency_mode": "chroma-key",
+      "alpha_origin": "chroma-derived"
+    }
+  ],
+  "source_sheet": "generated/button-sheet-03.png",
+  "stage": "normalized"
+}

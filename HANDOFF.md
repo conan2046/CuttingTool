@@ -4,7 +4,7 @@
 > 工作目录：`D:\CuttingTool`  
 > 仓库：`https://github.com/conan2046/CuttingTool.git`  
 > 当前工作分支：`main`
-> 已完成功能基线：v0.12.0 Unity 自动导入、九宫格与交互 Prefab
+> 已完成功能基线：v0.12.2 九宫格 PPU 联动修复、真实 HUD、Button 四态与 Unity Preview Scene
 
 ## 1. 新会话先做什么
 
@@ -46,7 +46,23 @@ game-ui-asset-pipeline
 
 ## 3. 已经完成什么
 
-### 3.0 v0.12.0：Unity 交付链路
+### 3.0 v0.12.2：九宫格 PPU 联动修复
+
+- Panel/Button 根据源图与全部布局目标的最小缩放比自动推导 PPU，避免固定 Border 在矮控件中被比例压缩。
+- 预检验证 Border 换算后的 Unity 显示尺寸；左右或上下固定区超过任一目标控件时阻断。
+- 支持 `pixels_per_unit_overrides` 人工覆写，并记录 `layout-derived`、`manual-override` 或 `default` 来源。
+- `QuestRowFrame` 已在真实 Unity 中写入 Border `[180,95,180,95]`、PPU `447.8261`；重新渲染后无压扁变形。
+- 源码与安装态全量测试各 99/99；63 个正式 Skill 文件哈希一致。
+
+### 3.1 v0.12.1：真实 HUD 与视觉验收
+
+- `xiuxian-ui-1980x1080-v1` 已导入 86 Sprite 并生成 86 资源 Prefab。
+- `XiuxianMainHUD` 含 47 个 BindingId、9 个 SpriteSwap Button。
+- 自动生成 `XiuxianMainHUD-Preview.unity` 和 1980×1080 Unity 渲染 PNG。
+- Unity report：1 Screen Prefab / 1 Preview Scene / 1 Preview PNG / 0 issue。
+- 源码与安装态全量测试各 97/97；63 个正式 Skill 文件哈希一致。
+
+### 3.1 v0.12.0：Unity 交付链路
 
 - 目标样板项目：`D:\CodeProjects\UIText`，Unity `2022.3.62f3c1`，UGUI。
 - `export_unity_ui.py` 统一完成预检、嵌入包安装、资源复制和 Unity batchmode。
@@ -402,6 +418,10 @@ $PYTHON = 'C:\Users\Admin\.cache\codex-runtimes\codex-primary-runtime\dependenci
 
 ## 8. 最终状态
 
+- `xiuxian-ui-1980x1080-v1` 的参考对齐 HUD 已补齐独立仙侠场景背景与专用女性玩家头像，不再使用深色占位背景，也不再复用底栏 `FunctionCharacter` 作为资料头像。
+- 正式 Manifest 当前为 88 件：85 pass / 3 warning / 0 fail。3 条 warning 为 2 个既有 Panel 远离碎片提示，以及整屏不透明背景预期产生的 `no-transparent-padding`。
+- Unity 2022.3.62f3c1 最终导出：88 Sprite / 88 资源 Prefab / 1 Screen Prefab / 1 Preview Scene / 1 Preview PNG / 0 issue；日志包含 `GameUIImportComplete`。
+- 最终视觉证据：`output/xiuxian-ui-1980x1080-v1/unity/previews/XiuxianMainHUDReferenceAligned-final.png`。
 - 当前开发分支：`main`。
 - v0.10.3 新增参考图接收关卡：初始化后暂停等待用户放图，用户确认后执行自动检查和逐图视觉检查；不合格时要求替换，全部通过前不进入资源清单和生成。
 - v0.10.2 新增首次项目初始化：缺少项目名时先询问，获得后自动创建 `input/<project-id>/references/reference-notes.md`，重复调用不覆盖用户内容。
