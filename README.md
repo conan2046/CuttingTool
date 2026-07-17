@@ -76,7 +76,7 @@ D:\CuttingTool\skills\game-ui-asset-pipeline
 完成验证后安装到：
 
 ```text
-C:\Users\Administrator\.codex\skills\game-ui-asset-pipeline
+C:\Users\Admin\.codex\skills\game-ui-asset-pipeline
 ```
 
 ## Python 环境
@@ -84,7 +84,7 @@ C:\Users\Administrator\.codex\skills\game-ui-asset-pipeline
 使用 Codex 工作区捆绑 Python，不使用裸 `python`：
 
 ```powershell
-$PYTHON = 'C:\Users\Administrator\.cache\codex-runtimes\codex-primary-runtime\dependencies\python\python.exe'
+$PYTHON = 'C:\Users\Admin\.cache\codex-runtimes\codex-primary-runtime\dependencies\python\python.exe'
 ```
 
 当前依赖：

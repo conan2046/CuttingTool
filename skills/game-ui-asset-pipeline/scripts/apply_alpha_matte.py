@@ -97,6 +97,15 @@ def apply_alpha_matte(
     transparent = alpha == 0
     distinct_levels = int(np.unique(alpha).size)
     issues: list[dict[str, Any]] = []
+    if matte_resized:
+        issues.append(
+            {
+                "severity": "fail",
+                "code": "source-matte-size-mismatch",
+                "source_size": list(source.size),
+                "matte_size": list(matte.size),
+            }
+        )
     checks = (
         (grayscale_spread_p95 <= maximum_matte_channel_spread, "matte-not-grayscale", grayscale_spread_p95),
         (border_alpha_p95 <= maximum_border_alpha, "matte-border-not-transparent", border_alpha_p95),

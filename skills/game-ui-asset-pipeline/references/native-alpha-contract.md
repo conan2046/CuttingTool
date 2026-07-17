@@ -51,6 +51,7 @@ generated/<job-id>-alpha-matte.png
 正式输出前检查：
 
 - 双图存在且可读取。
+- 彩色源图与 Matte 画布尺寸完全一致；尺寸不一致直接失败，不得自动缩放后继续交付。
 - Matte 至少包含 8 个 Alpha 等级和 32 个部分透明像素。
 - Matte 灰度通道差异 P95 不超过 24。
 - Matte 边框 Alpha P95 不超过 24。
@@ -76,7 +77,7 @@ F = clamp((C - (1 - α) × B) / max(α, 1/255))
 
 ## 模型原生 Alpha 模式
 
-`native-alpha-required` 只接受生成源直接携带的 RGBA，不得使用色键或 Matte 推导冒充。来源侧车文件至少记录：模型、生成方式、相对路径、SHA-256、`alpha_origin=model-native` 和 `background_removal_applied=false`。
+`native-alpha-required` 只接受生成源直接携带的 RGBA，不得使用色键或 Matte 推导冒充。来源侧车文件至少记录：非空模型、非空生成方式、相对路径、SHA-256、`alpha_origin=model-native` 和 `background_removal_applied=false`。
 
 Runner 验证真实 RGBA、透明像素、部分透明像素、Alpha 等级和侧车哈希。失败时不得创建正式输出。内置 GPT Image 2 当前不直接提供该模式；只有用户明确要求并授权外部透明生成路径时才使用。
 

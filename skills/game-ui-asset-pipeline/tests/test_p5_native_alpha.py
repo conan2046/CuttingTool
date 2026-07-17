@@ -182,6 +182,20 @@ class P5NativeAlphaTest(unittest.TestCase):
             self.assertFalse(report["ok"])
             self.assertIn("background-removal-not-native-alpha", {issue["code"] for issue in report["issues"]})
 
+    def test_missing_generation_method_cannot_claim_native_origin(self) -> None:
+        with tempfile.TemporaryDirectory() as temporary_directory:
+            run_dir = Path(temporary_directory) / "run"
+            PREPARE.prepare_batch(self.native_request(), run_dir)
+            source, provenance_path = self.write_layered_sheet(run_dir)
+            provenance = json.loads(provenance_path.read_text(encoding="utf-8"))
+            provenance["generation_method"] = ""
+            provenance_path.write_text(json.dumps(provenance), encoding="utf-8")
+            report = NATIVE.validate_native_alpha_source(
+                source, provenance_path, "generated/icon-effect-sheet-01.png"
+            )
+            self.assertFalse(report["ok"])
+            self.assertIn("missing-generation-method", {issue["code"] for issue in report["issues"]})
+
 
 class P5ModelMatteTest(unittest.TestCase):
     def matte_request(self) -> dict:
@@ -289,6 +303,14 @@ class P5ModelMatteTest(unittest.TestCase):
                 _output, report = MATTE.apply_alpha_matte(source, matte_image)
             self.assertFalse(report["ok"])
             self.assertIn("source-matte-pixel-mismatch", {issue["code"] for issue in report["issues"]})
+
+    def test_matte_size_mismatch_is_rejected_before_export(self) -> None:
+        source = Image.new("RGB", (128, 128), (0, 0, 0))
+        matte = Image.new("RGB", (64, 64), (0, 0, 0))
+        _output, report = MATTE.apply_alpha_matte(source, matte)
+        self.assertFalse(report["ok"])
+        self.assertTrue(report["matte_resized_to_source"])
+        self.assertIn("source-matte-size-mismatch", {issue["code"] for issue in report["issues"]})
 
     def test_polluted_source_border_is_rejected(self) -> None:
         with tempfile.TemporaryDirectory() as temporary_directory:

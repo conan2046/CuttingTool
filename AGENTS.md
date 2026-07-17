@@ -61,12 +61,12 @@ V1 不包含：
 ### P5 复杂半透明特效链路
 
 - 用户已于 2026-07-16 明确授权使用 Codex 内置 GPT Image 2 的 RGB＋Alpha Matte 双图方案推进 P5；默认不需要 API Key。
-- `model-matte-derived` 必须先生成纯黑底彩色 Sheet，再把该图作为编辑目标生成像素对齐的中性灰度 Matte；不得独立重画 Matte。
+- `model-matte-derived` 必须先生成纯黑底彩色 Sheet，再把该图作为编辑目标生成像素对齐且画布尺寸完全一致的中性灰度 Matte；不得独立重画 Matte。尺寸不一致必须在正式输出前失败，不得靠自动缩放冒充对齐。
 - Matte 推导结果必须标记为 `alpha_origin=gpt-image-2-matte-derived`，不得表述为模型原生 Alpha。
 - Runner 必须验证双图哈希、灰度纯度、Matte 黑边、连续 Alpha、彩色背景平整度、包围框和像素覆盖关系；失败只写 QA/摘要，不创建正式 Manifest。
 - 至少使用烟雾、玻璃、液体、柔光四类真实 GPT Image 2 样本完成数据与视觉验收。来源、透明层次、Matte 对齐、边缘污染、缩放保真和失败降级都必须可追溯。
 - `native-alpha-required` 继续保留为可选严格模式；只有用户明确要求源文件直接携带 Alpha 时，才重新确认外部生成授权和费用。
-- `native-alpha-required` Job 必须提供同名来源侧车文件，记录模型、生成方式、源图相对路径、SHA-256、`alpha_origin=model-native` 和 `background_removal_applied=false`。Runner 在正式输出前验证 RGBA、透明像素、部分透明像素和 Alpha 等级；失败只写 QA/摘要，不创建正式 Manifest。
+- `native-alpha-required` Job 必须提供同名来源侧车文件，记录非空模型、非空生成方式、源图相对路径、SHA-256、`alpha_origin=model-native` 和 `background_removal_applied=false`。Runner 在正式输出前验证 RGBA、透明像素、部分透明像素和 Alpha 等级；失败只写 QA/摘要，不创建正式 Manifest。
 
 ### 桌面 GUI 路线优先级
 
@@ -159,7 +159,7 @@ D:\CuttingTool\
 | `output/` | 最终交付与完整运行产物 |
 | `logs/` | 运行日志和诊断报告 |
 
-不得把正式项目资源只留在 `C:\Users\Administrator\.codex\generated_images` 或系统临时目录。
+不得把正式项目资源只留在 `C:\Users\Admin\.codex\generated_images` 或系统临时目录。
 
 ## 五、Skill 制作标准
 
@@ -174,7 +174,7 @@ D:\CuttingTool\skills\game-ui-asset-pipeline
 安装位置：
 
 ```text
-C:\Users\Administrator\.codex\skills\game-ui-asset-pipeline
+C:\Users\Admin\.codex\skills\game-ui-asset-pipeline
 ```
 
 始终先修改项目源码，再同步安装副本。不得只修改安装目录而不回写项目源码。

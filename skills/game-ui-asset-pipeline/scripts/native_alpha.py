@@ -90,6 +90,7 @@ def validate_native_alpha_source(
         (provenance.get("source_output") == expected_source_output, "provenance-source-path-mismatch"),
         (provenance.get("source_sha256") == actual_sha256, "provenance-source-hash-mismatch"),
         (bool(str(provenance.get("model", "")).strip()), "missing-generation-model"),
+        (bool(generation_method), "missing-generation-method"),
         (not generation_method.lower().startswith("built-in-imagegen"), "built-in-imagegen-not-native-alpha"),
     )
     for passed, code in checks:

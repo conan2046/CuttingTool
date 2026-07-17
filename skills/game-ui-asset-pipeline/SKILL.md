@@ -65,7 +65,7 @@ description: 生成、拆分、透明化、校验并打包游戏 UI 位图资源
 ${CODEX_HOME:-$HOME/.codex}/skills/.system/imagegen/SKILL.md
 ```
 
-默认使用内置图片生成路径。复杂烟雾、玻璃、液体或柔光优先使用 `model-matte-derived`：先生成纯黑底彩色 Sheet，再把该图作为编辑目标生成像素对齐的灰度 Alpha Matte。不要把 Matte 推导结果称为模型原生 Alpha。只有用户明确要求源文件原生 Alpha 时，才按 `$imagegen` 的 CLI 回退规则确认授权。
+默认使用内置图片生成路径。复杂烟雾、玻璃、液体或柔光优先使用 `model-matte-derived`：先生成纯黑底彩色 Sheet，再把该图作为编辑目标生成像素对齐且画布尺寸完全一致的灰度 Alpha Matte；尺寸不一致必须失败，不得自动缩放后继续交付。不要把 Matte 推导结果称为模型原生 Alpha。只有用户明确要求源文件原生 Alpha 时，才按 `$imagegen` 的 CLI 回退规则确认授权。
 
 ## 输入判断
 
@@ -197,7 +197,7 @@ ${CODEX_HOME:-$HOME/.codex}/skills/.system/imagegen/SKILL.md
 
 Runner 根据 Job 声明分流 `model-matte-derived`、原生 Alpha、已有 Alpha 或色键背景。Matte 模式必须在正式输出前验证双图齐全、灰度纯度、黑色边框、连续 Alpha 层次、背景平整度、像素覆盖关系和双图 SHA-256；通过后用已知黑背景合成方程恢复直通道 RGB＋Alpha。失败时只写 QA 与失败摘要，不生成正式 Manifest。所有 RGBA 生产尺寸与单体归一化均使用预乘 Alpha。默认拒绝覆盖已有正式 Manifest；明确重跑时使用 `--force`。
 
-内置 `imagegen` 当前不能直接用于 `native-alpha-required`，但可以用于 `model-matte-derived`，不需要 API Key。原生模式仍需用户明确确认外部透明生成回退，并保存 `generated/<job-id>.provenance.json`。
+内置 `imagegen` 当前不能直接用于 `native-alpha-required`，但可以用于 `model-matte-derived`，不需要 API Key。原生模式仍需用户明确确认外部透明生成回退，并保存 `generated/<job-id>.provenance.json`；来源侧车中的模型与生成方式都必须为非空值。
 
 以下分步命令保留用于单 Sheet 调试和人工校正：
 

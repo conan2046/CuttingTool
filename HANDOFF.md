@@ -4,7 +4,7 @@
 > 工作目录：`D:\CuttingTool`  
 > 仓库：`https://github.com/conan2046/CuttingTool.git`  
 > 当前工作分支：`agent/p5-native-alpha`
-> 已完成功能基线：v0.9.0 P5 GPT Image 2 RGB＋Alpha Matte 双图链路
+> 已完成功能基线：v0.9.1 P5 合并审查加固
 
 ## 1. 新会话先做什么
 
@@ -265,7 +265,7 @@ D:\CuttingTool\skills\game-ui-asset-pipeline
 安装位置：
 
 ```text
-C:\Users\Administrator\.codex\skills\game-ui-asset-pipeline
+C:\Users\Admin\.codex\skills\game-ui-asset-pipeline
 ```
 
 始终先改项目源码，再同步安装副本，最后比较逐文件哈希。
@@ -275,7 +275,7 @@ C:\Users\Administrator\.codex\skills\game-ui-asset-pipeline
 唯一规定测试入口是标准库 `unittest`，不要尝试、探测或安装 `pytest`：
 
 ```powershell
-$PYTHON = 'C:\Users\Administrator\.cache\codex-runtimes\codex-primary-runtime\dependencies\python\python.exe'
+$PYTHON = 'C:\Users\Admin\.cache\codex-runtimes\codex-primary-runtime\dependencies\python\python.exe'
 & $PYTHON -m unittest discover `
   -s .\skills\game-ui-asset-pipeline\tests `
   -p 'test_*.py' `
@@ -316,7 +316,7 @@ $GIT = 'C:\Program Files\Git\cmd\git.exe'
 ### 源码测试
 
 ```powershell
-$PYTHON = 'C:\Users\Administrator\.cache\codex-runtimes\codex-primary-runtime\dependencies\python\python.exe'
+$PYTHON = 'C:\Users\Admin\.cache\codex-runtimes\codex-primary-runtime\dependencies\python\python.exe'
 & $PYTHON -m unittest discover `
   -s .\skills\game-ui-asset-pipeline\tests `
   -p 'test_*.py' `
@@ -327,7 +327,7 @@ $PYTHON = 'C:\Users\Administrator\.cache\codex-runtimes\codex-primary-runtime\de
 
 ```powershell
 & $PYTHON -m unittest discover `
-  -s 'C:\Users\Administrator\.codex\skills\game-ui-asset-pipeline\tests' `
+  -s 'C:\Users\Admin\.codex\skills\game-ui-asset-pipeline\tests' `
   -p 'test_*.py' `
   -v
 ```
@@ -342,6 +342,7 @@ $PYTHON = 'C:\Users\Administrator\.cache\codex-runtimes\codex-primary-runtime\de
 ## 8. 最终状态
 
 - 当前开发分支：`agent/p5-native-alpha`，基于完整 P4 与 P5 路线文档基线。
-- v0.9.0 P5 使用内置 GPT Image 2 完成四类真实 Matte 推导透明链路；最终测试数量以 CHANGELOG 最新记录为准。
+- v0.9.1 P5 已完成合并审查加固；最终测试数量以 CHANGELOG 最新记录为准。
+- 合并审查已增加双图尺寸不一致和来源侧车缺少生成方式的正式输出阻断，并恢复本机 `C:\Users\Admin` 路径。
 - 下一阶段进入自然语言一键编排、交付摘要收敛和更多跨风格 Matte 回归，不需要 API Key，不重做 P1-P4。
 - GUI 继续保持最低优先级。
