@@ -1,0 +1,19 @@
+{
+  "name": "CuttingTool.GameUI.Editor",
+  "rootNamespace": "CuttingTool.GameUI.Editor",
+  "references": [
+    "CuttingTool.GameUI.Runtime",
+    "Unity.ugui"
+  ],
+  "includePlatforms": [
+    "Editor"
+  ],
+  "excludePlatforms": [],
+  "allowUnsafeCode": false,
+  "overrideReferences": false,
+  "precompiledReferences": [],
+  "autoReferenced": true,
+  "defineConstraints": [],
+  "versionDefines": [],
+  "noEngineReferences": false
+}

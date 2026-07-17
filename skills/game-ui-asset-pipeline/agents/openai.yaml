@@ -1,4 +1,4 @@
 interface:
   display_name: "Game UI Asset Pipeline"
-  short_description: "Orchestrate and package game UI bitmap assets"
-  default_prompt: "Use $game-ui-asset-pipeline. Resolve only the missing project name, reference placement, and one consolidated confirmation of screen layout, canonical-element consistency, and pixel size; then automatically update reference notes, deduplicate reusable project assets, run the remaining stages without user pauses, and deliver transparent PNGs with Manifest and QA."
+  short_description: "Produce UI assets and Unity-ready interactive prefabs"
+  default_prompt: "Use $game-ui-asset-pipeline. Resolve only the missing project name, reference placement, and one consolidated screen confirmation; then automatically produce and QA transparent UI assets. When a Unity project is in scope, configure Sprite imports, safely infer or require overrides for 9-slice borders, and generate traceable Image/Button prefabs from an explicit layout."

@@ -1,6 +1,6 @@
 ---
 name: game-ui-asset-pipeline
-description: 生成、拆分、透明化、校验并打包游戏 UI 位图资源。当用户要求制作游戏UI、UI资源包、按钮/面板/导航图标/道具/装备/技能图标、可切割资源Sheet、从整张资源图导出独立透明PNG，或为Unity准备UI图片资源时使用。支持文字需求和参考图驱动的风格基准图、分类Sheet、色键清理、确定性切割、归一化、命名、Manifest和QA；不用于角色动画、地图切片、普通照片抠图或从遮挡截图恢复不可见资源。
+description: 生成、拆分、透明化、校验并打包游戏 UI 位图资源，并可导入 Unity 2022.3、配置 Sprite、推断九宫格 Border、生成 Image/Button 资源 Prefab 和最终界面 Prefab。当用户要求制作游戏UI、UI资源包、可切割Sheet、透明PNG、Unity UI导入、Sprite Editor、九宫格或可交互Prefab时使用；不用于角色动画、地图切片、普通照片抠图或从遮挡截图恢复不可见资源。
 ---
 
 # Game UI Asset Pipeline
@@ -29,6 +29,7 @@ description: 生成、拆分、透明化、校验并打包游戏 UI 位图资源
 - Icon_Effect 中可通过色键稳定提取的简单硬边特效
 - 使用 GPT Image 2 彩色 Sheet＋灰度 Alpha Matte 推导的烟雾、玻璃、液体和柔光特效
 - 具有可验证生成来源的原生 RGBA 烟雾、玻璃、液体和柔光特效
+- Unity 2022.3 Sprite Single 自动导入、可验证九宫格 Border 和 Image/Button Prefab
 
 以上九项是运行配置和验收 JSON 使用的内部类别名，必须原样返回。`01_Panel` 到 `09_Icon_Effect` 只用于文件名前缀；不要把 `09_Icon_Effect` 当成内部 `category`。
 
@@ -39,8 +40,8 @@ description: 生成、拆分、透明化、校验并打包游戏 UI 位图资源
 - 普通照片和商品图抠图
 - 视频或动态 UI
 - 从元素互相遮挡的界面截图恢复底层素材
-- 自动 Unity Prefab 构建
-- 自动推断九宫格边界
+- 动态文本、本地化绑定、业务脚本和运行时数据源自动接线
+- 从截图猜测无法验证的交互逻辑
 
 ## 必须读取的参考文件
 
@@ -58,6 +59,7 @@ description: 生成、拆分、透明化、校验并打包游戏 UI 位图资源
 - 首次项目初始化、用户说参考图已放好或需要检查参考图时，读取 `references/reference-intake-contract.md`。
 - 需要确认界面布局/尺寸、自动写参考说明、建立资源清单、跨界面复用或从中间阶段开始时，读取 `references/project-intake-and-reuse-contract.md`。
 - 遇到明确的 WebSocket `stream disconnected before completion` 错误时，读取 `references/task-recovery-contract.md`。
+- 用户要求 Unity 导入、Sprite Editor、九宫格、资源 Prefab 或最终界面 Prefab 时，读取 `references/unity-export-contract.md`。
 
 不要一次加载无关参考文件。
 
@@ -370,6 +372,26 @@ Contact Sheet 中的棋盘格只用于人工查看透明边缘，不得回写到
 
 任何 `fail` 未处理时，不得报告资源包完成。
 
+### 9. Unity 导出与可交互 Prefab
+
+只有正式 Manifest 和 QA 均通过后才进入 Unity。先从已确认的界面布局生成 `unity-layout.json`；不要让确定性脚本从截图猜坐标或交互语义。
+
+读取 `unity-export-contract.md`，验证目标 Unity 项目、2022.3 版本、导入根目录和回滚范围，然后运行：
+
+```powershell
+& $PYTHON scripts/export_unity_ui.py `
+  --run-dir output/<project-id> `
+  --unity-project D:\CodeProjects\UIText `
+  --unity-editor E:\UnityPro\2022.3.62f3c1\Editor\Unity.exe `
+  --layout output/<project-id>/unity/unity-layout.json
+```
+
+脚本把可追溯 PNG 导入 `Assets/_Generated/GameUI/<project-id>`，配置 Sprite Single、Alpha、PPU、Pivot 和 Border，生成独立资源 Prefab 与界面 Prefab。Panel/Button 自动分析九宫格；只有置信度达到阈值且中心拉伸区有效时自动写入，否则预检失败并要求在布局 JSON 的 `nine_slice_overrides` 中明确覆写。
+
+界面元素当前正式支持 `Image` 和 `Button`。每个对象附带稳定 `GameUIElementBinding.BindingId`；Button 自动配置 `Image`、`Button.targetGraphic` 和 Raycast。文字、本地化、业务事件和运行时数据绑定属于项目代码，不得伪造完成。
+
+Unity 导出失败时读取 `unity/unity-preflight.json`、`unity/unity-import-report.json` 和 `unity/unity-batch.log`。需要回滚本次生成目录时运行 `rollback_unity_export.py`；默认保留共享嵌入包，只有明确需要完全移除时才加 `--remove-package`。
+
 ## 色键策略
 
 默认：
@@ -423,6 +445,7 @@ output/<project-id>-<timestamp>/
 - 使用的图片生成方式
 - 通过、警告、失败数量
 - 尚需人工处理的资源编号
+- 如执行 Unity 阶段：Unity 预检、导入报告、生成 Prefab 目录和回滚清单
 
 ## 项目规范同步
 

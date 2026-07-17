@@ -9,6 +9,7 @@
 → 一键识别 Alpha、Matte 或色键并切割
 → 尺寸归一化与总 Manifest
 → Contact Sheet、严格 QA、运行摘要
+→ Unity Sprite/九宫格配置与可交互 Prefab
 ```
 
 项目制作标准见 [AGENTS.md](AGENTS.md)，每次正式功能提交见 [CHANGELOG.md](CHANGELOG.md)。
@@ -58,6 +59,10 @@
 - P6 一键编排器支持首次准备、精确缺图清单、补图续跑、自动 Runner、完成态复用和统一交付摘要。
 - 每次编排写出 `qa/delivery-summary.json` 与 `qa/delivery-summary.md`，集中列出生成方式、Job/输入进度、结果数量、交付路径和人工处理项。
 - 完成态自动把正式 Manifest 合并到 `input/<project-id>/ui-asset-catalog.json`，供后续界面确定性复用。
+- 支持 Unity 2022.3 自动导入：Sprite Single、Alpha、PPU、Pivot、无 Mipmap、Clamp、Bilinear 和 Uncompressed。
+- 对 Panel/Button 自动推断九宫格 Border；低置信度或无有效中心区时阻断，支持显式人工覆写。
+- 从已确认的 `unity-layout.json` 生成独立资源 Prefab 和 Image/Button 界面 Prefab，并附稳定 BindingId。
+- 每次 Unity 导出生成预检、导入报告、批处理日志和安全回滚清单。
 
 ## 流程提速
 
@@ -70,10 +75,9 @@
 
 碎片策略真实校准样本位于 `output/p2-fragment-calibration`：面板、按钮、装备、技能共 16 件，包含尖角、链条、悬挂件、独立符文和硬边火花。
 
-暂未实现但已排期：
+当前仍不自动处理：
 
-- P7：Unity 自动导入和 Sprite Editor 配置。
-- P8：自动九宫格边界推断及人工覆写。
+- Unity 业务事件、本地化文本、数据源、动画状态机和项目专属控制器接线。
 - 外部模型原生 Alpha 生成仍为可选能力；只有明确要求源文件直接携带 Alpha 时才需要额外授权。
 - 复杂混合展示图的自动语义分类和遮挡内容恢复。
 
@@ -81,10 +85,11 @@
 
 1. P6：Codex 自然语言一键编排和稳定交付（已实现）。
 2. P6.1：GPT Image 2 RGB＋Matte 跨风格回归（已完成：暗黑幻想、明亮卡通、科幻全息三套真实样本）。
-3. P7：Unity 自动导入与 Sprite Editor 配置（已排期，下一阶段需先确认目标 Unity 项目与导入规则）。
-4. P8：自动九宫格边界推断与人工覆写（已排期，安排在 P7 之后）。
-5. 根据真实生产任务继续优化色键、碎片、JSON 修正、bbox 预览和 Contact Sheet。
-6. 桌面 GUI：长期最低优先级。只有前述流程稳定完成，且高频人工操作无法通过现有轻量方式解决时才重新评估。
+3. P7：Unity 自动导入与 Sprite Editor 配置（已实现）。
+4. P8：自动九宫格边界推断、低置信阻断与人工覆写（已实现）。
+5. P7.1：扩展更多显式布局组件，并与实际项目业务绑定层解耦。
+6. 根据真实生产任务继续优化色键、碎片、JSON 修正、bbox 预览和 Contact Sheet。
+7. 桌面 GUI：长期最低优先级。只有前述流程稳定完成，且高频人工操作无法通过现有轻量方式解决时才重新评估。
 
 桌面 GUI 不是当前待开发功能，也不会作为核心流水线完成条件。
 

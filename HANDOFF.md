@@ -4,7 +4,7 @@
 > 工作目录：`D:\CuttingTool`  
 > 仓库：`https://github.com/conan2046/CuttingTool.git`  
 > 当前工作分支：`main`
-> 已完成功能基线：v0.11.0 自动需求接收、跨界面复用与连续执行
+> 已完成功能基线：v0.12.0 Unity 自动导入、九宫格与交互 Prefab
 
 ## 1. 新会话先做什么
 
@@ -39,13 +39,22 @@ game-ui-asset-pipeline
 → 本地色键/Alpha处理
 → 自动检测、切割、归一化、命名
 → Manifest、Contact Sheet、QA
+→ Unity Sprite/Border 配置、资源 Prefab、界面 Prefab
 ```
 
 核心原则：AI 负责视觉，Python 脚本负责确定性处理和验收。桌面 GUI 已明确降为长期最低优先级，不是当前开发目标。
 
 ## 3. 已经完成什么
 
-### 3.0 v0.11.0：自动接收与跨界面复用
+### 3.0 v0.12.0：Unity 交付链路
+
+- 目标样板项目：`D:\CodeProjects\UIText`，Unity `2022.3.62f3c1`，UGUI。
+- `export_unity_ui.py` 统一完成预检、嵌入包安装、资源复制和 Unity batchmode。
+- 自动配置 Sprite Single、Alpha、PPU、Pivot、Border；Panel/Button 低置信九宫格必须人工覆写。
+- 从 schema v1 显式布局生成 Image/Button 资源 Prefab 和界面 Prefab，元素附稳定 BindingId。
+- 所有生成内容限定在 `Assets/_Generated/GameUI/<project-id>`，并输出回滚清单。
+
+### 3.1 v0.11.0：自动接收与跨界面复用
 
 - 参考图通过后由 Codex 自动维护 `reference-notes.md`，不再要求用户填写模板。
 - 布局、UI 元素与主参考一致性、差异说明和界面像素尺寸合并为一次确认。
@@ -56,7 +65,7 @@ game-ui-asset-pipeline
 - 断线恢复协议已落文档；全自动新建任务仍依赖 Codex 桌面断线回调。
 - 源码与安装态全量 `unittest` 各 86/86 通过；51 个正式文件 SHA-256 一致。
 
-### 3.1 V1 确定性核心链路
+### 3.2 V1 确定性核心链路
 
 - 建立 Skill 标准目录、`SKILL.md`、参考契约、脚本、测试和安装副本。
 - 支持九类静态资源：`Panel`、`Button`、`Icon_Nav`、`Icon_Status`、`Icon_General`、`Icon_Item`、`Icon_Equip`、`Icon_Skill`、`Icon_Effect`。
@@ -64,7 +73,7 @@ game-ui-asset-pipeline
 - 支持 Contact Sheet 和严格 QA。
 - 当前依赖只有 Pillow 和 NumPy，不依赖 OpenCV。
 
-### 3.2 批量分类与统一 Runner
+### 3.3 批量分类与统一 Runner
 
 - `prepare_ui_batch.py` 支持多分类请求和超容量自动拆 Sheet。
 - 同一语义按钮状态组不会跨 Sheet。
@@ -72,7 +81,7 @@ game-ui-asset-pipeline
 - 自动汇总总 Manifest、Contact Sheet、QA 和 `run-summary.json`。
 - 分类编号跨 Sheet 连续。
 
-### 3.3 未知 UI 整图诊断
+### 3.4 未知 UI 整图诊断
 
 - `diagnose_ui_sheet.py` 能识别真实 Alpha、可靠纯色背景、RGB 假棋盘格和无法解析的混合背景。
 - 输出 `input-diagnosis.json`、`bbox-corrections.json` 和 `bbox-preview.png`。
@@ -183,8 +192,7 @@ game-ui-asset-pipeline
 
 当前尚未完成：
 
-- Unity 自动导入和 Sprite Editor 配置。
-- 自动九宫格边界推断。
+- Unity 业务事件、本地化、数据源和动画状态机自动接线。
 - 模型原生 Alpha 仍为可选严格来源；只有用户明确要求源图直接携带 Alpha 时才需要外部授权。
 - 混合展示图的全自动语义分类和遮挡内容恢复。
 - 桌面 GUI。
@@ -197,15 +205,11 @@ game-ui-asset-pipeline
 - 首次准备、缺图清单、补图续跑、Runner 和交付摘要已统一。
 - 下一维护项为 P6.1 跨风格 Matte 回归。
 
-### P7：Unity 自动导入（已排期）
+### P7/P8：Unity 自动导入与九宫格（已实现）
 
-- 单独立项；实施前确认 Unity 项目、版本、导入目录、TextureImporter 参数、Sprite 命名、Pivot 和回滚方案。
-- 当前 P6 不创建或修改 Unity 项目。
-
-### P8：自动九宫格边界推断（已排期）
-
-- 安排在 P7 之后；先输出可验证 Border 元数据，再接入 Sprite Editor。
-- 必须支持误判阻断、可视化验证和人工覆写，不能直接写入未经确认的边界。
+- Unity 2022.3 + UGUI 作为正式兼容基线。
+- 九宫格先生成带置信度的 Border 元数据，再由 batchmode 写入 SpriteImporter；低置信阻断，支持人工覆写。
+- 界面 Prefab 由明确布局生成，不从截图猜业务交互。
 
 ### P5：复杂半透明特效生成链路（已完成）
 
@@ -325,7 +329,7 @@ $PYTHON = 'C:\Users\Admin\.cache\codex-runtimes\codex-primary-runtime\dependenci
 
 ### 6.9 不要引入未经批准的范围
 
-当前用户只有 Codex，没有 API Key。不要切到付费 Image API，不要引入 OpenCV，不要开发 Unity 自动导入，也不要启动桌面 GUI 技术栈，除非用户明确扩大范围。
+当前用户只有 Codex，没有 API Key。不要切到付费 Image API，不要引入 OpenCV，也不要启动桌面 GUI 技术栈。Unity 自动导入只允许写入用户明确授权的目标项目和生成根目录。
 
 ### 6.10 不要漏更新规范和变更说明
 
@@ -386,6 +390,16 @@ $PYTHON = 'C:\Users\Admin\.cache\codex-runtimes\codex-primary-runtime\dependenci
   --run-dir .\output\<project-id>
 ```
 
+### Unity 导出
+
+```powershell
+& $PYTHON .\skills\game-ui-asset-pipeline\scripts\export_unity_ui.py `
+  --run-dir .\output\<project-id> `
+  --unity-project D:\CodeProjects\UIText `
+  --unity-editor E:\UnityPro\2022.3.62f3c1\Editor\Unity.exe `
+  --layout .\output\<project-id>\unity\unity-layout.json
+```
+
 ## 8. 最终状态
 
 - 当前开发分支：`main`。
@@ -393,7 +407,7 @@ $PYTHON = 'C:\Users\Admin\.cache\codex-runtimes\codex-primary-runtime\dependenci
 - v0.10.2 新增首次项目初始化：缺少项目名时先询问，获得后自动创建 `input/<project-id>/references/reference-notes.md`，重复调用不覆盖用户内容。
 - v0.10.1 P6.1 已完成暗黑幻想、明亮卡通、科幻全息三套真实 GPT Image 2 RGB＋Matte 回归；每套覆盖 Smoke、Glass、Liquid、SoftGlow，合计 12 pass / 0 warning / 0 fail。
 - 三套 Contact Sheet 已人工检查；Matte 均为同图编辑、画布一致且未缩放，`alpha_origin=gpt-image-2-matte-derived`。
-- 下一阶段为 P7 Unity 自动导入与 Sprite Editor 配置；实施前必须单独确认目标 Unity 项目、版本、导入目录、TextureImporter 规则和回滚方案。P8 九宫格推断仍排在 P7 之后。
+- P7/P8 已进入 v0.12.0；下一阶段优先用真实商业 UI 页面回归 Border 和布局 Prefab，再评估更多显式组件类型。
 - GUI 继续保持最低优先级。
 
 ## 9. 下个新窗口优先验收
@@ -407,4 +421,4 @@ $PYTHON = 'C:\Users\Admin\.cache\codex-runtimes\codex-primary-runtime\dependenci
 5. 放入一张不合格图验证阻断，例如错误命名或小于 `256×256`；预期返回具体文件、原因和替换要求。
 6. 替换为合格参考图后回复“已重新放好”；预期重新执行完整自动检查并逐张视觉检查，全部通过后才进入资源清单。
 
-本轮源码与安装态全量测试均为 82/82 通过；Skill 源码与安装副本 47 个正式文件哈希一致。
+本轮源码与安装态全量测试均为 95/95 通过；Skill 源码与安装副本 63 个正式文件哈希一致。真实 Unity batchmode 返回码 0，2 Sprite / 2 资源 Prefab / 1 界面 Prefab / 0 issue。

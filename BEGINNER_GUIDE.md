@@ -18,6 +18,10 @@
 
 Codex 会负责建立请求、拆分 Sheet、生成图片、切割透明 PNG、运行 QA，并返回最终目录和 Contact Sheet。
 
+如果同时提供 Unity 项目路径，QA 通过后还会自动配置 Sprite、九宫格并从确认过的布局生成 Image/Button Prefab。当前已验证目标为 Unity 2022.3 LTS；业务点击事件、文本本地化和运行时数据仍由项目代码接线。
+
+Unity 布局示例：`D:\CuttingTool\samples\unity-layout-example.json`。正式执行会生成 `unity-preflight.json`、`unity-import-report.json`、Unity 日志和回滚清单；九宫格低置信度时会要求明确 Border 覆写，不会猜测写入。
+
 ## 2. 参考图放在哪里
 
 首次初始化后会得到：

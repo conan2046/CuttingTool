@@ -1,0 +1,14 @@
+{
+  "name": "CuttingTool.GameUI.Runtime",
+  "rootNamespace": "CuttingTool.GameUI",
+  "references": [],
+  "includePlatforms": [],
+  "excludePlatforms": [],
+  "allowUnsafeCode": false,
+  "overrideReferences": false,
+  "precompiledReferences": [],
+  "autoReferenced": true,
+  "defineConstraints": [],
+  "versionDefines": [],
+  "noEngineReferences": false
+}

@@ -142,6 +142,15 @@
       "expected_first_action": "识别为processing或unknown-sheet入口并检查是否有Layout Guide。",
       "expected_output": "有Layout Guide时直接进入Runner；无Layout Guide时先诊断和bbox修正。不得强制重新走项目初始化和风格生成。",
       "files": []
+    },
+    {
+      "id": 16,
+      "kind": "unity-export",
+      "prompt": "资源QA通过后直接导入D:\\CodeProjects\\UIText，配置Sprite Editor和九宫格，并生成最终可点击按钮Prefab。",
+      "expected_skill": "game-ui-asset-pipeline",
+      "expected_first_action": "读取Unity导出契约，检查Unity版本、正式Manifest、布局JSON、导入根和回滚范围。",
+      "expected_output": "运行export_unity_ui.py；Panel/Button九宫格仅高置信自动写入，低置信要求nine_slice_overrides；从显式布局生成Image/Button Prefab并返回预检、导入报告、日志和回滚清单。",
+      "files": []
     }
   ]
 }

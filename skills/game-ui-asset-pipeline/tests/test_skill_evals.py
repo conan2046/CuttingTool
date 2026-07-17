@@ -85,6 +85,16 @@ class SkillEvalsTest(unittest.TestCase):
         self.assertIn("失败", case["expected_output"])
         self.assertIn("只有全部通过后", case["expected_output"])
 
+    def test_unity_export_eval_requires_safe_border_and_reports(self) -> None:
+        payload = json.loads((SKILL_ROOT / "evals" / "evals.json").read_text(encoding="utf-8"))
+        cases = [case for case in payload["evals"] if case.get("kind") == "unity-export"]
+        self.assertEqual(len(cases), 1)
+        case = cases[0]
+        self.assertEqual(case["expected_skill"], "game-ui-asset-pipeline")
+        self.assertIn("Unity版本", case["expected_first_action"])
+        self.assertIn("nine_slice_overrides", case["expected_output"])
+        self.assertIn("回滚清单", case["expected_output"])
+
 
 if __name__ == "__main__":
     unittest.main()

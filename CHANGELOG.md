@@ -2,6 +2,36 @@
 
 记录每次正式功能提交的目标、主要改动、验证结果和兼容性影响。按时间倒序维护；纯格式整理或无功能影响的微小修正可以合并记录。
 
+## 2026-07-17｜v0.12.0｜Unity 自动导入、九宫格与交互 Prefab
+
+提交：随本记录同提交。
+
+### 目标
+
+把 QA 通过的 UI 位图继续交付到 Unity 2022.3，形成可追溯、可阻断、可回滚的 Sprite 与 UGUI Prefab。
+
+### 主要改动
+
+- 新增 `prepare_unity_export.py`、`export_unity_ui.py`、`infer_nine_slice.py` 和 `rollback_unity_export.py`。
+- 新增 Unity 嵌入 UPM 包，批量配置 Sprite Single、Alpha、PPU、Pivot、Border，并生成资源/界面 Prefab。
+- Panel/Button 九宫格使用确定性结构推断；低置信或无有效中心区在 Unity 启动前阻断，支持显式 Border 覆写。
+- 新增 schema v1 `unity-layout.json`，正式支持 Image/Button、父子层级、锚点、Pivot、位置和尺寸。
+- 输出 Unity 预检、导入报告、batchmode 日志和项目级回滚清单；默认只写 `Assets/_Generated/GameUI/<project-id>`。
+- 新增 Unity 导出契约、示例布局、Skill 触发评测和测试矩阵；版本升级为 `0.12.0`。
+
+### 验证
+
+- 源码与安装态全量 `unittest`：各 95/95 通过；日志为 `logs/unittest-v0.12.0.txt`、`logs/unittest-installed-v0.12.0.txt`。
+- 真实 Unity 2022.3.62f3c1 batchmode：返回码 0；导入 2 Sprite、生成 2 资源 Prefab 和 1 界面 Prefab，0 issue。
+- 两个测试 Sprite 自动 Border 均为 `[13,13,13,13]`；Button 资源/界面 Prefab 均验证 Raycast、`Button.targetGraphic` 和 BindingId。
+- Unity 证据：`output/unity-e2e/unity/unity-import-report.json`、`unity-batch.log`、`unity-import-plan.json`。
+- Skill 源码与安装副本：63 个正式文件 SHA-256 一致，0 差异。
+
+### 兼容性
+
+- 当前正式支持 Unity `2022.3.x` 与 UGUI；不修改用户手工 Prefab。
+- 业务点击事件、本地化、数据绑定和动画控制器仍由目标项目实现。
+
 ## 2026-07-17｜v0.11.0｜自动需求接收、跨界面复用与连续执行
 
 提交：随本记录同提交。
