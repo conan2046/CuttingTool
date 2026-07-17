@@ -11,6 +11,7 @@ from typing import Any
 
 from prepare_ui_batch import prepare_batch
 from run_ui_pipeline import run_pipeline
+from update_project_asset_catalog import update_catalog
 
 
 def read_json(path: Path) -> dict[str, Any]:
@@ -193,6 +194,20 @@ def write_delivery_summary(run_dir: Path, summary: dict[str, Any]) -> None:
     markdown_path.write_text(render_markdown(summary), encoding="utf-8")
 
 
+def sync_project_catalog(run_dir: Path, request: dict[str, Any]) -> dict[str, Any] | None:
+    manifest = run_dir / "final" / "manifest.json"
+    if not manifest.is_file():
+        return None
+    workspace_root = Path(__file__).resolve().parents[3]
+    try:
+        run_dir.relative_to(workspace_root / "output")
+    except ValueError:
+        return None
+    project_id = str(request.get("project_id", "game-ui"))
+    catalog = workspace_root / "input" / project_id / "ui-asset-catalog.json"
+    return update_catalog(catalog, manifest, run_dir.name)
+
+
 def orchestrate(
     run_dir: Path,
     request_path: Path | None = None,
@@ -233,7 +248,12 @@ def orchestrate(
     prior_summary = existing_run_summary(run_dir)
     final_manifest = run_dir / "final" / "manifest.json"
     if prior_summary and prior_summary.get("status") == "complete" and final_manifest.is_file() and not force_run:
+        catalog_result = sync_project_catalog(run_dir, request)
         summary = build_summary(run_dir, request, generation, "complete", prior_summary)
+        if catalog_result:
+            summary["outputs"]["project_asset_catalog"] = (
+                Path("..") / ".." / "input" / str(request.get("project_id", "game-ui")) / "ui-asset-catalog.json"
+            ).as_posix()
         write_delivery_summary(run_dir, summary)
         return {"ok": True, "reused_existing_delivery": True, **summary}
 
@@ -252,7 +272,12 @@ def orchestrate(
     )
     run_summary = existing_run_summary(run_dir)
     status = "complete" if result["ok"] else "failed"
+    catalog_result = sync_project_catalog(run_dir, request) if status == "complete" else None
     summary = build_summary(run_dir, request, generation, status, run_summary)
+    if catalog_result:
+        summary["outputs"]["project_asset_catalog"] = (
+            Path("..") / ".." / "input" / str(request.get("project_id", "game-ui")) / "ui-asset-catalog.json"
+        ).as_posix()
     write_delivery_summary(run_dir, summary)
     return {"ok": result["ok"], **summary}
 

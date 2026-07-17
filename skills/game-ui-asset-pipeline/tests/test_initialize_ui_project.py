@@ -39,10 +39,10 @@ class InitializeUiProjectTest(unittest.TestCase):
             self.assertEqual(payload["project_id"], "xianxia-bag-ui")
             self.assertTrue(notes.is_file())
             text = notes.read_text(encoding="utf-8")
-            self.assertIn("canonical-style.png", text)
+            self.assertIn("GAME-UI-ASSET-PIPELINE:AUTO-BEGIN", text)
+            self.assertIn("Codex 会自动分析", text)
             self.assertIn("reference-01-material.png", text)
-            self.assertIn("<!-- 填写说明：", text)
-            self.assertIn("填写示例：", text)
+            self.assertIn("用户无需手工填写", text)
             self.assertIn("已放好", text)
 
     def test_reuses_existing_notes_without_overwriting_user_content(self) -> None:

@@ -45,6 +45,10 @@ V1 必须支持：
 - 使用 Codex 将自然语言转换为批量请求，并通过统一编排器完成首次准备、缺图清单、断点续跑、Runner 调用和交付摘要。
 - 首次使用 Skill 且缺少项目名时先询问项目名；获得后由确定性脚本创建 `input/<project-id>/references/reference-notes.md`，重复初始化不得覆盖用户内容。
 - 新建参考图目录后必须告知绝对路径并暂停。用户确认放图后先运行自动检查，再逐图视觉检查；任一参考图不合格时要求替换并继续暂停，全部通过前禁止建立资源清单、请求 JSON 或调用图片生成。
+- 参考图通过后由 Codex 自动分析主/辅参考职责并更新 `reference-notes.md`；不得要求用户填写该文件。随后把界面布局、UI 元素是否与主参考一致、不一致差异和每个界面像素尺寸合并为一次确认。
+- 用户确认后自动生成 `ui-resource-inventory.md/json` 和批量请求，并连续执行到最终美术资源交付；`awaiting-generation` 是内部图片生成待办，不得作为用户停顿点。
+- 项目首个 UI 界面全部产出；后续界面按内部类别、语义名和状态复用既有资源，忽略尺寸，并记录引用资源 ID、输出路径和来源运行。
+- 支持从需求接收、生成、已有 Sheet 后处理、未知整图诊断、仅 QA 和断点续跑阶段独立进入；从最靠后的安全阶段开始，但不得跳过后续 QA。
 - 对没有 Layout Guide 的未知整图先执行背景诊断，生成候选 bbox、可编辑修正 JSON 和标注预览。
 - 在不引入桌面 GUI 的前提下，用批准后的 bbox 修正文件完成透明切割和正式 QA。
 
@@ -78,6 +82,7 @@ V1 不包含：
 - 缺少生成图、Matte 或原生来源侧车时返回 `awaiting-generation`，并列出 Job、精确路径、Prompt 和参考图角色；这是正常暂停，不得误报为失败。
 - 完成态重复调用必须幂等复用；失败后替换输入可继续，只有已有正式 Manifest 时才允许显式 `--force-run`。
 - 每次调用必须更新 `qa/delivery-summary.json` 与 `qa/delivery-summary.md`，汇总生成方式、Job/输入就绪度、结果数量、交付路径、人工处理项和下一步动作。
+- 完成态自动把正式 Manifest 合并到 `input/<project-id>/ui-asset-catalog.json`，后续界面复用键固定为 `category + semantic_name + state`，尺寸不参与命中。
 - 编排器不调用图片 API；Codex 仍使用内置 `imagegen` 按缺图清单完成视觉生成。
 
 ### 后续路线排期

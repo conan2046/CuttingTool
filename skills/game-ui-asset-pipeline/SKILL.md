@@ -56,6 +56,8 @@ description: 生成、拆分、透明化、校验并打包游戏 UI 位图资源
 - 请求原生透明、烟雾、玻璃、液体或柔光时，读取 `references/native-alpha-contract.md`。
 - 用户要求一键生成、多分类完整交付、继续上次任务或查看缺少哪些生成图时，读取 `references/orchestration-contract.md`。
 - 首次项目初始化、用户说参考图已放好或需要检查参考图时，读取 `references/reference-intake-contract.md`。
+- 需要确认界面布局/尺寸、自动写参考说明、建立资源清单、跨界面复用或从中间阶段开始时，读取 `references/project-intake-and-reuse-contract.md`。
+- 遇到明确的 WebSocket `stream disconnected before completion` 错误时，读取 `references/task-recovery-contract.md`。
 
 不要一次加载无关参考文件。
 
@@ -85,7 +87,7 @@ ${CODEX_HOME:-$HOME/.codex}/skills/.system/imagegen/SKILL.md
      --project-name <项目名>
    ```
 
-4. 确认已创建 `input/<project-id>/references/reference-notes.md`，把参考图目录的绝对路径返回给用户，明确要求用户把图片放好后回复“已放好”，然后暂停本轮。新目录必然没有用户参考图，不得直接进入资源清单或生成。
+4. 确认已创建 `input/<project-id>/references/reference-notes.md`，把参考图目录的绝对路径返回给用户，明确要求用户把图片放好后回复“已放好”，然后暂停本轮。用户无需填写 Markdown。
 5. 用户回复“已放好”后运行：
 
    ```powershell
@@ -94,10 +96,18 @@ ${CODEX_HOME:-$HOME/.codex}/skills/.system/imagegen/SKILL.md
      --json-out D:\CuttingTool\input\<project-id>\reference-validation.json
    ```
 
-6. 自动检查通过后，使用 `view_image` 逐张检查参考图的清晰度、主体完整性、水印/大字污染、主参考图代表性、辅助图职责和多图风格冲突。自动检查或视觉检查任一不合格时，列出具体文件、原因和替换要求，然后暂停；用户重新放置并回复后，从自动检查开始完整复验。
-7. 只有全部参考图通过自动与视觉检查后，才允许继续询问或整理资源清单、建立请求 JSON、生成风格基准或进入图片生成。
+6. 自动检查通过后，使用 `view_image` 逐张检查并自动判断清晰度、完整性、污染、主参考代表性、辅助图职责和风格冲突；不合格时要求替换并暂停。
+7. 全部通过后，把每个界面的布局参考、UI 元素是否与主参考一致（不一致时写清差异）和目标像素尺寸合并为一次确认。用户确认后自动运行 `compile_ui_project_intake.py`，更新 `reference-notes.md`、生成 `ui-resource-inventory.md` 与批量请求，然后连续执行到正式资源交付。
 
-初始化脚本必须幂等复用已有目录和说明文件，不覆盖用户已经填写的 Markdown。只有用户明确要求重新建立说明文件时，才另存新文件，不直接覆盖旧文件。
+初始化脚本必须幂等复用已有目录。自动分析只替换 Markdown 的自动维护区，保留区外人工文字。
+
+把最终目标设为“产出用户需求的美术资源”。除项目名、用户尚未放置参考图、一次性界面确认、参考图不合格替换和重大歧义外，不停在说明文件、资源清单、`awaiting-generation` 或缺图摘要。
+
+### 项目复用与阶段入口
+
+项目首个界面全部产出；后续界面按 `category + semantic_name + state` 复用，忽略尺寸，并在清单记录引用资源。使用项目级 `ui-asset-catalog.json` 保存已交付资源。
+
+如果用户已有请求 JSON、Sheet、透明资源、Manifest 或运行目录，从 `generation`、`processing`、`unknown-sheet`、`qa-only` 或 `resume` 等最靠后的安全阶段开始；不要强迫重新走首次初始化。具体路由读取 `project-intake-and-reuse-contract.md`。
 
 如果用户正在处理一张已提供的未知整图，或明确给出已有运行目录并要求续跑，不需要强制新建项目输入目录。
 
@@ -204,7 +214,7 @@ ${CODEX_HOME:-$HOME/.codex}/skills/.system/imagegen/SKILL.md
   --run-dir output/<project-id>
 ```
 
-编排器在缺图时返回 `awaiting-generation`、精确缺失路径、对应 Prompt 和参考图角色。使用 `$imagegen` 补齐文件后，仅传 `--run-dir` 再次运行；输入齐全时自动执行 Runner。不要把正常等待图片生成误报为流水线失败。
+编排器在缺图时返回 `awaiting-generation`、精确缺失路径、对应 Prompt 和参考图角色。立即使用 `$imagegen` 补齐文件并仅传 `--run-dir` 续跑；输入齐全时自动执行 Runner。`awaiting-generation` 是内部状态，不是向用户停顿的理由。
 
 ### 4. 生成布局引导图
 

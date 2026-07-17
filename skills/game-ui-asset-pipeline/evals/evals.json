@@ -112,8 +112,8 @@
       "kind": "first-use-onboarding",
       "prompt": "第一次用这个技能，帮我做一套修仙背包UI资源。",
       "expected_skill": "game-ui-asset-pipeline",
-      "expected_first_action": "当前没有项目名，先询问用户输入项目名并暂停；用户回复后运行 initialize_ui_project.py，返回参考图目录并再次暂停等待用户放图。",
-      "expected_output": "用户回复已放好后运行 validate_ui_references.py 并逐张视觉检查；不合格时要求替换并暂停，全部通过后才继续资源清单和生成。",
+      "expected_first_action": "当前没有项目名，先询问用户输入项目名并暂停；用户回复后运行 initialize_ui_project.py，返回参考图目录并暂停等待用户放图，但不要求用户填写reference-notes.md。",
+      "expected_output": "用户回复已放好后运行validate_ui_references.py自动检查并逐图分析；全部通过后只合并询问一次界面布局、UI元素一致性和界面像素尺寸，确认后自动回写说明、生成资源清单并连续执行到美术资源交付。",
       "files": []
     },
     {
@@ -122,7 +122,25 @@
       "prompt": "项目 xianxia-bag-ui 的参考图我已经放好了，继续做资源。",
       "expected_skill": "game-ui-asset-pipeline",
       "expected_first_action": "运行 validate_ui_references.py 自动检查，再使用 view_image 逐张视觉检查。",
-      "expected_output": "自动或视觉检查失败时列出具体文件、原因和替换要求并暂停；只有全部通过后才进入资源清单、请求JSON和图片生成。",
+      "expected_output": "自动或视觉检查失败时要求替换；只有全部通过后才由Codex自动完善reference-notes.md，合并确认布局、元素一致性和尺寸，生成ui-resource-inventory.md后不再停顿，直接进入生成和交付。",
+      "files": []
+    },
+    {
+      "id": 14,
+      "kind": "project-reuse",
+      "prompt": "项目第二个商店界面沿用背包界面的关闭按钮和货币图标，尺寸不同没关系，已有资源别重复做，直接继续产出缺少的资源。",
+      "expected_skill": "game-ui-asset-pipeline",
+      "expected_first_action": "读取项目ui-asset-catalog.json，按category、semantic_name和state判定复用，忽略尺寸。",
+      "expected_output": "ui-resource-inventory.md将已有资源标记reuse并记录资源ID、输出和来源运行；只为未命中资源建立生成Job，然后自动继续交付。",
+      "files": []
+    },
+    {
+      "id": 15,
+      "kind": "stage-entry",
+      "prompt": "我已经有一张纯色背景的UI资源Sheet，只需要从切图、透明化和QA开始，不要重新问项目参考图。",
+      "expected_skill": "game-ui-asset-pipeline",
+      "expected_first_action": "识别为processing或unknown-sheet入口并检查是否有Layout Guide。",
+      "expected_output": "有Layout Guide时直接进入Runner；无Layout Guide时先诊断和bbox修正。不得强制重新走项目初始化和风格生成。",
       "files": []
     }
   ]

@@ -14,7 +14,7 @@ unprepared
 ```
 
 - `unprepared`：运行目录中没有 `request.json` 和 `jobs.json`，必须提供 `--request`。
-- `awaiting-generation`：Prompt、Layout Guide 和 Job 已创建，但至少一个必需生成输入缺失；这是正常暂停状态，CLI 返回成功。
+- `awaiting-generation`：Prompt、Layout Guide 和 Job 已创建，但至少一个必需生成输入缺失；这是编排器内部待办状态，CLI 返回成功。Codex 应立即调用内置图片生成补齐，不向用户暂停。
 - `ready-for-processing`：所有 Job 的必需生成输入就绪，编排器自动调用统一 Runner。
 - `complete`：正式 Manifest、Contact Sheet、QA 和运行摘要均已生成且无 fail。
 - `failed`：透明预检、切割、命名或 QA 失败；禁止把资源包报告为完成。
@@ -29,7 +29,7 @@ unprepared
 | `model-matte-derived` | 彩色 Sheet 和同尺寸 `-alpha-matte.png` |
 | `native-alpha-required` | RGBA Sheet 和 `.provenance.json` 来源侧车 |
 
-编排器必须按 Job 返回精确缺失路径、Prompt、参考图角色和 Matte 编辑源。不得只返回“素材不齐”一类模糊信息。
+编排器必须按 Job 返回精确缺失路径、Prompt、参考图角色和 Matte 编辑源。Codex 逐项生成并按精确路径保存，然后自动续跑；不得只返回“素材不齐”或让用户手工续跑。
 
 ## 命令
 

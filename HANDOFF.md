@@ -4,7 +4,7 @@
 > 工作目录：`D:\CuttingTool`  
 > 仓库：`https://github.com/conan2046/CuttingTool.git`  
 > 当前工作分支：`main`
-> 已完成功能基线：v0.10.3 参考图接收与强制验收关卡
+> 已完成功能基线：v0.11.0 自动需求接收、跨界面复用与连续执行
 
 ## 1. 新会话先做什么
 
@@ -44,6 +44,17 @@ game-ui-asset-pipeline
 核心原则：AI 负责视觉，Python 脚本负责确定性处理和验收。桌面 GUI 已明确降为长期最低优先级，不是当前开发目标。
 
 ## 3. 已经完成什么
+
+### 3.0 v0.11.0：自动接收与跨界面复用
+
+- 参考图通过后由 Codex 自动维护 `reference-notes.md`，不再要求用户填写模板。
+- 布局、UI 元素与主参考一致性、差异说明和界面像素尺寸合并为一次确认。
+- `compile_ui_project_intake.py` 自动生成资源清单和批量请求；确认后连续执行到最终资源交付。
+- 首个界面全产出；后续界面按类别、语义名和状态复用，忽略尺寸并记录来源。
+- 完成态自动更新项目 `ui-asset-catalog.json`。
+- 支持从 intake、generation、processing、unknown-sheet、qa-only、resume 独立进入。
+- 断线恢复协议已落文档；全自动新建任务仍依赖 Codex 桌面断线回调。
+- 源码与安装态全量 `unittest` 各 86/86 通过；51 个正式文件 SHA-256 一致。
 
 ### 3.1 V1 确定性核心链路
 
