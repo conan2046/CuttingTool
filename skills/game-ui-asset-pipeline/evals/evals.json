@@ -106,6 +106,24 @@
       "expected_first_action": "把自然语言整理为包含Icon_Item色键任务与Icon_Effect Matte任务的批量请求，然后运行P6编排器建立缺图清单。",
       "expected_output": "触发 game-ui-asset-pipeline，先建立批量请求并运行 orchestrate_ui_delivery.py；缺图时返回 awaiting-generation，补图后自动执行 Runner 并输出 JSON/Markdown 交付摘要。",
       "files": []
+    },
+    {
+      "id": 12,
+      "kind": "first-use-onboarding",
+      "prompt": "第一次用这个技能，帮我做一套修仙背包UI资源。",
+      "expected_skill": "game-ui-asset-pipeline",
+      "expected_first_action": "当前没有项目名，先询问用户输入项目名并暂停；用户回复后运行 initialize_ui_project.py，返回参考图目录并再次暂停等待用户放图。",
+      "expected_output": "用户回复已放好后运行 validate_ui_references.py 并逐张视觉检查；不合格时要求替换并暂停，全部通过后才继续资源清单和生成。",
+      "files": []
+    },
+    {
+      "id": 13,
+      "kind": "reference-intake-gate",
+      "prompt": "项目 xianxia-bag-ui 的参考图我已经放好了，继续做资源。",
+      "expected_skill": "game-ui-asset-pipeline",
+      "expected_first_action": "运行 validate_ui_references.py 自动检查，再使用 view_image 逐张视觉检查。",
+      "expected_output": "自动或视觉检查失败时列出具体文件、原因和替换要求并暂停；只有全部通过后才进入资源清单、请求JSON和图片生成。",
+      "files": []
     }
   ]
 }

@@ -1,0 +1,22 @@
+{
+  "project_id": "xianxia-item-icons",
+  "style_notes": "国风修仙手游，青玉与鎏金材质，正面视角，移动端清晰可读；reference-01 只参考材质，reference-02 只参考配色",
+  "generation_method": "built-in-imagegen",
+  "canonical_style": "D:/CuttingTool/input/xianxia-item-icons/references/canonical-style.png",
+  "references": [
+    "D:/CuttingTool/input/xianxia-item-icons/references/reference-01-material.png",
+    "D:/CuttingTool/input/xianxia-item-icons/references/reference-02-color.png"
+  ],
+  "categories": [
+    {
+      "category": "Icon_Item",
+      "target_size": [128, 128],
+      "assets": [
+        {"semantic_name": "HealthPill", "description": "恢复生命的朱红色丹药"},
+        {"semantic_name": "ManaPill", "description": "恢复法力的青蓝色丹药"},
+        {"semantic_name": "BreakthroughPill", "description": "用于境界突破的金色丹药"},
+        {"semantic_name": "QuestScroll", "description": "带青玉轴头的任务卷轴"}
+      ]
+    }
+  ]
+}

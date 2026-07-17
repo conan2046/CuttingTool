@@ -55,6 +55,7 @@ description: 生成、拆分、透明化、校验并打包游戏 UI 位图资源
 - 色键背景存在色差、阈值需要自适应或组件出现碎片时，读取 `references/chroma-fragment-contract.md`。
 - 请求原生透明、烟雾、玻璃、液体或柔光时，读取 `references/native-alpha-contract.md`。
 - 用户要求一键生成、多分类完整交付、继续上次任务或查看缺少哪些生成图时，读取 `references/orchestration-contract.md`。
+- 首次项目初始化、用户说参考图已放好或需要检查参考图时，读取 `references/reference-intake-contract.md`。
 
 不要一次加载无关参考文件。
 
@@ -69,6 +70,36 @@ ${CODEX_HOME:-$HOME/.codex}/skills/.system/imagegen/SKILL.md
 默认使用内置图片生成路径。复杂烟雾、玻璃、液体或柔光优先使用 `model-matte-derived`：先生成纯黑底彩色 Sheet，再把该图作为编辑目标生成像素对齐且画布尺寸完全一致的灰度 Alpha Matte；尺寸不一致必须失败，不得自动缩放后继续交付。不要把 Matte 推导结果称为模型原生 Alpha。只有用户明确要求源文件原生 Alpha 时，才按 `$imagegen` 的 CLI 回退规则确认授权。
 
 ## 输入判断
+
+### 首次项目初始化
+
+在收集参考图或资源清单前先确定项目名，因为项目名决定本地输入目录和后续 `project_id`：
+
+1. 如果用户已经明确提供项目名，直接使用，不要重复询问。
+2. 如果当前任务没有项目名，且不是继续一个已知运行目录，只问一句并暂停：`请输入项目名（建议使用英文、数字和短横线，例如 xianxia-bag-ui）。`
+3. 获得项目名后立即运行：
+
+   ```powershell
+   & $PYTHON scripts/initialize_ui_project.py `
+     --workspace-root D:\CuttingTool `
+     --project-name <项目名>
+   ```
+
+4. 确认已创建 `input/<project-id>/references/reference-notes.md`，把参考图目录的绝对路径返回给用户，明确要求用户把图片放好后回复“已放好”，然后暂停本轮。新目录必然没有用户参考图，不得直接进入资源清单或生成。
+5. 用户回复“已放好”后运行：
+
+   ```powershell
+   & $PYTHON scripts/validate_ui_references.py `
+     --references-dir D:\CuttingTool\input\<project-id>\references `
+     --json-out D:\CuttingTool\input\<project-id>\reference-validation.json
+   ```
+
+6. 自动检查通过后，使用 `view_image` 逐张检查参考图的清晰度、主体完整性、水印/大字污染、主参考图代表性、辅助图职责和多图风格冲突。自动检查或视觉检查任一不合格时，列出具体文件、原因和替换要求，然后暂停；用户重新放置并回复后，从自动检查开始完整复验。
+7. 只有全部参考图通过自动与视觉检查后，才允许继续询问或整理资源清单、建立请求 JSON、生成风格基准或进入图片生成。
+
+初始化脚本必须幂等复用已有目录和说明文件，不覆盖用户已经填写的 Markdown。只有用户明确要求重新建立说明文件时，才另存新文件，不直接覆盖旧文件。
+
+如果用户正在处理一张已提供的未知整图，或明确给出已有运行目录并要求续跑，不需要强制新建项目输入目录。
 
 先把请求归为以下一种或多种模式：
 

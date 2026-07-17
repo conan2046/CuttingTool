@@ -43,6 +43,8 @@ V1 必须支持：
 - 同一请求包含多个分类时自动建立独立 Job；单分类超出容量时自动拆分多张 Sheet。
 - 在所有生成图就绪后，通过统一确定性 Runner 汇总正式 Manifest、QA 和运行摘要。
 - 使用 Codex 将自然语言转换为批量请求，并通过统一编排器完成首次准备、缺图清单、断点续跑、Runner 调用和交付摘要。
+- 首次使用 Skill 且缺少项目名时先询问项目名；获得后由确定性脚本创建 `input/<project-id>/references/reference-notes.md`，重复初始化不得覆盖用户内容。
+- 新建参考图目录后必须告知绝对路径并暂停。用户确认放图后先运行自动检查，再逐图视觉检查；任一参考图不合格时要求替换并继续暂停，全部通过前禁止建立资源清单、请求 JSON 或调用图片生成。
 - 对没有 Layout Guide 的未知整图先执行背景诊断，生成候选 bbox、可编辑修正 JSON 和标注预览。
 - 在不引入桌面 GUI 的前提下，用批准后的 bbox 修正文件完成透明切割和正式 QA。
 
@@ -144,7 +146,10 @@ D:\CuttingTool\
 ├─ AGENTS.md
 ├─ CHANGELOG.md
 ├─ README.md
+├─ BEGINNER_GUIDE.md
 ├─ pyproject.toml
+├─ input\
+│  └─ README.md
 ├─ skills\
 │  └─ game-ui-asset-pipeline\
 │     ├─ SKILL.md
@@ -166,6 +171,7 @@ D:\CuttingTool\
 
 | 目录 | 用途 |
 |---|---|
+| `input/` | 用户本地需求附件与参考图；除说明文件外默认不纳入 Git |
 | `skills/` | Skill 可版本管理源码 |
 | `references/` | 生成协议、分类、命名、QA 等按需读取文档 |
 | `scripts/` | 确定性图片处理和构建脚本 |

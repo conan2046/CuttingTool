@@ -63,6 +63,28 @@ class SkillEvalsTest(unittest.TestCase):
         self.assertIn("orchestrate_ui_delivery.py", case["expected_output"])
         self.assertIn("awaiting-generation", case["expected_output"])
 
+    def test_first_use_onboarding_requires_project_initialization(self) -> None:
+        payload = json.loads((SKILL_ROOT / "evals" / "evals.json").read_text(encoding="utf-8"))
+        cases = [case for case in payload["evals"] if case.get("kind") == "first-use-onboarding"]
+        self.assertEqual(len(cases), 1)
+        case = cases[0]
+        self.assertEqual(case["expected_skill"], "game-ui-asset-pipeline")
+        self.assertIn("询问用户输入项目名", case["expected_first_action"])
+        self.assertIn("initialize_ui_project.py", case["expected_first_action"])
+        self.assertIn("暂停等待用户放图", case["expected_first_action"])
+        self.assertIn("validate_ui_references.py", case["expected_output"])
+        self.assertIn("全部通过后", case["expected_output"])
+
+    def test_reference_intake_gate_blocks_generation_until_review_passes(self) -> None:
+        payload = json.loads((SKILL_ROOT / "evals" / "evals.json").read_text(encoding="utf-8"))
+        cases = [case for case in payload["evals"] if case.get("kind") == "reference-intake-gate"]
+        self.assertEqual(len(cases), 1)
+        case = cases[0]
+        self.assertIn("validate_ui_references.py", case["expected_first_action"])
+        self.assertIn("view_image", case["expected_first_action"])
+        self.assertIn("失败", case["expected_output"])
+        self.assertIn("只有全部通过后", case["expected_output"])
+
 
 if __name__ == "__main__":
     unittest.main()

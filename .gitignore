@@ -3,6 +3,10 @@
 /tmp/
 /logs/
 
+# Local user inputs and private visual references
+/input/*
+!/input/README.md
+
 # Python caches and build artifacts
 __pycache__/
 *.py[cod]

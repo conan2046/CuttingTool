@@ -1,4 +1,4 @@
 interface:
   display_name: "Game UI Asset Pipeline"
   short_description: "Orchestrate and package game UI bitmap assets"
-  default_prompt: "Use $game-ui-asset-pipeline to turn my natural-language UI request into resumable generation jobs, create and split the asset sheets, validate transparent PNGs, and return the manifest, contact sheet, QA report, and delivery summary."
+  default_prompt: "Use $game-ui-asset-pipeline. On first use, resolve the project name and initialize its local references folder and reference-notes.md before turning my natural-language UI request into resumable generation jobs, transparent PNGs, QA, and a delivery summary."

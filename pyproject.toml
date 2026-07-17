@@ -1,6 +1,6 @@
 [project]
 name = "cuttingtool"
-version = "0.10.1"
+version = "0.10.3"
 description = "Codex-first game UI asset generation, unknown-sheet diagnosis, extraction, normalization, and QA tools."
 requires-python = ">=3.11"
 dependencies = [
