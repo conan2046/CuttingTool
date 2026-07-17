@@ -1,0 +1,23 @@
+{
+  "project_id": "p61-sci-fi-holographic-matte",
+  "style_notes": "Premium sci-fi holographic strategy UI effects, electric blue teal and ultraviolet palette, precise luminous energy treatment, crisp readability at 256px, no text or frames",
+  "generation_method": "built-in-imagegen",
+  "categories": [
+    {
+      "category": "Icon_Effect",
+      "transparency_mode": "model-matte-derived",
+      "canvas": [1024, 1024],
+      "grid": [2, 2],
+      "target_size": [256, 256],
+      "outer_margin": 96,
+      "gutter": 96,
+      "safe_padding": 32,
+      "assets": [
+        {"semantic_name": "Smoke", "description": "ionized teal plasma vapor"},
+        {"semantic_name": "Glass", "description": "angular holographic glass shield fragment with electric-blue refraction"},
+        {"semantic_name": "Liquid", "description": "zero-gravity ultraviolet nanofluid splash"},
+        {"semantic_name": "SoftGlow", "description": "concentric blue-violet holographic energy glow"}
+      ]
+    }
+  ]
+}

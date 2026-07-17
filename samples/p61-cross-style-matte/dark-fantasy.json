@@ -1,0 +1,23 @@
+{
+  "project_id": "p61-dark-fantasy-matte",
+  "style_notes": "Dark fantasy mobile ARPG UI effects, obsidian and aged gold visual language, ember crimson highlights, cinematic but readable at 256px, no text or frames",
+  "generation_method": "built-in-imagegen",
+  "categories": [
+    {
+      "category": "Icon_Effect",
+      "transparency_mode": "model-matte-derived",
+      "canvas": [1024, 1024],
+      "grid": [2, 2],
+      "target_size": [256, 256],
+      "outer_margin": 96,
+      "gutter": 96,
+      "safe_padding": 32,
+      "assets": [
+        {"semantic_name": "Smoke", "description": "charcoal ritual smoke with faint ember-red wisps"},
+        {"semantic_name": "Glass", "description": "cracked obsidian glass shard aura with restrained antique-gold highlights"},
+        {"semantic_name": "Liquid", "description": "suspended crimson alchemical liquid splash"},
+        {"semantic_name": "SoftGlow", "description": "soft circular ember-gold magical glow"}
+      ]
+    }
+  ]
+}

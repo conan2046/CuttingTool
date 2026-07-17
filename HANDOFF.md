@@ -4,7 +4,7 @@
 > 工作目录：`D:\CuttingTool`  
 > 仓库：`https://github.com/conan2046/CuttingTool.git`  
 > 当前工作分支：`main`
-> 已完成功能基线：v0.10.0 P6 自然语言一键编排
+> 已完成功能基线：v0.10.1 P6.1 跨风格 Matte 回归
 
 ## 1. 新会话先做什么
 
@@ -378,6 +378,7 @@ $PYTHON = 'C:\Users\Admin\.cache\codex-runtimes\codex-primary-runtime\dependenci
 ## 8. 最终状态
 
 - 当前开发分支：`main`。
-- v0.10.0 P6 已实现；最终测试和安装一致性以 CHANGELOG 最新记录为准。
-- 下一阶段为 P6.1 跨风格 Matte 回归；P7 Unity 导入、P8 九宫格推断已排期但未实施。
+- v0.10.1 P6.1 已完成暗黑幻想、明亮卡通、科幻全息三套真实 GPT Image 2 RGB＋Matte 回归；每套覆盖 Smoke、Glass、Liquid、SoftGlow，合计 12 pass / 0 warning / 0 fail。
+- 三套 Contact Sheet 已人工检查；Matte 均为同图编辑、画布一致且未缩放，`alpha_origin=gpt-image-2-matte-derived`。
+- 下一阶段为 P7 Unity 自动导入与 Sprite Editor 配置；实施前必须单独确认目标 Unity 项目、版本、导入目录、TextureImporter 规则和回滚方案。P8 九宫格推断仍排在 P7 之后。
 - GUI 继续保持最低优先级。
