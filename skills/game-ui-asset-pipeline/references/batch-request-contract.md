@@ -76,3 +76,5 @@
 `native-alpha-required` 不得使用顶层 `generation_method=built-in-imagegen`。外部生成方式必须经用户明确确认，并为每个 Job 同时写出 `generated/<job-id>.provenance.json`；格式见 `native-alpha-contract.md`。
 
 `model-matte-derived` 使用内置 `built-in-imagegen`，每个 Job 必须同时生成 `generated/<job-id>.png` 与 `generated/<job-id>-alpha-matte.png`。Matte 生成时把彩色 Sheet 作为编辑目标，禁止独立重画；Runner 在正式输出前验证双图对齐和连续灰度层次。
+
+自然语言完整交付由 Codex 先建立本契约的请求 JSON，再交给 `orchestrate_ui_delivery.py`。编排器不解析自然语言、不调用图片 API；它负责生成 Job、报告精确缺图、补图续跑和汇总正式交付。状态机和摘要格式见 `orchestration-contract.md`。

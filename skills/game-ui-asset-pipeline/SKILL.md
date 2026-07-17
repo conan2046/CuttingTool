@@ -54,6 +54,7 @@ description: 生成、拆分、透明化、校验并打包游戏 UI 位图资源
 - 输入是未知整图、假棋盘格或需要人工修正 bbox 时，读取 `references/unknown-sheet-contract.md`。
 - 色键背景存在色差、阈值需要自适应或组件出现碎片时，读取 `references/chroma-fragment-contract.md`。
 - 请求原生透明、烟雾、玻璃、液体或柔光时，读取 `references/native-alpha-contract.md`。
+- 用户要求一键生成、多分类完整交付、继续上次任务或查看缺少哪些生成图时，读取 `references/orchestration-contract.md`。
 
 不要一次加载无关参考文件。
 
@@ -164,6 +165,16 @@ ${CODEX_HOME:-$HOME/.codex}/skills/.system/imagegen/SKILL.md
 
 批量准备器按分类容量自动拆成多个 Job，并保持同一语义名的按钮状态组不跨 Sheet。逐个使用 `$imagegen` 生成 `jobs.json` 指定的 `generated_output`；不要改写 Job 文件名或布局关系。
 
+自然语言完整交付优先使用 P6 编排器代替手动串联准备器和 Runner。先由 Codex 把用户描述转换为批量请求 JSON，再运行：
+
+```bash
+"$PYTHON" scripts/orchestrate_ui_delivery.py \
+  --request batch-request.json \
+  --run-dir output/<project-id>
+```
+
+编排器在缺图时返回 `awaiting-generation`、精确缺失路径、对应 Prompt 和参考图角色。使用 `$imagegen` 补齐文件后，仅传 `--run-dir` 再次运行；输入齐全时自动执行 Runner。不要把正常等待图片生成误报为流水线失败。
+
 ### 4. 生成布局引导图
 
 为每个 Sheet 建立确定性 Layout Guide。它只表达：
@@ -196,6 +207,8 @@ ${CODEX_HOME:-$HOME/.codex}/skills/.system/imagegen/SKILL.md
 ```
 
 Runner 根据 Job 声明分流 `model-matte-derived`、原生 Alpha、已有 Alpha 或色键背景。Matte 模式必须在正式输出前验证双图齐全、灰度纯度、黑色边框、连续 Alpha 层次、背景平整度、像素覆盖关系和双图 SHA-256；通过后用已知黑背景合成方程恢复直通道 RGB＋Alpha。失败时只写 QA 与失败摘要，不生成正式 Manifest。所有 RGBA 生产尺寸与单体归一化均使用预乘 Alpha。默认拒绝覆盖已有正式 Manifest；明确重跑时使用 `--force`。
+
+P6 编排器每次调用都写出 `qa/delivery-summary.json` 和 `qa/delivery-summary.md`。完成态重复调用必须直接复用正式结果；失败后替换生成输入可继续执行，只有已有正式 Manifest 时才允许显式 `--force-run`。
 
 内置 `imagegen` 当前不能直接用于 `native-alpha-required`，但可以用于 `model-matte-derived`，不需要 API Key。原生模式仍需用户明确确认外部透明生成回退，并保存 `generated/<job-id>.provenance.json`；来源侧车中的模型与生成方式都必须为非空值。
 
@@ -353,7 +366,9 @@ output/<project-id>-<timestamp>/
 └─ qa/
    ├─ contact-sheet.png
    ├─ qa-report.json
-   └─ run-summary.json
+   ├─ run-summary.json
+   ├─ delivery-summary.json
+   └─ delivery-summary.md
 ```
 
 ## 交付要求

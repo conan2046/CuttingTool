@@ -2,6 +2,41 @@
 
 记录每次正式功能提交的目标、主要改动、验证结果和兼容性影响。按时间倒序维护；纯格式整理或无功能影响的微小修正可以合并记录。
 
+## 2026-07-17｜v0.10.0｜P6 自然语言一键编排与交付摘要
+
+提交：随本记录同提交。
+
+### 目标
+
+把多分类 UI 生产从“手动依次运行准备器和 Runner”收敛为 Codex-first 一键编排流程，支持缺图暂停、补图续跑、失败恢复、完成态复用和统一交付摘要。
+
+### 主要改动
+
+- 新增 `orchestrate_ui_delivery.py`：首次传入批量请求建立 Job；后续只传运行目录即可检查输入并自动继续。
+- 建立 `unprepared → awaiting-generation → ready-for-processing → complete|failed` 状态机；缺图是正常暂停，返回精确 Job、输出路径、Prompt、参考图角色和 Matte 编辑源。
+- 按透明模式检查必需输入：色键 Sheet、RGB＋Matte 双图、原生 RGBA＋来源侧车；原生来源侧车缺失时不提前进入 Runner。
+- 支持 Matte 预检失败后替换生成图直接恢复；已有正式 Manifest 的失败重跑要求显式 `--force-run`；完成态重复调用幂等复用。
+- 每次调用生成 `qa/delivery-summary.json` 和 `qa/delivery-summary.md`，统一汇总生成方式、Job/输入进度、结果数量、交付路径、人工处理项和下一步动作。
+- 新增 P6 编排契约、混合任务测试和静态触发评测；同步 Skill、OpenAI UI 元数据、README、AGENTS 和 HANDOFF。
+- 项目版本升级为 `0.10.0`；P7 Unity 自动导入、P8 九宫格边界推断进入后续排期，本阶段未实施。
+
+### 验证
+
+- 源码 `unittest`：72/72 通过。
+- 安装态 `unittest`：72/72 通过。
+- P6 混合端到端：`Icon_Item` 色键＋`Icon_Effect` Matte，首次缺少 3 个输入，部分补图后 1/2 Job 就绪，最终 4 pass / 0 warning / 0 fail；完成态重复调用成功复用。
+- 失败恢复：非灰度 Matte 预检失败不创建正式 Manifest，替换正确 Matte 后恢复完成。
+- Contact Sheet 已人工检查：2 个道具和 2 个半透明特效顺序正确、背景透明、轮廓完整。
+- JSON/Markdown 交付摘要、Manifest、QA、运行摘要路径一致。
+- P6 静态触发评测：1/1 通过；九类既有独立新任务触发验收仍为 9/9。
+- Skill 源码与安装副本：42 个正式文件 SHA-256 一致，0 缺失、0 额外、0 差异。
+
+### 兼容性
+
+- 不新增依赖、API Key、付费调用、OpenCV、桌面 GUI 或 Unity 项目修改。
+- 现有 `prepare_ui_batch.py` 与 `run_ui_pipeline.py` 继续作为分步调试入口；P6 编排器是新的推荐完整交付入口。
+- Unity 导入和九宫格仅进入排期，后续分别立项、验证和授权实施。
+
 ## 2026-07-17｜v0.9.1｜P4/P5 合并审查加固
 
 提交：随本记录同提交。

@@ -42,6 +42,7 @@ V1 必须支持：
 - 保留从生成源图到最终文件的可追溯关系。
 - 同一请求包含多个分类时自动建立独立 Job；单分类超出容量时自动拆分多张 Sheet。
 - 在所有生成图就绪后，通过统一确定性 Runner 汇总正式 Manifest、QA 和运行摘要。
+- 使用 Codex 将自然语言转换为批量请求，并通过统一编排器完成首次准备、缺图清单、断点续跑、Runner 调用和交付摘要。
 - 对没有 Layout Guide 的未知整图先执行背景诊断，生成候选 bbox、可编辑修正 JSON 和标注预览。
 - 在不引入桌面 GUI 的前提下，用批准后的 bbox 修正文件完成透明切割和正式 QA。
 
@@ -67,6 +68,21 @@ V1 不包含：
 - 至少使用烟雾、玻璃、液体、柔光四类真实 GPT Image 2 样本完成数据与视觉验收。来源、透明层次、Matte 对齐、边缘污染、缩放保真和失败降级都必须可追溯。
 - `native-alpha-required` 继续保留为可选严格模式；只有用户明确要求源文件直接携带 Alpha 时，才重新确认外部生成授权和费用。
 - `native-alpha-required` Job 必须提供同名来源侧车文件，记录非空模型、非空生成方式、源图相对路径、SHA-256、`alpha_origin=model-native` 和 `background_removal_applied=false`。Runner 在正式输出前验证 RGBA、透明像素、部分透明像素和 Alpha 等级；失败只写 QA/摘要，不创建正式 Manifest。
+
+### P6 自然语言一键编排
+
+- 自然语言理解由 Codex 和 Skill 完成；确定性 Python 脚本只接收结构化批量请求，不实现不可验证的关键词 NLP。
+- `orchestrate_ui_delivery.py` 统一负责首次准备、必需生成输入检查、断点续跑、Runner 调用和交付摘要。
+- 缺少生成图、Matte 或原生来源侧车时返回 `awaiting-generation`，并列出 Job、精确路径、Prompt 和参考图角色；这是正常暂停，不得误报为失败。
+- 完成态重复调用必须幂等复用；失败后替换输入可继续，只有已有正式 Manifest 时才允许显式 `--force-run`。
+- 每次调用必须更新 `qa/delivery-summary.json` 与 `qa/delivery-summary.md`，汇总生成方式、Job/输入就绪度、结果数量、交付路径、人工处理项和下一步动作。
+- 编排器不调用图片 API；Codex 仍使用内置 `imagegen` 按缺图清单完成视觉生成。
+
+### 后续路线排期
+
+- P7：Unity 自动导入与 Sprite Editor 配置。已获准进入排期，但不属于 P6；实施前必须单独确认目标 Unity 项目、版本、导入目录、TextureImporter 规则和回滚方案。
+- P8：自动九宫格边界推断。安排在 P7 之后，先产出可验证 Border 元数据，再接入 Unity Sprite Editor；必须覆盖误判阻断和人工覆写。
+- 排期不等于实施授权；当前任务不得创建或修改 Unity 项目，也不得提前混入九宫格算法。
 
 ### 桌面 GUI 路线优先级
 
@@ -476,10 +492,14 @@ output/<project-id>-<timestamp>/
 └─ qa/
    ├─ contact-sheet.png
    ├─ qa-report.json
-   └─ run-summary.json
+   ├─ run-summary.json
+   ├─ delivery-summary.json
+   └─ delivery-summary.md
 ```
 
 多分类或多 Sheet 任务先运行 `prepare_ui_batch.py` 生成 Job、独立请求、Prompt 和 Layout Guide。所有 `generated_output` 及适用的 `alpha_matte_output` 就绪后运行 `run_ui_pipeline.py --run-dir <run-dir>`；Runner 负责 Matte/原生 Alpha/色键分流、单次生产尺寸归一、逐 Job 切割、分类连续编号、总 Manifest、Contact Sheet、严格 QA 和 `run-summary.json`。Runner 不调用图片 API，缺少任何必需生成图时必须在写入正式输出前失败。
+
+自然语言完整交付默认改用 `orchestrate_ui_delivery.py`。首次传入 `--request` 和 `--run-dir`，补图后仅传 `--run-dir`；脚本按 `unprepared → awaiting-generation → ready-for-processing → complete|failed` 状态机推进，并持续写交付摘要。`prepare_ui_batch.py` 与 `run_ui_pipeline.py` 保留为分步调试入口。
 
 原生 Alpha 分流还必须在任何正式输出前校验 `generated/<job-id>.provenance.json` 与源图哈希。原生源图只允许清理 `alpha=0` 的隐藏 RGB，不得改写可见 RGB/Alpha；生产画布缩放和单体归一化统一使用预乘 Alpha。内置 `imagegen` 实测返回 RGB 烘焙棋盘格，禁止用于 `native-alpha-required`。
 
@@ -642,6 +662,8 @@ fail     禁止进入正式输出
 未知整图样本必须由自动测试直接读取，不能只在临时目录中动态构造后删除。标注预览和正式 Contact Sheet 都必须完成视觉检查。
 
 批量编排还必须覆盖：至少两个分类、至少一个分类跨两张 Sheet、同一按钮状态组不跨 Sheet、色键/Matte/原生 Alpha 输入混合、跨 Sheet 分类编号连续、缺少生成图时预检失败。Matte 专项必须覆盖非灰度、全不透明、错位和背景污染失败。
+
+P6 编排专项必须覆盖：首次准备后等待、部分输入就绪、色键＋Matte 混合完成、原生来源侧车缺失、Matte 失败后替换恢复、完成态幂等复用、JSON/Markdown 交付摘要路径一致。
 
 Skill 触发评测必须覆盖九个内部资源类别，并至少在版本阶段验收时通过独立 Codex 新任务确认 Skill 选择、类别识别和第一动作。真实触发输出若返回文件名前缀而非内部类别名，必须修正规则并复验，不得按模糊命中计为严格通过。
 

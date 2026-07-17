@@ -97,6 +97,15 @@
       "prompt": "把这张混合按钮、面板和图标的UI资源整图切成独立透明PNG。",
       "expected_output": "先运行未知整图诊断，输出背景分类、bbox修正JSON和标注预览；真实Alpha或安全纯色背景经批准后导出，假棋盘格和未解析背景必须阻止交付。",
       "files": []
+    },
+    {
+      "id": 11,
+      "kind": "orchestration-trigger",
+      "prompt": "一次做完整UI资源包：8个背包道具和4个烟雾柔光特效，生成到一半可以继续，最后直接给我交付清单。",
+      "expected_skill": "game-ui-asset-pipeline",
+      "expected_first_action": "把自然语言整理为包含Icon_Item色键任务与Icon_Effect Matte任务的批量请求，然后运行P6编排器建立缺图清单。",
+      "expected_output": "触发 game-ui-asset-pipeline，先建立批量请求并运行 orchestrate_ui_delivery.py；缺图时返回 awaiting-generation，补图后自动执行 Runner 并输出 JSON/Markdown 交付摘要。",
+      "files": []
     }
   ]
 }

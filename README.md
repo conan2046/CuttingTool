@@ -47,23 +47,26 @@
 - 支持 `model-matte-derived`：使用 Codex 内置 GPT Image 2 生成纯黑底彩色 Sheet，再基于同一图生成像素对齐的灰度 Matte，不需要 API Key。
 - Matte Runner 校验灰度纯度、黑色边框、连续 Alpha、背景平整度、像素覆盖关系和双图 SHA-256；通过后按黑背景合成方程恢复 RGBA。
 - Manifest 明确记录 `alpha_origin=gpt-image-2-matte-derived`，不会把 Matte 推导结果冒充模型原生 Alpha。
+- P6 一键编排器支持首次准备、精确缺图清单、补图续跑、自动 Runner、完成态复用和统一交付摘要。
+- 每次编排写出 `qa/delivery-summary.json` 与 `qa/delivery-summary.md`，集中列出生成方式、Job/输入进度、结果数量、交付路径和人工处理项。
 
 碎片策略真实校准样本位于 `output/p2-fragment-calibration`：面板、按钮、装备、技能共 16 件，包含尖角、链条、悬挂件、独立符文和硬边火花。
 
-暂未实现：
+暂未实现但已排期：
 
-- Unity 自动导入。
-- 自动九宫格推断。
+- P7：Unity 自动导入和 Sprite Editor 配置。
+- P8：自动九宫格边界推断及人工覆写。
 - 外部模型原生 Alpha 生成仍为可选能力；只有明确要求源文件直接携带 Alpha 时才需要额外授权。
 - 复杂混合展示图的自动语义分类和遮挡内容恢复。
 
 ## 路线优先级
 
-1. 完善 Codex 自然语言一键编排和稳定交付。
-2. 继续扩充 GPT Image 2 RGB＋Matte 的复杂特效和跨风格回归。
-3. 根据真实生产任务继续优化色键诊断、碎片合并、JSON 修正、bbox 标注预览和 Contact Sheet。
-4. 扩充复杂失败样本和跨风格回归矩阵。
-5. 桌面 GUI：长期最低优先级。只有前述流程稳定完成，且高频人工操作无法通过现有轻量方式解决时才重新评估。
+1. P6：Codex 自然语言一键编排和稳定交付（已实现）。
+2. P6.1：继续扩充 GPT Image 2 RGB＋Matte 的跨风格回归。
+3. P7：Unity 自动导入与 Sprite Editor 配置（已排期，单独立项实施）。
+4. P8：自动九宫格边界推断与人工覆写（已排期，安排在 P7 之后）。
+5. 根据真实生产任务继续优化色键、碎片、JSON 修正、bbox 预览和 Contact Sheet。
+6. 桌面 GUI：长期最低优先级。只有前述流程稳定完成，且高频人工操作无法通过现有轻量方式解决时才重新评估。
 
 桌面 GUI 不是当前待开发功能，也不会作为核心流水线完成条件。
 
@@ -92,30 +95,32 @@ $PYTHON = 'C:\Users\Admin\.cache\codex-runtimes\codex-primary-runtime\dependenci
 - Pillow
 - NumPy
 
-## 推荐：批量运行
+## 推荐：P6 一键编排
 
-请求格式见 [batch-request-contract.md](skills/game-ui-asset-pipeline/references/batch-request-contract.md)。
+Codex 先根据自然语言建立批量请求，格式见 [batch-request-contract.md](skills/game-ui-asset-pipeline/references/batch-request-contract.md)，完整状态机见 [orchestration-contract.md](skills/game-ui-asset-pipeline/references/orchestration-contract.md)。
 
 ```powershell
-& $PYTHON .\skills\game-ui-asset-pipeline\scripts\prepare_ui_batch.py `
+& $PYTHON .\skills\game-ui-asset-pipeline\scripts\orchestrate_ui_delivery.py `
   --request .\batch-request.json `
-  --output-dir .\output\dark-fantasy-ui
-```
-
-按照 `output/dark-fantasy-ui/jobs.json` 逐张使用内置 `image_gen` 生成图片，并保存到各 Job 的 `generated_output`。全部图片就绪后运行：
-
-```powershell
-& $PYTHON .\skills\game-ui-asset-pipeline\scripts\run_ui_pipeline.py `
   --run-dir .\output\dark-fantasy-ui
 ```
 
-Runner 输出：
+首次调用返回精确缺图清单。按 `jobs.json` 使用内置 `image_gen` 生成并保存到指定路径，补齐后续跑：
+
+```powershell
+& $PYTHON .\skills\game-ui-asset-pipeline\scripts\orchestrate_ui_delivery.py `
+  --run-dir .\output\dark-fantasy-ui
+```
+
+输入齐全后自动执行 Runner，并输出：
 
 ```text
 final/manifest.json
 qa/contact-sheet.png
 qa/qa-report.json
 qa/run-summary.json
+qa/delivery-summary.json
+qa/delivery-summary.md
 ```
 
 复杂半透明任务默认设置 `transparency_mode: "model-matte-derived"`。每个 Job 使用内置 GPT Image 2 生成彩色黑底 Sheet 和同名 `-alpha-matte.png`；不需要 API Key。真实烟雾、玻璃、液体、柔光验收位于 `output/p5-model-matte-real`。

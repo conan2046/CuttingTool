@@ -53,6 +53,16 @@ class SkillEvalsTest(unittest.TestCase):
                 self.assertTrue(case["thread_id"].strip())
                 self.assertTrue(case["first_action"].strip())
 
+    def test_p6_orchestration_trigger_defines_one_click_first_action(self) -> None:
+        payload = json.loads((SKILL_ROOT / "evals" / "evals.json").read_text(encoding="utf-8"))
+        cases = [case for case in payload["evals"] if case.get("kind") == "orchestration-trigger"]
+        self.assertEqual(len(cases), 1)
+        case = cases[0]
+        self.assertEqual(case["expected_skill"], "game-ui-asset-pipeline")
+        self.assertIn("批量请求", case["expected_first_action"])
+        self.assertIn("orchestrate_ui_delivery.py", case["expected_output"])
+        self.assertIn("awaiting-generation", case["expected_output"])
+
 
 if __name__ == "__main__":
     unittest.main()

@@ -1,10 +1,10 @@
 # CuttingTool 会话交接
 
-> 更新时间：2026-07-16  
+> 更新时间：2026-07-17
 > 工作目录：`D:\CuttingTool`  
 > 仓库：`https://github.com/conan2046/CuttingTool.git`  
-> 当前工作分支：`agent/p5-native-alpha`
-> 已完成功能基线：v0.9.1 P5 合并审查加固
+> 当前工作分支：`main`
+> 已完成功能基线：v0.10.0 P6 自然语言一键编排
 
 ## 1. 新会话先做什么
 
@@ -86,15 +86,16 @@ game-ui-asset-pipeline
 
 ### 3.5 验证状态
 
-最后一次已验证：
+当前已验证：
 
 | 项目 | 结果 |
 |---|---:|
-| 源码 `unittest` | 41/41 通过 |
-| 安装态 `unittest` | 41/41 通过 |
-| 三风格真实生产回归 | 36 pass / 0 warning / 0 fail |
-| 独立 Codex 新任务触发 | 9/9 通过 |
-| Skill 源码/安装副本 | 33 个正式文件哈希一致，0 差异 |
+| 源码 `unittest` | 72/72 通过 |
+| 安装态 `unittest` | 72/72 通过 |
+| P6 混合编排端到端 | 4 pass / 0 warning / 0 fail |
+| P6 静态编排触发评测 | 1/1 通过 |
+| 九类独立 Codex 新任务触发 | 9/9 通过 |
+| Skill 源码/安装副本 | 42 个正式文件哈希一致，0 差异 |
 
 关键证据：
 
@@ -108,6 +109,9 @@ game-ui-asset-pipeline
 - `D:\CuttingTool\output\lowlight-dark-regression-c\qa\contact-sheet.png`
 - `D:\CuttingTool\output\lowlight-dark-regression-c\qa\qa-report.json`
 - `D:\CuttingTool\CHANGELOG.md`
+- `D:\CuttingTool\output\p6-orchestration-e2e\qa\delivery-summary.json`
+- `D:\CuttingTool\output\p6-orchestration-e2e\qa\delivery-summary.md`
+- `D:\CuttingTool\output\p6-orchestration-e2e\qa\contact-sheet.png`
 
 ### 3.6 v0.4.0：三风格真实生产回归
 
@@ -152,9 +156,17 @@ game-ui-asset-pipeline
 - 真实 12 件复杂 `Icon_Effect`：首版拒绝，二版 12 pass / 0 warning / 0 fail；产物 `output/p4-failure-matrix-real`。
 - 源码测试：56/56 通过。
 
+### 3.10 v0.10.0：P6 自然语言一键编排
+
+- 新增 `orchestrate_ui_delivery.py`，统一首次准备、必需输入检查、断点续跑、Runner 和交付摘要。
+- 缺图时返回 `awaiting-generation`，按 Job 列出精确输出路径、Prompt、参考图角色和 Matte 编辑源。
+- 支持色键＋Matte 混合任务；原生 Alpha 任务额外等待来源侧车。
+- Matte 预检失败后替换输入可直接恢复；完成态重复调用幂等复用。
+- 每次调用写出 `qa/delivery-summary.json` 和 `qa/delivery-summary.md`。
+
 ## 4. 当前卡在哪
 
-当前没有代码、测试、图片生成或 API 权限阻塞。P5 已改用 Codex 内置 GPT Image 2 的 RGB＋Alpha Matte 双图方案完成四类真实验收，不需要 API Key。
+当前没有代码、测试、图片生成或 API 权限阻塞。P6 已完成代码与定向测试，最终验证数量以 CHANGELOG 最新记录为准。
 
 已知环境限制：WindowsApps 内的 `codex.exe` 从 PowerShell 直接执行会报“拒绝访问”，所以不能用 `codex exec` 做新任务触发验收。此前已改用 Codex 桌面的独立任务接口完成 9 类验收，不要再浪费时间重复尝试 WindowsApps CLI。
 
@@ -167,6 +179,22 @@ game-ui-asset-pipeline
 - 桌面 GUI。
 
 ## 5. 下一步计划
+
+### P6：自然语言一键编排（已完成）
+
+- 自然语言由 Codex 转为批量请求，确定性脚本不实现伪 NLP。
+- 首次准备、缺图清单、补图续跑、Runner 和交付摘要已统一。
+- 下一维护项为 P6.1 跨风格 Matte 回归。
+
+### P7：Unity 自动导入（已排期）
+
+- 单独立项；实施前确认 Unity 项目、版本、导入目录、TextureImporter 参数、Sprite 命名、Pivot 和回滚方案。
+- 当前 P6 不创建或修改 Unity 项目。
+
+### P8：自动九宫格边界推断（已排期）
+
+- 安排在 P7 之后；先输出可验证 Border 元数据，再接入 Sprite Editor。
+- 必须支持误判阻断、可视化验证和人工覆写，不能直接写入未经确认的边界。
 
 ### P5：复杂半透明特效生成链路（已完成）
 
@@ -339,10 +367,17 @@ $PYTHON = 'C:\Users\Admin\.cache\codex-runtimes\codex-primary-runtime\dependenci
   --run-dir .\output\<project-id>
 ```
 
+### P6 一键编排
+
+```powershell
+& $PYTHON .\skills\game-ui-asset-pipeline\scripts\orchestrate_ui_delivery.py `
+  --request .\batch-request.json `
+  --run-dir .\output\<project-id>
+```
+
 ## 8. 最终状态
 
-- 当前开发分支：`agent/p5-native-alpha`，基于完整 P4 与 P5 路线文档基线。
-- v0.9.1 P5 已完成合并审查加固；最终测试数量以 CHANGELOG 最新记录为准。
-- 合并审查已增加双图尺寸不一致和来源侧车缺少生成方式的正式输出阻断，并恢复本机 `C:\Users\Admin` 路径。
-- 下一阶段进入自然语言一键编排、交付摘要收敛和更多跨风格 Matte 回归，不需要 API Key，不重做 P1-P4。
+- 当前开发分支：`main`。
+- v0.10.0 P6 已实现；最终测试和安装一致性以 CHANGELOG 最新记录为准。
+- 下一阶段为 P6.1 跨风格 Matte 回归；P7 Unity 导入、P8 九宫格推断已排期但未实施。
 - GUI 继续保持最低优先级。
