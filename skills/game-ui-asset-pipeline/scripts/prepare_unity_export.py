@@ -143,8 +143,9 @@ def validate_sliced_layout_geometry(
 def normalize_layout(layout: dict[str, Any] | None) -> list[dict[str, Any]]:
     if layout is None:
         return []
-    if layout.get("schema_version") != 1:
-        raise ValueError("unity layout schema_version must be 1")
+    schema_version = layout.get("schema_version")
+    if schema_version not in {1, 2}:
+        raise ValueError("unity layout schema_version must be 1 or 2")
     screens = layout.get("screens")
     if not isinstance(screens, list) or not screens:
         raise ValueError("unity layout requires at least one screen")
@@ -164,8 +165,11 @@ def normalize_layout(layout: dict[str, Any] | None) -> list[dict[str, Any]]:
                 raise ValueError(f"invalid duplicate element id at screens[{screen_index}].elements[{element_index}]")
             ids.add(element_id)
             kind = str(element.get("kind", "Image"))
-            if kind not in {"Image", "Button"}:
+            if kind not in {"Image", "Button", "HorizontalLayoutGroup", "VerticalLayoutGroup"}:
                 raise ValueError(f"unsupported Unity element kind: {kind}")
+            is_layout_group = kind in {"HorizontalLayoutGroup", "VerticalLayoutGroup"}
+            if is_layout_group and schema_version < 2:
+                raise ValueError(f"{kind} requires unity layout schema_version 2")
             parent_id = str(element.get("parent_id", ""))
             if parent_id and parent_id not in ids:
                 raise ValueError(
@@ -190,6 +194,36 @@ def normalize_layout(layout: dict[str, Any] | None) -> list[dict[str, Any]]:
                 raise ValueError(f"screens[{screen_index}].elements[{element_index}].color must contain four numbers")
             if not all(0.0 <= float(value) <= 1.0 for value in color):
                 raise ValueError(f"screens[{screen_index}].elements[{element_index}].color values must be between 0 and 1")
+            spacing = element.get("spacing", 0.0)
+            if not isinstance(spacing, (int, float)):
+                raise ValueError(f"screens[{screen_index}].elements[{element_index}].spacing must be a number")
+            padding = element.get("padding", [0, 0, 0, 0])
+            if (
+                not isinstance(padding, list)
+                or len(padding) != 4
+                or not all(isinstance(value, int) and value >= 0 for value in padding)
+            ):
+                raise ValueError(
+                    f"screens[{screen_index}].elements[{element_index}].padding must be [left,right,top,bottom] non-negative integers"
+                )
+            child_alignment = str(element.get("child_alignment", "MiddleCenter"))
+            supported_alignments = {
+                "UpperLeft", "UpperCenter", "UpperRight",
+                "MiddleLeft", "MiddleCenter", "MiddleRight",
+                "LowerLeft", "LowerCenter", "LowerRight",
+            }
+            if child_alignment not in supported_alignments:
+                raise ValueError(
+                    f"screens[{screen_index}].elements[{element_index}].child_alignment is unsupported: {child_alignment}"
+                )
+            asset_fields = (
+                str(element.get("asset_id", "")),
+                str(element.get("highlighted_asset_id", "")),
+                str(element.get("pressed_asset_id", "")),
+                str(element.get("disabled_asset_id", "")),
+            )
+            if is_layout_group and any(asset_fields):
+                raise ValueError(f"{kind} cannot reference sprites at screens[{screen_index}].elements[{element_index}]")
             normalized_elements.append(
                 {
                     "id": element_id,
@@ -207,8 +241,21 @@ def normalize_layout(layout: dict[str, Any] | None) -> list[dict[str, Any]]:
                     "highlighted_asset_id": str(element.get("highlighted_asset_id", "")),
                     "pressed_asset_id": str(element.get("pressed_asset_id", "")),
                     "disabled_asset_id": str(element.get("disabled_asset_id", "")),
+                    "spacing": float(spacing),
+                    "padding": list(padding),
+                    "child_alignment": child_alignment,
+                    "control_child_size": bool(element.get("control_child_size", False)),
+                    "child_force_expand": bool(element.get("child_force_expand", False)),
                 }
             )
+        direct_child_counts = {
+            element["id"]: sum(1 for child in normalized_elements if child["parent_id"] == element["id"])
+            for element in normalized_elements
+            if element["kind"] in {"HorizontalLayoutGroup", "VerticalLayoutGroup"}
+        }
+        for group_id, child_count in direct_child_counts.items():
+            if child_count < 2:
+                raise ValueError(f"layout group {group_id} requires at least two direct children")
         normalized.append(
             {
                 "id": str(screen.get("id", f"screen-{screen_index + 1:02d}")),
@@ -370,7 +417,8 @@ def prepare_unity_export(
     report_path = unity_dir / "unity-import-report.json"
     plan_path = unity_dir / "unity-import-plan.json"
     plan = {
-        "schema_version": 1,
+        "schema_version": 2,
+        "layout_schema_version": int((layout or {}).get("schema_version", 1)),
         "project_id": project_id,
         "unity_version": unity_version,
         "generated_root": generated_root,
@@ -398,6 +446,7 @@ def prepare_unity_export(
         "unity_version": unity_version,
         "sprite_count": len(sprites),
         "screen_count": len(screens),
+        "layout_schema_version": int((layout or {}).get("schema_version", 1)),
         "qa_report": str(qa_report_path),
         "issues": issues,
         "plan": str(plan_path),

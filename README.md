@@ -59,9 +59,9 @@
 - P6 一键编排器支持首次准备、精确缺图清单、补图续跑、自动 Runner、完成态复用和统一交付摘要。
 - 每次编排写出 `qa/delivery-summary.json` 与 `qa/delivery-summary.md`，集中列出生成方式、Job/输入进度、结果数量、交付路径和人工处理项。
 - 完成态自动把正式 Manifest 合并到 `input/<project-id>/ui-asset-catalog.json`，供后续界面确定性复用。
-- 支持 Unity 2022.3 自动导入：Sprite Single、Alpha、布局自适应 PPU、Pivot、无 Mipmap、Clamp、Bilinear 和 Uncompressed。
+- 支持 Unity 2022.3 自动导入：嵌入包声明 `com.unity.ugui` 与 `com.unity.2d.sprite` 依赖，空白工程可直接使用 UGUI 与 Sprite Editor；Sprite 使用 Single、Alpha、布局自适应 PPU、Pivot、无 Mipmap、Clamp、Bilinear 和 Uncompressed。
 - 对 Panel/Button 自动推断九宫格 Border，并结合全部布局目标尺寸推导 PPU；低置信、无有效中心区或 Border 显示尺寸超限时阻断，支持显式人工覆写。
-- 从已确认的 `unity-layout.json` 生成独立资源 Prefab 和 Image/Button 界面 Prefab，并附稳定 BindingId。
+- 从已确认的 `unity-layout.json` 生成独立资源 Prefab 和 Image/Button 界面 Prefab，并附稳定 BindingId；schema v2 对单行/单列资源强制使用 HorizontalLayoutGroup/VerticalLayoutGroup 父节点。
 - 每次 Unity 导出生成预检、导入报告、批处理日志和安全回滚清单。
 - Unity 布局支持 RGBA 底色和 Button 四态 SpriteSwap，并自动生成可运行 Preview Scene 与同尺寸 Unity 渲染图。
 
@@ -88,7 +88,7 @@
 2. P6.1：GPT Image 2 RGB＋Matte 跨风格回归（已完成：暗黑幻想、明亮卡通、科幻全息三套真实样本）。
 3. P7：Unity 自动导入与 Sprite Editor 配置（已实现）。
 4. P8：自动九宫格边界推断、低置信阻断与人工覆写（已实现）。
-5. P7.1：已完成 RGBA 布局层、Button 四态、Preview Scene 和 Unity 渲染预览；后续扩展更多显式组件并与业务绑定层解耦。
+5. P7.1：已完成 RGBA 布局层、Button 四态、Horizontal/Vertical LayoutGroup、Preview Scene 和 Unity 渲染预览；后续扩展更多显式组件并与业务绑定层解耦。
 6. 根据真实生产任务继续优化色键、碎片、JSON 修正、bbox 预览和 Contact Sheet。
 7. 桌面 GUI：长期最低优先级。只有前述流程稳定完成，且高频人工操作无法通过现有轻量方式解决时才重新评估。
 

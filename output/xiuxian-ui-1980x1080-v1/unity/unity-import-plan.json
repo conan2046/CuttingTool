@@ -1,5 +1,6 @@
 {
-  "schema_version": 1,
+  "schema_version": 2,
+  "layout_schema_version": 2,
   "project_id": "xiuxian-ui-main-v1",
   "unity_version": "2022.3.62f3c1",
   "generated_root": "Assets/_Generated/GameUI/xiuxian-ui-main-v1",
@@ -11,11 +12,11 @@
     {
       "id": "01_Panel_PlayerProfileFrame_Default_001",
       "category": "Panel",
-      "source_sha256": "f64d66e32a123199f365a1790e3e87c715276d8440cefa8c8ec6e5e09bbda637",
+      "source_sha256": "27a3f4766ead219b879926deacf0043ae15c0019fb670cbed67467d720fb81e0",
       "asset_path": "Assets/_Generated/GameUI/xiuxian-ui-main-v1/Sprites/01_Panel_PlayerProfileFrame_Default_001.png",
-      "pixels_per_unit": 570.6667,
+      "pixels_per_unit": 338.0,
       "pixels_per_unit_origin": "layout-derived",
-      "layout_scale": 0.175234,
+      "layout_scale": 0.295858,
       "layout_target_sizes": [
         [
           350.0,
@@ -38,11 +39,11 @@
     {
       "id": "01_Panel_CurrencyCounterFrame_Default_002",
       "category": "Panel",
-      "source_sha256": "ca6f7e91a1937390d90ec85086686e3b201da37e6721d00d8ff3dd0f8c1977c6",
+      "source_sha256": "14d83c2fe1a035ea01dd01c87f350a291ddd3653b15968abb3cf73feb070136b",
       "asset_path": "Assets/_Generated/GameUI/xiuxian-ui-main-v1/Sprites/01_Panel_CurrencyCounterFrame_Default_002.png",
-      "pixels_per_unit": 1018.5714,
+      "pixels_per_unit": 381.4286,
       "pixels_per_unit_origin": "layout-derived",
-      "layout_scale": 0.098177,
+      "layout_scale": 0.262172,
       "layout_target_sizes": [
         [
           300.0,
@@ -58,13 +59,13 @@
         ]
       ],
       "border": [
-        200,
-        214,
-        124,
-        247
+        0,
+        0,
+        0,
+        0
       ],
-      "border_origin": "auto-inferred",
-      "border_confidence": 0.7264,
+      "border_origin": "manual-override",
+      "border_confidence": 1.0,
       "pivot": [
         0.5,
         0.5
@@ -73,11 +74,11 @@
     {
       "id": "01_Panel_MinimapFrame_Default_003",
       "category": "Panel",
-      "source_sha256": "16f81795f57f5aaccea7d6ef5805ba3df2429b372868a5db4ec2a8eae2f46aed",
+      "source_sha256": "075e783a019da4e20d07ea037d9bdf50a86e61a10334b23904545ba872f3287f",
       "asset_path": "Assets/_Generated/GameUI/xiuxian-ui-main-v1/Sprites/01_Panel_MinimapFrame_Default_003.png",
-      "pixels_per_unit": 361.4815,
+      "pixels_per_unit": 364.0741,
       "pixels_per_unit_origin": "layout-derived",
-      "layout_scale": 0.276639,
+      "layout_scale": 0.274669,
       "layout_target_sizes": [
         [
           250.0,
@@ -86,12 +87,12 @@
       ],
       "border": [
         72,
-        202,
+        197,
         71,
-        142
+        150
       ],
       "border_origin": "auto-inferred",
-      "border_confidence": 0.8662,
+      "border_confidence": 0.8674,
       "pivot": [
         0.5,
         0.5
@@ -100,11 +101,11 @@
     {
       "id": "01_Panel_QuestPanel_Default_004",
       "category": "Panel",
-      "source_sha256": "5a4b022ef8fcab4c54f251853594c0bcde112bec20399a989cecf9ba9e333609",
+      "source_sha256": "2e323a2266bc4178de449c167b6a82f7afeb0a23575794ac9d50ce29fbee36d1",
       "asset_path": "Assets/_Generated/GameUI/xiuxian-ui-main-v1/Sprites/01_Panel_QuestPanel_Default_004.png",
-      "pixels_per_unit": 290.0,
+      "pixels_per_unit": 293.6842,
       "pixels_per_unit_origin": "layout-derived",
-      "layout_scale": 0.344828,
+      "layout_scale": 0.340502,
       "layout_target_sizes": [
         [
           300.0,
@@ -127,7 +128,7 @@
     {
       "id": "01_Panel_QuestRowFrame_Default_005",
       "category": "Panel",
-      "source_sha256": "ea8d78b31df1e16afb683c41857d1c84955bf7062cce991c0097c7d0d8ae8df8",
+      "source_sha256": "a9a913d0b93c8f51ffc91e5b2b061ba6c6f3d6615d434721a6803aaef0e4dd64",
       "asset_path": "Assets/_Generated/GameUI/xiuxian-ui-main-v1/Sprites/01_Panel_QuestRowFrame_Default_005.png",
       "pixels_per_unit": 664.5161,
       "pixels_per_unit_origin": "layout-derived",
@@ -162,7 +163,7 @@
     {
       "id": "01_Panel_ChatPanel_Default_006",
       "category": "Panel",
-      "source_sha256": "1dbe64c6af3e291e9337f19e4a8788dfb7eaff5dedc50bc8c63f08d4e829289f",
+      "source_sha256": "bb19c5811b1d3a55ac0635e05eb08a14e1db973012e02c8c007065116272fb09",
       "asset_path": "Assets/_Generated/GameUI/xiuxian-ui-main-v1/Sprites/01_Panel_ChatPanel_Default_006.png",
       "pixels_per_unit": 266.8966,
       "pixels_per_unit_origin": "layout-derived",
@@ -174,13 +175,13 @@
         ]
       ],
       "border": [
-        57,
-        208,
-        60,
-        131
+        51,
+        189,
+        55,
+        130
       ],
       "border_origin": "auto-inferred",
-      "border_confidence": 0.8601,
+      "border_confidence": 0.8537,
       "pivot": [
         0.5,
         0.5
@@ -189,7 +190,7 @@
     {
       "id": "01_Panel_BottomNavSlotFrame_Default_007",
       "category": "Panel",
-      "source_sha256": "38fb5a84241c94507e93e2f3cc74524d81cea31a77398063446b05cfa5724b02",
+      "source_sha256": "fa681bebdb3268ba0a2f8328e48d4a593080d4d3468de2f847802ce43fb3034f",
       "asset_path": "Assets/_Generated/GameUI/xiuxian-ui-main-v1/Sprites/01_Panel_BottomNavSlotFrame_Default_007.png",
       "pixels_per_unit": 534.8485,
       "pixels_per_unit_origin": "layout-derived",
@@ -229,13 +230,13 @@
         ]
       ],
       "border": [
-        79,
-        72,
-        79,
-        72
+        77,
+        71,
+        77,
+        71
       ],
       "border_origin": "auto-inferred",
-      "border_confidence": 0.8656,
+      "border_confidence": 0.8669,
       "pivot": [
         0.5,
         0.5
@@ -244,7 +245,7 @@
     {
       "id": "01_Panel_VerticalOrnamentBanner_Default_008",
       "category": "Panel",
-      "source_sha256": "3c6486eab4bc318f0e4ec60968c8666cacbd1f969fd2822a19fc20ea3447e40a",
+      "source_sha256": "1bbabe9b84d4598ac84ccad5f9a7fd9181d7bf3e79a94c9e8e52ff2e51f60956",
       "asset_path": "Assets/_Generated/GameUI/xiuxian-ui-main-v1/Sprites/01_Panel_VerticalOrnamentBanner_Default_008.png",
       "pixels_per_unit": 477.7778,
       "pixels_per_unit_origin": "layout-derived",
@@ -266,7 +267,7 @@
         418
       ],
       "border_origin": "auto-inferred",
-      "border_confidence": 0.7466,
+      "border_confidence": 0.7485,
       "pivot": [
         0.5,
         0.5
@@ -275,7 +276,7 @@
     {
       "id": "01_Panel_ProgressBarFrame_Default_009",
       "category": "Panel",
-      "source_sha256": "346f9cbad58de0a174697a69e1cba85fa40e7f609240c214805c6e39fab05721",
+      "source_sha256": "124e0235accf7fc05f15420f6f8a57f047eb1b08bcfa0138f69612628fb55306",
       "asset_path": "Assets/_Generated/GameUI/xiuxian-ui-main-v1/Sprites/01_Panel_ProgressBarFrame_Default_009.png",
       "pixels_per_unit": 100.0,
       "pixels_per_unit_origin": "default",
@@ -288,2176 +289,7 @@
         58
       ],
       "border_origin": "auto-inferred",
-      "border_confidence": 0.7624,
-      "pivot": [
-        0.5,
-        0.5
-      ]
-    },
-    {
-      "id": "02_Button_AddCurrency_Normal_001",
-      "category": "Button",
-      "source_sha256": "ab8ede4ff9819c1d57ba2184b4c356e6bf2a8db5470512e740e58093dfe2300c",
-      "asset_path": "Assets/_Generated/GameUI/xiuxian-ui-main-v1/Sprites/02_Button_AddCurrency_Normal_001.png",
-      "pixels_per_unit": 537.931,
-      "pixels_per_unit_origin": "layout-derived",
-      "layout_scale": 0.185897,
-      "layout_target_sizes": [
-        [
-          58.0,
-          58.0
-        ],
-        [
-          58.0,
-          58.0
-        ],
-        [
-          58.0,
-          58.0
-        ]
-      ],
-      "border": [
-        51,
-        44,
-        50,
-        44
-      ],
-      "border_origin": "auto-inferred",
-      "border_confidence": 0.8416,
-      "pivot": [
-        0.5,
-        0.5
-      ]
-    },
-    {
-      "id": "02_Button_AddCurrency_Hover_002",
-      "category": "Button",
-      "source_sha256": "25afd0f078c006c17f597abcc5fa20c818d33f220404be1a7f70c7a16c1e6165",
-      "asset_path": "Assets/_Generated/GameUI/xiuxian-ui-main-v1/Sprites/02_Button_AddCurrency_Hover_002.png",
-      "pixels_per_unit": 539.6552,
-      "pixels_per_unit_origin": "layout-derived",
-      "layout_scale": 0.185304,
-      "layout_target_sizes": [
-        [
-          58.0,
-          58.0
-        ],
-        [
-          58.0,
-          58.0
-        ],
-        [
-          58.0,
-          58.0
-        ]
-      ],
-      "border": [
-        54,
-        48,
-        52,
-        49
-      ],
-      "border_origin": "auto-inferred",
-      "border_confidence": 0.8421,
-      "pivot": [
-        0.5,
-        0.5
-      ]
-    },
-    {
-      "id": "02_Button_AddCurrency_Pressed_003",
-      "category": "Button",
-      "source_sha256": "d5b5414ad1a44407114470c85225dd8881f63cfe79c4e9b60cd493f0e4fc39cd",
-      "asset_path": "Assets/_Generated/GameUI/xiuxian-ui-main-v1/Sprites/02_Button_AddCurrency_Pressed_003.png",
-      "pixels_per_unit": 537.931,
-      "pixels_per_unit_origin": "layout-derived",
-      "layout_scale": 0.185897,
-      "layout_target_sizes": [
-        [
-          58.0,
-          58.0
-        ],
-        [
-          58.0,
-          58.0
-        ],
-        [
-          58.0,
-          58.0
-        ]
-      ],
-      "border": [
-        37,
-        33,
-        38,
-        33
-      ],
-      "border_origin": "auto-inferred",
-      "border_confidence": 0.8244,
-      "pivot": [
-        0.5,
-        0.5
-      ]
-    },
-    {
-      "id": "02_Button_AddCurrency_Disabled_004",
-      "category": "Button",
-      "source_sha256": "17640cad1f7df1bd3ef0ab8ab463543441227275ad41040cad5da5bffbc4e7ab",
-      "asset_path": "Assets/_Generated/GameUI/xiuxian-ui-main-v1/Sprites/02_Button_AddCurrency_Disabled_004.png",
-      "pixels_per_unit": 532.7586,
-      "pixels_per_unit_origin": "layout-derived",
-      "layout_scale": 0.187702,
-      "layout_target_sizes": [
-        [
-          58.0,
-          58.0
-        ],
-        [
-          58.0,
-          58.0
-        ],
-        [
-          58.0,
-          58.0
-        ]
-      ],
-      "border": [
-        64,
-        53,
-        62,
-        59
-      ],
-      "border_origin": "auto-inferred",
-      "border_confidence": 0.8283,
-      "pivot": [
-        0.5,
-        0.5
-      ]
-    },
-    {
-      "id": "02_Button_ExitGame_Normal_005",
-      "category": "Button",
-      "source_sha256": "2b8e91ebb4eca0a4ffcdb8f14561d9b6ba861d1b7288d407d02881cf477cd986",
-      "asset_path": "Assets/_Generated/GameUI/xiuxian-ui-main-v1/Sprites/02_Button_ExitGame_Normal_005.png",
-      "pixels_per_unit": 275.7576,
-      "pixels_per_unit_origin": "layout-derived",
-      "layout_scale": 0.362637,
-      "layout_target_sizes": [
-        [
-          210.0,
-          66.0
-        ]
-      ],
-      "border": [
-        43,
-        46,
-        49,
-        46
-      ],
-      "border_origin": "auto-inferred",
-      "border_confidence": 0.827,
-      "pivot": [
-        0.5,
-        0.5
-      ]
-    },
-    {
-      "id": "02_Button_ExitGame_Hover_006",
-      "category": "Button",
-      "source_sha256": "27dcf32d5b4c03910e64dc8e2b49a17173bc0797f68fb4c12ce18829f0383f66",
-      "asset_path": "Assets/_Generated/GameUI/xiuxian-ui-main-v1/Sprites/02_Button_ExitGame_Hover_006.png",
-      "pixels_per_unit": 278.7879,
-      "pixels_per_unit_origin": "layout-derived",
-      "layout_scale": 0.358696,
-      "layout_target_sizes": [
-        [
-          210.0,
-          66.0
-        ]
-      ],
-      "border": [
-        44,
-        45,
-        42,
-        49
-      ],
-      "border_origin": "auto-inferred",
-      "border_confidence": 0.8498,
-      "pivot": [
-        0.5,
-        0.5
-      ]
-    },
-    {
-      "id": "02_Button_ExitGame_Pressed_007",
-      "category": "Button",
-      "source_sha256": "d80b58e74407536c0610609479d7cc7869cc221ba18e21f8da5a77075e841c51",
-      "asset_path": "Assets/_Generated/GameUI/xiuxian-ui-main-v1/Sprites/02_Button_ExitGame_Pressed_007.png",
-      "pixels_per_unit": 286.3636,
-      "pixels_per_unit_origin": "layout-derived",
-      "layout_scale": 0.349206,
-      "layout_target_sizes": [
-        [
-          210.0,
-          66.0
-        ]
-      ],
-      "border": [
-        43,
-        49,
-        43,
-        50
-      ],
-      "border_origin": "auto-inferred",
-      "border_confidence": 0.8655,
-      "pivot": [
-        0.5,
-        0.5
-      ]
-    },
-    {
-      "id": "02_Button_ExitGame_Disabled_008",
-      "category": "Button",
-      "source_sha256": "1018a3c9fea9c653055f64851e46400c74b8cb419f4369842033179fd65badf0",
-      "asset_path": "Assets/_Generated/GameUI/xiuxian-ui-main-v1/Sprites/02_Button_ExitGame_Disabled_008.png",
-      "pixels_per_unit": 284.8485,
-      "pixels_per_unit_origin": "layout-derived",
-      "layout_scale": 0.351064,
-      "layout_target_sizes": [
-        [
-          210.0,
-          66.0
-        ]
-      ],
-      "border": [
-        43,
-        46,
-        41,
-        52
-      ],
-      "border_origin": "auto-inferred",
-      "border_confidence": 0.8504,
-      "pivot": [
-        0.5,
-        0.5
-      ]
-    },
-    {
-      "id": "02_Button_WorldMap_Normal_009",
-      "category": "Button",
-      "source_sha256": "e632ccd815ab0a8e484173c62408027af32cfd56b996b58775e365c3be340647",
-      "asset_path": "Assets/_Generated/GameUI/xiuxian-ui-main-v1/Sprites/02_Button_WorldMap_Normal_009.png",
-      "pixels_per_unit": 318.9655,
-      "pixels_per_unit_origin": "layout-derived",
-      "layout_scale": 0.313514,
-      "layout_target_sizes": [
-        [
-          190.0,
-          58.0
-        ]
-      ],
-      "border": [
-        43,
-        46,
-        43,
-        49
-      ],
-      "border_origin": "auto-inferred",
-      "border_confidence": 0.8639,
-      "pivot": [
-        0.5,
-        0.5
-      ]
-    },
-    {
-      "id": "02_Button_WorldMap_Hover_010",
-      "category": "Button",
-      "source_sha256": "ce5f2d1adf040e275bac4ca3761e8fb09d65c42bf84148aeaf1c45dc9e9db0e7",
-      "asset_path": "Assets/_Generated/GameUI/xiuxian-ui-main-v1/Sprites/02_Button_WorldMap_Hover_010.png",
-      "pixels_per_unit": 313.7931,
-      "pixels_per_unit_origin": "layout-derived",
-      "layout_scale": 0.318681,
-      "layout_target_sizes": [
-        [
-          190.0,
-          58.0
-        ]
-      ],
-      "border": [
-        44,
-        46,
-        47,
-        46
-      ],
-      "border_origin": "auto-inferred",
-      "border_confidence": 0.8444,
-      "pivot": [
-        0.5,
-        0.5
-      ]
-    },
-    {
-      "id": "02_Button_WorldMap_Pressed_011",
-      "category": "Button",
-      "source_sha256": "2bdb4f1227a2616a8c76dffdcd472fa868dfeeffd8c00cac9790e35e5ca29434",
-      "asset_path": "Assets/_Generated/GameUI/xiuxian-ui-main-v1/Sprites/02_Button_WorldMap_Pressed_011.png",
-      "pixels_per_unit": 313.7931,
-      "pixels_per_unit_origin": "layout-derived",
-      "layout_scale": 0.318681,
-      "layout_target_sizes": [
-        [
-          190.0,
-          58.0
-        ]
-      ],
-      "border": [
-        44,
-        46,
-        44,
-        45
-      ],
-      "border_origin": "auto-inferred",
-      "border_confidence": 0.8649,
-      "pivot": [
-        0.5,
-        0.5
-      ]
-    },
-    {
-      "id": "02_Button_WorldMap_Disabled_012",
-      "category": "Button",
-      "source_sha256": "b779fe222850ececa72e68108d7c08d2a2ded79d8d4c6b07b8da7e372b1ac588",
-      "asset_path": "Assets/_Generated/GameUI/xiuxian-ui-main-v1/Sprites/02_Button_WorldMap_Disabled_012.png",
-      "pixels_per_unit": 315.5172,
-      "pixels_per_unit_origin": "layout-derived",
-      "layout_scale": 0.31694,
-      "layout_target_sizes": [
-        [
-          190.0,
-          58.0
-        ]
-      ],
-      "border": [
-        43,
-        46,
-        43,
-        46
-      ],
-      "border_origin": "auto-inferred",
-      "border_confidence": 0.8645,
-      "pivot": [
-        0.5,
-        0.5
-      ]
-    },
-    {
-      "id": "02_Button_QuestTab_Normal_013",
-      "category": "Button",
-      "source_sha256": "f8bb947209e8570840b455088cf38e3fd2969fb968df805661f165186558fe05",
-      "asset_path": "Assets/_Generated/GameUI/xiuxian-ui-main-v1/Sprites/02_Button_QuestTab_Normal_013.png",
-      "pixels_per_unit": 554.5455,
-      "pixels_per_unit_origin": "layout-derived",
-      "layout_scale": 0.180328,
-      "layout_target_sizes": [
-        [
-          88.0,
-          46.0
-        ],
-        [
-          88.0,
-          46.0
-        ],
-        [
-          88.0,
-          46.0
-        ]
-      ],
-      "border": [
-        71,
-        32,
-        74,
-        38
-      ],
-      "border_origin": "auto-inferred",
-      "border_confidence": 0.8262,
-      "pivot": [
-        0.5,
-        0.5
-      ]
-    },
-    {
-      "id": "02_Button_QuestTab_Hover_014",
-      "category": "Button",
-      "source_sha256": "94b99392b74c1dedb7271e82135a9418d05370fe53a1062733f9afdb3a2736ea",
-      "asset_path": "Assets/_Generated/GameUI/xiuxian-ui-main-v1/Sprites/02_Button_QuestTab_Hover_014.png",
-      "pixels_per_unit": 562.5,
-      "pixels_per_unit_origin": "layout-derived",
-      "layout_scale": 0.177778,
-      "layout_target_sizes": [
-        [
-          88.0,
-          46.0
-        ],
-        [
-          88.0,
-          46.0
-        ],
-        [
-          88.0,
-          46.0
-        ]
-      ],
-      "border": [
-        69,
-        29,
-        72,
-        35
-      ],
-      "border_origin": "auto-inferred",
-      "border_confidence": 0.8245,
-      "pivot": [
-        0.5,
-        0.5
-      ]
-    },
-    {
-      "id": "02_Button_QuestTab_Pressed_015",
-      "category": "Button",
-      "source_sha256": "9fb0a8bd632bc8db0aeaff7e1d6182089e2c8ff1ca5cac48044504caa3fce88e",
-      "asset_path": "Assets/_Generated/GameUI/xiuxian-ui-main-v1/Sprites/02_Button_QuestTab_Pressed_015.png",
-      "pixels_per_unit": 564.7727,
-      "pixels_per_unit_origin": "layout-derived",
-      "layout_scale": 0.177062,
-      "layout_target_sizes": [
-        [
-          88.0,
-          46.0
-        ],
-        [
-          88.0,
-          46.0
-        ],
-        [
-          88.0,
-          46.0
-        ]
-      ],
-      "border": [
-        71,
-        27,
-        70,
-        31
-      ],
-      "border_origin": "auto-inferred",
-      "border_confidence": 0.831,
-      "pivot": [
-        0.5,
-        0.5
-      ]
-    },
-    {
-      "id": "02_Button_QuestTab_Disabled_016",
-      "category": "Button",
-      "source_sha256": "b6fce296b8e4682c16c4a0cbe1cbd3ed86f769809882591184fd08332a3bba0c",
-      "asset_path": "Assets/_Generated/GameUI/xiuxian-ui-main-v1/Sprites/02_Button_QuestTab_Disabled_016.png",
-      "pixels_per_unit": 561.3636,
-      "pixels_per_unit_origin": "layout-derived",
-      "layout_scale": 0.178138,
-      "layout_target_sizes": [
-        [
-          88.0,
-          46.0
-        ],
-        [
-          88.0,
-          46.0
-        ],
-        [
-          88.0,
-          46.0
-        ]
-      ],
-      "border": [
-        70,
-        27,
-        70,
-        23
-      ],
-      "border_origin": "auto-inferred",
-      "border_confidence": 0.819,
-      "pivot": [
-        0.5,
-        0.5
-      ]
-    },
-    {
-      "id": "02_Button_QuestComplete_Normal_017",
-      "category": "Button",
-      "source_sha256": "13424d3ed404c03a8d6ea1f95d48ddd793e70ebbac489d8138719a7a008c7db6",
-      "asset_path": "Assets/_Generated/GameUI/xiuxian-ui-main-v1/Sprites/02_Button_QuestComplete_Normal_017.png",
-      "pixels_per_unit": 100.0,
-      "pixels_per_unit_origin": "default",
-      "layout_scale": null,
-      "layout_target_sizes": [],
-      "border": [
-        97,
-        40,
-        101,
-        51
-      ],
-      "border_origin": "auto-inferred",
-      "border_confidence": 0.8092,
-      "pivot": [
-        0.5,
-        0.5
-      ]
-    },
-    {
-      "id": "02_Button_QuestComplete_Hover_018",
-      "category": "Button",
-      "source_sha256": "ec1450878ea693354fa0e6043bc1a788b5fa777317de61ef83c05bcd192b5e7e",
-      "asset_path": "Assets/_Generated/GameUI/xiuxian-ui-main-v1/Sprites/02_Button_QuestComplete_Hover_018.png",
-      "pixels_per_unit": 100.0,
-      "pixels_per_unit_origin": "default",
-      "layout_scale": null,
-      "layout_target_sizes": [],
-      "border": [
-        99,
-        38,
-        99,
-        42
-      ],
-      "border_origin": "auto-inferred",
-      "border_confidence": 0.8379,
-      "pivot": [
-        0.5,
-        0.5
-      ]
-    },
-    {
-      "id": "02_Button_QuestComplete_Pressed_019",
-      "category": "Button",
-      "source_sha256": "02b78714e221ac06224af26ff9494084ecbfd8c08fff07ac36e998d3fe707948",
-      "asset_path": "Assets/_Generated/GameUI/xiuxian-ui-main-v1/Sprites/02_Button_QuestComplete_Pressed_019.png",
-      "pixels_per_unit": 100.0,
-      "pixels_per_unit_origin": "default",
-      "layout_scale": null,
-      "layout_target_sizes": [],
-      "border": [
-        97,
-        39,
-        97,
-        45
-      ],
-      "border_origin": "auto-inferred",
-      "border_confidence": 0.8351,
-      "pivot": [
-        0.5,
-        0.5
-      ]
-    },
-    {
-      "id": "02_Button_QuestComplete_Disabled_020",
-      "category": "Button",
-      "source_sha256": "e93e21674ccb32cf2ac9d323ec97aaf4999c3654dde877a5b62a68b970640d51",
-      "asset_path": "Assets/_Generated/GameUI/xiuxian-ui-main-v1/Sprites/02_Button_QuestComplete_Disabled_020.png",
-      "pixels_per_unit": 100.0,
-      "pixels_per_unit_origin": "default",
-      "layout_scale": null,
-      "layout_target_sizes": [],
-      "border": [
-        100,
-        36,
-        96,
-        37
-      ],
-      "border_origin": "auto-inferred",
-      "border_confidence": 0.8574,
-      "pivot": [
-        0.5,
-        0.5
-      ]
-    },
-    {
-      "id": "02_Button_QuestCompleteAll_Normal_021",
-      "category": "Button",
-      "source_sha256": "d77e826579361b409bbe8001467ea54145cf277e8e2a552b7a268a55368de491",
-      "asset_path": "Assets/_Generated/GameUI/xiuxian-ui-main-v1/Sprites/02_Button_QuestCompleteAll_Normal_021.png",
-      "pixels_per_unit": 475.8621,
-      "pixels_per_unit_origin": "layout-derived",
-      "layout_scale": 0.210145,
-      "layout_target_sizes": [
-        [
-          200.0,
-          58.0
-        ]
-      ],
-      "border": [
-        29,
-        73,
-        27,
-        73
-      ],
-      "border_origin": "auto-inferred",
-      "border_confidence": 0.8473,
-      "pivot": [
-        0.5,
-        0.5
-      ]
-    },
-    {
-      "id": "02_Button_QuestCompleteAll_Hover_022",
-      "category": "Button",
-      "source_sha256": "f4e8e1f66795981cc9f883b1b4d14209649c26225c9e1b93ed83a21e4f2fef21",
-      "asset_path": "Assets/_Generated/GameUI/xiuxian-ui-main-v1/Sprites/02_Button_QuestCompleteAll_Hover_022.png",
-      "pixels_per_unit": 481.0345,
-      "pixels_per_unit_origin": "layout-derived",
-      "layout_scale": 0.207885,
-      "layout_target_sizes": [
-        [
-          200.0,
-          58.0
-        ]
-      ],
-      "border": [
-        23,
-        75,
-        26,
-        76
-      ],
-      "border_origin": "auto-inferred",
-      "border_confidence": 0.834,
-      "pivot": [
-        0.5,
-        0.5
-      ]
-    },
-    {
-      "id": "02_Button_QuestCompleteAll_Pressed_023",
-      "category": "Button",
-      "source_sha256": "cbba30d839149812e82dbbf8dcf6fe0e2243e2565d00a9b96b20caf770144438",
-      "asset_path": "Assets/_Generated/GameUI/xiuxian-ui-main-v1/Sprites/02_Button_QuestCompleteAll_Pressed_023.png",
-      "pixels_per_unit": 479.3103,
-      "pixels_per_unit_origin": "layout-derived",
-      "layout_scale": 0.208633,
-      "layout_target_sizes": [
-        [
-          200.0,
-          58.0
-        ]
-      ],
-      "border": [
-        23,
-        70,
-        23,
-        71
-      ],
-      "border_origin": "auto-inferred",
-      "border_confidence": 0.8696,
-      "pivot": [
-        0.5,
-        0.5
-      ]
-    },
-    {
-      "id": "02_Button_QuestCompleteAll_Disabled_024",
-      "category": "Button",
-      "source_sha256": "3626a4ca09e100237dd620bcd455c1de66469aa0011cae78db4ec98c0798caa9",
-      "asset_path": "Assets/_Generated/GameUI/xiuxian-ui-main-v1/Sprites/02_Button_QuestCompleteAll_Disabled_024.png",
-      "pixels_per_unit": 479.3103,
-      "pixels_per_unit_origin": "layout-derived",
-      "layout_scale": 0.208633,
-      "layout_target_sizes": [
-        [
-          200.0,
-          58.0
-        ]
-      ],
-      "border": [
-        26,
-        71,
-        23,
-        75
-      ],
-      "border_origin": "auto-inferred",
-      "border_confidence": 0.8361,
-      "pivot": [
-        0.5,
-        0.5
-      ]
-    },
-    {
-      "id": "02_Button_ChatTab_Normal_025",
-      "category": "Button",
-      "source_sha256": "5b8053fbae64b9e555200c4c5c6a9f19ebffee7bfdbee05e998e3a3e1c154a6b",
-      "asset_path": "Assets/_Generated/GameUI/xiuxian-ui-main-v1/Sprites/02_Button_ChatTab_Normal_025.png",
-      "pixels_per_unit": 608.5366,
-      "pixels_per_unit_origin": "layout-derived",
-      "layout_scale": 0.164329,
-      "layout_target_sizes": [
-        [
-          82.0,
-          44.0
-        ],
-        [
-          82.0,
-          44.0
-        ],
-        [
-          82.0,
-          44.0
-        ],
-        [
-          82.0,
-          44.0
-        ]
-      ],
-      "border": [
-        91,
-        32,
-        91,
-        34
-      ],
-      "border_origin": "auto-inferred",
-      "border_confidence": 0.8393,
-      "pivot": [
-        0.5,
-        0.5
-      ]
-    },
-    {
-      "id": "02_Button_ChatTab_Hover_026",
-      "category": "Button",
-      "source_sha256": "2f87ba866142cf5ec7d2d69457a97fa496c1ba2b74a58867ae5772f0f1ded32b",
-      "asset_path": "Assets/_Generated/GameUI/xiuxian-ui-main-v1/Sprites/02_Button_ChatTab_Hover_026.png",
-      "pixels_per_unit": 615.8537,
-      "pixels_per_unit_origin": "layout-derived",
-      "layout_scale": 0.162376,
-      "layout_target_sizes": [
-        [
-          82.0,
-          44.0
-        ],
-        [
-          82.0,
-          44.0
-        ],
-        [
-          82.0,
-          44.0
-        ],
-        [
-          82.0,
-          44.0
-        ]
-      ],
-      "border": [
-        91,
-        39,
-        93,
-        39
-      ],
-      "border_origin": "auto-inferred",
-      "border_confidence": 0.868,
-      "pivot": [
-        0.5,
-        0.5
-      ]
-    },
-    {
-      "id": "02_Button_ChatTab_Pressed_027",
-      "category": "Button",
-      "source_sha256": "83184a71bc0d034c0435b2e16690cc009856d3940830fc18437f913214c0ba7b",
-      "asset_path": "Assets/_Generated/GameUI/xiuxian-ui-main-v1/Sprites/02_Button_ChatTab_Pressed_027.png",
-      "pixels_per_unit": 610.9756,
-      "pixels_per_unit_origin": "layout-derived",
-      "layout_scale": 0.163673,
-      "layout_target_sizes": [
-        [
-          82.0,
-          44.0
-        ],
-        [
-          82.0,
-          44.0
-        ],
-        [
-          82.0,
-          44.0
-        ],
-        [
-          82.0,
-          44.0
-        ]
-      ],
-      "border": [
-        91,
-        32,
-        92,
-        42
-      ],
-      "border_origin": "auto-inferred",
-      "border_confidence": 0.7967,
-      "pivot": [
-        0.5,
-        0.5
-      ]
-    },
-    {
-      "id": "02_Button_ChatTab_Disabled_028",
-      "category": "Button",
-      "source_sha256": "bb21c13fc65149d5da7b4056012bdc41c5671e150b0ce479d0d99ea78b609a37",
-      "asset_path": "Assets/_Generated/GameUI/xiuxian-ui-main-v1/Sprites/02_Button_ChatTab_Disabled_028.png",
-      "pixels_per_unit": 606.0976,
-      "pixels_per_unit_origin": "layout-derived",
-      "layout_scale": 0.16499,
-      "layout_target_sizes": [
-        [
-          82.0,
-          44.0
-        ],
-        [
-          82.0,
-          44.0
-        ],
-        [
-          82.0,
-          44.0
-        ],
-        [
-          82.0,
-          44.0
-        ]
-      ],
-      "border": [
-        89,
-        31,
-        87,
-        31
-      ],
-      "border_origin": "auto-inferred",
-      "border_confidence": 0.86,
-      "pivot": [
-        0.5,
-        0.5
-      ]
-    },
-    {
-      "id": "02_Button_VoiceChat_Normal_029",
-      "category": "Button",
-      "source_sha256": "37aa94bd23b6f9078b12bdd23d5869d2cdb43babf4451180ad54caaa5f6f8086",
-      "asset_path": "Assets/_Generated/GameUI/xiuxian-ui-main-v1/Sprites/02_Button_VoiceChat_Normal_029.png",
-      "pixels_per_unit": 591.6667,
-      "pixels_per_unit_origin": "layout-derived",
-      "layout_scale": 0.169014,
-      "layout_target_sizes": [
-        [
-          60.0,
-          60.0
-        ]
-      ],
-      "border": [
-        49,
-        66,
-        49,
-        73
-      ],
-      "border_origin": "auto-inferred",
-      "border_confidence": 0.8305,
-      "pivot": [
-        0.5,
-        0.5
-      ]
-    },
-    {
-      "id": "02_Button_VoiceChat_Hover_030",
-      "category": "Button",
-      "source_sha256": "976fb9f4c8f8948a109947fd09852badc4bec8048db4deccdf8e159b7a50cfa4",
-      "asset_path": "Assets/_Generated/GameUI/xiuxian-ui-main-v1/Sprites/02_Button_VoiceChat_Hover_030.png",
-      "pixels_per_unit": 601.6667,
-      "pixels_per_unit_origin": "layout-derived",
-      "layout_scale": 0.166205,
-      "layout_target_sizes": [
-        [
-          60.0,
-          60.0
-        ]
-      ],
-      "border": [
-        51,
-        69,
-        52,
-        75
-      ],
-      "border_origin": "auto-inferred",
-      "border_confidence": 0.8379,
-      "pivot": [
-        0.5,
-        0.5
-      ]
-    },
-    {
-      "id": "02_Button_VoiceChat_Pressed_031",
-      "category": "Button",
-      "source_sha256": "de1edcddf5093fad787290311eb673b78366f6b00a08ee10ec3454f61db5e9bb",
-      "asset_path": "Assets/_Generated/GameUI/xiuxian-ui-main-v1/Sprites/02_Button_VoiceChat_Pressed_031.png",
-      "pixels_per_unit": 591.6667,
-      "pixels_per_unit_origin": "layout-derived",
-      "layout_scale": 0.169014,
-      "layout_target_sizes": [
-        [
-          60.0,
-          60.0
-        ]
-      ],
-      "border": [
-        44,
-        66,
-        44,
-        75
-      ],
-      "border_origin": "auto-inferred",
-      "border_confidence": 0.8135,
-      "pivot": [
-        0.5,
-        0.5
-      ]
-    },
-    {
-      "id": "02_Button_VoiceChat_Disabled_032",
-      "category": "Button",
-      "source_sha256": "5e9f6013a04738115371d345c45ed8235becbe0cef66d587347a5341fbf73816",
-      "asset_path": "Assets/_Generated/GameUI/xiuxian-ui-main-v1/Sprites/02_Button_VoiceChat_Disabled_032.png",
-      "pixels_per_unit": 591.6667,
-      "pixels_per_unit_origin": "layout-derived",
-      "layout_scale": 0.169014,
-      "layout_target_sizes": [
-        [
-          60.0,
-          60.0
-        ]
-      ],
-      "border": [
-        53,
-        70,
-        54,
-        73
-      ],
-      "border_origin": "auto-inferred",
-      "border_confidence": 0.8505,
-      "pivot": [
-        0.5,
-        0.5
-      ]
-    },
-    {
-      "id": "02_Button_SendChat_Normal_033",
-      "category": "Button",
-      "source_sha256": "7ab81154a3e1da5681e55bfbbe3537434ab84d0211313b641e08c0c43774a716",
-      "asset_path": "Assets/_Generated/GameUI/xiuxian-ui-main-v1/Sprites/02_Button_SendChat_Normal_033.png",
-      "pixels_per_unit": 514.0,
-      "pixels_per_unit_origin": "layout-derived",
-      "layout_scale": 0.194553,
-      "layout_target_sizes": [
-        [
-          100.0,
-          50.0
-        ]
-      ],
-      "border": [
-        112,
-        38,
-        114,
-        38
-      ],
-      "border_origin": "auto-inferred",
-      "border_confidence": 0.8659,
-      "pivot": [
-        0.5,
-        0.5
-      ]
-    },
-    {
-      "id": "02_Button_SendChat_Hover_034",
-      "category": "Button",
-      "source_sha256": "4bce1a544a485108e57df026af88d2598b7ecccda7e795eadbf8d1faf9ce31f0",
-      "asset_path": "Assets/_Generated/GameUI/xiuxian-ui-main-v1/Sprites/02_Button_SendChat_Hover_034.png",
-      "pixels_per_unit": 517.0,
-      "pixels_per_unit_origin": "layout-derived",
-      "layout_scale": 0.193424,
-      "layout_target_sizes": [
-        [
-          100.0,
-          50.0
-        ]
-      ],
-      "border": [
-        109,
-        42,
-        117,
-        41
-      ],
-      "border_origin": "auto-inferred",
-      "border_confidence": 0.8586,
-      "pivot": [
-        0.5,
-        0.5
-      ]
-    },
-    {
-      "id": "02_Button_SendChat_Pressed_035",
-      "category": "Button",
-      "source_sha256": "99b6a97bcfe9f503f8fc6e77218ea8efbca1a2b9061ee6e8bdeae588cec11173",
-      "asset_path": "Assets/_Generated/GameUI/xiuxian-ui-main-v1/Sprites/02_Button_SendChat_Pressed_035.png",
-      "pixels_per_unit": 511.0,
-      "pixels_per_unit_origin": "layout-derived",
-      "layout_scale": 0.195695,
-      "layout_target_sizes": [
-        [
-          100.0,
-          50.0
-        ]
-      ],
-      "border": [
-        108,
-        38,
-        108,
-        39
-      ],
-      "border_origin": "auto-inferred",
-      "border_confidence": 0.8584,
-      "pivot": [
-        0.5,
-        0.5
-      ]
-    },
-    {
-      "id": "02_Button_SendChat_Disabled_036",
-      "category": "Button",
-      "source_sha256": "bb2d208a56bbd634ec7a3c897bf53885d50ca4c55c66f829427ba1bcff315d1d",
-      "asset_path": "Assets/_Generated/GameUI/xiuxian-ui-main-v1/Sprites/02_Button_SendChat_Disabled_036.png",
-      "pixels_per_unit": 515.0,
-      "pixels_per_unit_origin": "layout-derived",
-      "layout_scale": 0.194175,
-      "layout_target_sizes": [
-        [
-          100.0,
-          50.0
-        ]
-      ],
-      "border": [
-        114,
-        38,
-        109,
-        29
-      ],
-      "border_origin": "auto-inferred",
-      "border_confidence": 0.7922,
-      "pivot": [
-        0.5,
-        0.5
-      ]
-    },
-    {
-      "id": "03_Icon_Nav_GiftLotus_Default_001",
-      "category": "Icon_Nav",
-      "source_sha256": "9042096c799db1747b7d5865eb7986bfc1ebb5f0de63b519b2f9749c9c9cf8ab",
-      "asset_path": "Assets/_Generated/GameUI/xiuxian-ui-main-v1/Sprites/03_Icon_Nav_GiftLotus_Default_001.png",
-      "pixels_per_unit": 100.0,
-      "pixels_per_unit_origin": "default",
-      "layout_scale": null,
-      "layout_target_sizes": [
-        [
-          82.0,
-          82.0
-        ]
-      ],
-      "border": [
-        0,
-        0,
-        0,
-        0
-      ],
-      "border_origin": "not-applicable",
-      "border_confidence": 1.0,
-      "pivot": [
-        0.5,
-        0.5
-      ]
-    },
-    {
-      "id": "03_Icon_Nav_GiftBox_Default_002",
-      "category": "Icon_Nav",
-      "source_sha256": "cf71080dce36a22e15cfd3a9c3ec77223b52b4e3befd9532bf08c06620f72d2d",
-      "asset_path": "Assets/_Generated/GameUI/xiuxian-ui-main-v1/Sprites/03_Icon_Nav_GiftBox_Default_002.png",
-      "pixels_per_unit": 100.0,
-      "pixels_per_unit_origin": "default",
-      "layout_scale": null,
-      "layout_target_sizes": [
-        [
-          82.0,
-          82.0
-        ]
-      ],
-      "border": [
-        0,
-        0,
-        0,
-        0
-      ],
-      "border_origin": "not-applicable",
-      "border_confidence": 1.0,
-      "pivot": [
-        0.5,
-        0.5
-      ]
-    },
-    {
-      "id": "03_Icon_Nav_GiftPavilion_Default_003",
-      "category": "Icon_Nav",
-      "source_sha256": "30ef3282f049ab665aebb9b7bf127078ba626c37b34cf4c64eea3912d9e6bb0d",
-      "asset_path": "Assets/_Generated/GameUI/xiuxian-ui-main-v1/Sprites/03_Icon_Nav_GiftPavilion_Default_003.png",
-      "pixels_per_unit": 100.0,
-      "pixels_per_unit_origin": "default",
-      "layout_scale": null,
-      "layout_target_sizes": [
-        [
-          82.0,
-          82.0
-        ]
-      ],
-      "border": [
-        0,
-        0,
-        0,
-        0
-      ],
-      "border_origin": "not-applicable",
-      "border_confidence": 1.0,
-      "pivot": [
-        0.5,
-        0.5
-      ]
-    },
-    {
-      "id": "03_Icon_Nav_GiftMedallion_Default_004",
-      "category": "Icon_Nav",
-      "source_sha256": "53528278117f3222480251a6645255eab76649c0fbbca8e1a332062b3523443d",
-      "asset_path": "Assets/_Generated/GameUI/xiuxian-ui-main-v1/Sprites/03_Icon_Nav_GiftMedallion_Default_004.png",
-      "pixels_per_unit": 100.0,
-      "pixels_per_unit_origin": "default",
-      "layout_scale": null,
-      "layout_target_sizes": [
-        [
-          82.0,
-          82.0
-        ]
-      ],
-      "border": [
-        0,
-        0,
-        0,
-        0
-      ],
-      "border_origin": "not-applicable",
-      "border_confidence": 1.0,
-      "pivot": [
-        0.5,
-        0.5
-      ]
-    },
-    {
-      "id": "03_Icon_Nav_GiftClock_Default_005",
-      "category": "Icon_Nav",
-      "source_sha256": "75d6cf3900faaddc57d20caef5b9ae443b3a3bd18ea33c43f113a164c8898543",
-      "asset_path": "Assets/_Generated/GameUI/xiuxian-ui-main-v1/Sprites/03_Icon_Nav_GiftClock_Default_005.png",
-      "pixels_per_unit": 100.0,
-      "pixels_per_unit_origin": "default",
-      "layout_scale": null,
-      "layout_target_sizes": [
-        [
-          82.0,
-          82.0
-        ]
-      ],
-      "border": [
-        0,
-        0,
-        0,
-        0
-      ],
-      "border_origin": "not-applicable",
-      "border_confidence": 1.0,
-      "pivot": [
-        0.5,
-        0.5
-      ]
-    },
-    {
-      "id": "03_Icon_Nav_GiftTarget_Default_006",
-      "category": "Icon_Nav",
-      "source_sha256": "488fa129d6539ca8e4d71a67e31eb5a9c6b7548587a5b1d7151b479d654f27dc",
-      "asset_path": "Assets/_Generated/GameUI/xiuxian-ui-main-v1/Sprites/03_Icon_Nav_GiftTarget_Default_006.png",
-      "pixels_per_unit": 100.0,
-      "pixels_per_unit_origin": "default",
-      "layout_scale": null,
-      "layout_target_sizes": [
-        [
-          82.0,
-          82.0
-        ]
-      ],
-      "border": [
-        0,
-        0,
-        0,
-        0
-      ],
-      "border_origin": "not-applicable",
-      "border_confidence": 1.0,
-      "pivot": [
-        0.5,
-        0.5
-      ]
-    },
-    {
-      "id": "03_Icon_Nav_GiftLotusReward_Default_007",
-      "category": "Icon_Nav",
-      "source_sha256": "4c646266bb8cf5ea09978c2d5549df986afcf7bd9fa521bbe0e94234c3665a81",
-      "asset_path": "Assets/_Generated/GameUI/xiuxian-ui-main-v1/Sprites/03_Icon_Nav_GiftLotusReward_Default_007.png",
-      "pixels_per_unit": 100.0,
-      "pixels_per_unit_origin": "default",
-      "layout_scale": null,
-      "layout_target_sizes": [
-        [
-          82.0,
-          82.0
-        ]
-      ],
-      "border": [
-        0,
-        0,
-        0,
-        0
-      ],
-      "border_origin": "not-applicable",
-      "border_confidence": 1.0,
-      "pivot": [
-        0.5,
-        0.5
-      ]
-    },
-    {
-      "id": "03_Icon_Nav_GiftCauldron_Default_008",
-      "category": "Icon_Nav",
-      "source_sha256": "430dab9b9a84015a5dd6f7befe61a62f1dca59ef085b88931ffa0cffd75076ba",
-      "asset_path": "Assets/_Generated/GameUI/xiuxian-ui-main-v1/Sprites/03_Icon_Nav_GiftCauldron_Default_008.png",
-      "pixels_per_unit": 100.0,
-      "pixels_per_unit_origin": "default",
-      "layout_scale": null,
-      "layout_target_sizes": [
-        [
-          82.0,
-          82.0
-        ]
-      ],
-      "border": [
-        0,
-        0,
-        0,
-        0
-      ],
-      "border_origin": "not-applicable",
-      "border_confidence": 1.0,
-      "pivot": [
-        0.5,
-        0.5
-      ]
-    },
-    {
-      "id": "03_Icon_Nav_GiftBattle_Default_009",
-      "category": "Icon_Nav",
-      "source_sha256": "1e29171333723b20c6372303407c091df111e60b1202f9b2ffa911fb1c99daf0",
-      "asset_path": "Assets/_Generated/GameUI/xiuxian-ui-main-v1/Sprites/03_Icon_Nav_GiftBattle_Default_009.png",
-      "pixels_per_unit": 100.0,
-      "pixels_per_unit_origin": "default",
-      "layout_scale": null,
-      "layout_target_sizes": [
-        [
-          82.0,
-          82.0
-        ]
-      ],
-      "border": [
-        0,
-        0,
-        0,
-        0
-      ],
-      "border_origin": "not-applicable",
-      "border_confidence": 1.0,
-      "pivot": [
-        0.5,
-        0.5
-      ]
-    },
-    {
-      "id": "03_Icon_Nav_GiftShield_Default_010",
-      "category": "Icon_Nav",
-      "source_sha256": "8cd8b660c3376cf16b81e82de548f4d991e7060b1fe3e12ba975cfb003db4d6d",
-      "asset_path": "Assets/_Generated/GameUI/xiuxian-ui-main-v1/Sprites/03_Icon_Nav_GiftShield_Default_010.png",
-      "pixels_per_unit": 100.0,
-      "pixels_per_unit_origin": "default",
-      "layout_scale": null,
-      "layout_target_sizes": [
-        [
-          82.0,
-          82.0
-        ]
-      ],
-      "border": [
-        0,
-        0,
-        0,
-        0
-      ],
-      "border_origin": "not-applicable",
-      "border_confidence": 1.0,
-      "pivot": [
-        0.5,
-        0.5
-      ]
-    },
-    {
-      "id": "03_Icon_Nav_GiftPouch_Default_011",
-      "category": "Icon_Nav",
-      "source_sha256": "321e2865b8324c2f13c06610b3aadea22b6fc74cc29475c06965e906c55ac96b",
-      "asset_path": "Assets/_Generated/GameUI/xiuxian-ui-main-v1/Sprites/03_Icon_Nav_GiftPouch_Default_011.png",
-      "pixels_per_unit": 100.0,
-      "pixels_per_unit_origin": "default",
-      "layout_scale": null,
-      "layout_target_sizes": [
-        [
-          82.0,
-          82.0
-        ]
-      ],
-      "border": [
-        0,
-        0,
-        0,
-        0
-      ],
-      "border_origin": "not-applicable",
-      "border_confidence": 1.0,
-      "pivot": [
-        0.5,
-        0.5
-      ]
-    },
-    {
-      "id": "03_Icon_Nav_ActivityShield_Default_012",
-      "category": "Icon_Nav",
-      "source_sha256": "235aa79a63c31be8ce6a98b126cb8134988d036c22d7e71cd4cc6f1dddf6216e",
-      "asset_path": "Assets/_Generated/GameUI/xiuxian-ui-main-v1/Sprites/03_Icon_Nav_ActivityShield_Default_012.png",
-      "pixels_per_unit": 100.0,
-      "pixels_per_unit_origin": "default",
-      "layout_scale": null,
-      "layout_target_sizes": [
-        [
-          82.0,
-          82.0
-        ]
-      ],
-      "border": [
-        0,
-        0,
-        0,
-        0
-      ],
-      "border_origin": "not-applicable",
-      "border_confidence": 1.0,
-      "pivot": [
-        0.5,
-        0.5
-      ]
-    },
-    {
-      "id": "03_Icon_Nav_ActivityEmblem_Default_013",
-      "category": "Icon_Nav",
-      "source_sha256": "a8d67e8393ab3904f4f271723bb8d0a441e5938c030f6152bf7764b913d3a50f",
-      "asset_path": "Assets/_Generated/GameUI/xiuxian-ui-main-v1/Sprites/03_Icon_Nav_ActivityEmblem_Default_013.png",
-      "pixels_per_unit": 100.0,
-      "pixels_per_unit_origin": "default",
-      "layout_scale": null,
-      "layout_target_sizes": [
-        [
-          82.0,
-          82.0
-        ]
-      ],
-      "border": [
-        0,
-        0,
-        0,
-        0
-      ],
-      "border_origin": "not-applicable",
-      "border_confidence": 1.0,
-      "pivot": [
-        0.5,
-        0.5
-      ]
-    },
-    {
-      "id": "03_Icon_Nav_ActivityTwinBlades_Default_014",
-      "category": "Icon_Nav",
-      "source_sha256": "9b995244f740014b73a577bf21c22a0d7e32346f633fb96d27785e5788430e1c",
-      "asset_path": "Assets/_Generated/GameUI/xiuxian-ui-main-v1/Sprites/03_Icon_Nav_ActivityTwinBlades_Default_014.png",
-      "pixels_per_unit": 100.0,
-      "pixels_per_unit_origin": "default",
-      "layout_scale": null,
-      "layout_target_sizes": [
-        [
-          82.0,
-          82.0
-        ]
-      ],
-      "border": [
-        0,
-        0,
-        0,
-        0
-      ],
-      "border_origin": "not-applicable",
-      "border_confidence": 1.0,
-      "pivot": [
-        0.5,
-        0.5
-      ]
-    },
-    {
-      "id": "03_Icon_Nav_ActivityCrossedSwords_Default_015",
-      "category": "Icon_Nav",
-      "source_sha256": "f0157d2dfcfac8cdb94d927a3b4f9cf1e52a05e16c5e031c1b23a13d1df7eecb",
-      "asset_path": "Assets/_Generated/GameUI/xiuxian-ui-main-v1/Sprites/03_Icon_Nav_ActivityCrossedSwords_Default_015.png",
-      "pixels_per_unit": 100.0,
-      "pixels_per_unit_origin": "default",
-      "layout_scale": null,
-      "layout_target_sizes": [
-        [
-          82.0,
-          82.0
-        ]
-      ],
-      "border": [
-        0,
-        0,
-        0,
-        0
-      ],
-      "border_origin": "not-applicable",
-      "border_confidence": 1.0,
-      "pivot": [
-        0.5,
-        0.5
-      ]
-    },
-    {
-      "id": "03_Icon_Nav_ActivityGate_Default_016",
-      "category": "Icon_Nav",
-      "source_sha256": "95060c657d2b7581169f39723af8cb522b16f785f102ef241b43cd094c6741a6",
-      "asset_path": "Assets/_Generated/GameUI/xiuxian-ui-main-v1/Sprites/03_Icon_Nav_ActivityGate_Default_016.png",
-      "pixels_per_unit": 100.0,
-      "pixels_per_unit_origin": "default",
-      "layout_scale": null,
-      "layout_target_sizes": [
-        [
-          82.0,
-          82.0
-        ]
-      ],
-      "border": [
-        0,
-        0,
-        0,
-        0
-      ],
-      "border_origin": "not-applicable",
-      "border_confidence": 1.0,
-      "pivot": [
-        0.5,
-        0.5
-      ]
-    },
-    {
-      "id": "03_Icon_Nav_ActivityDrum_Default_017",
-      "category": "Icon_Nav",
-      "source_sha256": "e4b085debd83e823f81abab007e17b0620c013fb00133090cd9a2033baf8d152",
-      "asset_path": "Assets/_Generated/GameUI/xiuxian-ui-main-v1/Sprites/03_Icon_Nav_ActivityDrum_Default_017.png",
-      "pixels_per_unit": 100.0,
-      "pixels_per_unit_origin": "default",
-      "layout_scale": null,
-      "layout_target_sizes": [
-        [
-          82.0,
-          82.0
-        ]
-      ],
-      "border": [
-        0,
-        0,
-        0,
-        0
-      ],
-      "border_origin": "not-applicable",
-      "border_confidence": 1.0,
-      "pivot": [
-        0.5,
-        0.5
-      ]
-    },
-    {
-      "id": "03_Icon_Nav_ActivityAchievement_Default_018",
-      "category": "Icon_Nav",
-      "source_sha256": "e8380c96f787442b4448fa28dabccaab6927f1bafb4bb5b3ac41f31aa9ec71be",
-      "asset_path": "Assets/_Generated/GameUI/xiuxian-ui-main-v1/Sprites/03_Icon_Nav_ActivityAchievement_Default_018.png",
-      "pixels_per_unit": 100.0,
-      "pixels_per_unit_origin": "default",
-      "layout_scale": null,
-      "layout_target_sizes": [
-        [
-          82.0,
-          82.0
-        ]
-      ],
-      "border": [
-        0,
-        0,
-        0,
-        0
-      ],
-      "border_origin": "not-applicable",
-      "border_confidence": 1.0,
-      "pivot": [
-        0.5,
-        0.5
-      ]
-    },
-    {
-      "id": "03_Icon_Nav_ActivityAlliance_Default_019",
-      "category": "Icon_Nav",
-      "source_sha256": "be9059ab00784c8a57e00375db324137a626242995b0bb901ab09d7e8ac0bb7b",
-      "asset_path": "Assets/_Generated/GameUI/xiuxian-ui-main-v1/Sprites/03_Icon_Nav_ActivityAlliance_Default_019.png",
-      "pixels_per_unit": 100.0,
-      "pixels_per_unit_origin": "default",
-      "layout_scale": null,
-      "layout_target_sizes": [
-        [
-          82.0,
-          82.0
-        ]
-      ],
-      "border": [
-        0,
-        0,
-        0,
-        0
-      ],
-      "border_origin": "not-applicable",
-      "border_confidence": 1.0,
-      "pivot": [
-        0.5,
-        0.5
-      ]
-    },
-    {
-      "id": "03_Icon_Nav_ActivityBanner_Default_020",
-      "category": "Icon_Nav",
-      "source_sha256": "852c72c1f78f30572811514c730003b89e9c622f5bcc3aace145779e49b3e1a2",
-      "asset_path": "Assets/_Generated/GameUI/xiuxian-ui-main-v1/Sprites/03_Icon_Nav_ActivityBanner_Default_020.png",
-      "pixels_per_unit": 100.0,
-      "pixels_per_unit_origin": "default",
-      "layout_scale": null,
-      "layout_target_sizes": [
-        [
-          82.0,
-          82.0
-        ]
-      ],
-      "border": [
-        0,
-        0,
-        0,
-        0
-      ],
-      "border_origin": "not-applicable",
-      "border_confidence": 1.0,
-      "pivot": [
-        0.5,
-        0.5
-      ]
-    },
-    {
-      "id": "03_Icon_Nav_ActivityRanking_Default_021",
-      "category": "Icon_Nav",
-      "source_sha256": "90b2d284c8b775fdf899d87d4eacbf1195af7105597bea40cefd19d0a0f50be9",
-      "asset_path": "Assets/_Generated/GameUI/xiuxian-ui-main-v1/Sprites/03_Icon_Nav_ActivityRanking_Default_021.png",
-      "pixels_per_unit": 100.0,
-      "pixels_per_unit_origin": "default",
-      "layout_scale": null,
-      "layout_target_sizes": [
-        [
-          82.0,
-          82.0
-        ]
-      ],
-      "border": [
-        0,
-        0,
-        0,
-        0
-      ],
-      "border_origin": "not-applicable",
-      "border_confidence": 1.0,
-      "pivot": [
-        0.5,
-        0.5
-      ]
-    },
-    {
-      "id": "03_Icon_Nav_FunctionPavilion_Default_022",
-      "category": "Icon_Nav",
-      "source_sha256": "1b1bf60700d1d0999f3290a009acc84d96665d5ebaeadf493b99b994933851b2",
-      "asset_path": "Assets/_Generated/GameUI/xiuxian-ui-main-v1/Sprites/03_Icon_Nav_FunctionPavilion_Default_022.png",
-      "pixels_per_unit": 100.0,
-      "pixels_per_unit_origin": "default",
-      "layout_scale": null,
-      "layout_target_sizes": [
-        [
-          78.0,
-          78.0
-        ],
-        [
-          96.0,
-          96.0
-        ]
-      ],
-      "border": [
-        0,
-        0,
-        0,
-        0
-      ],
-      "border_origin": "not-applicable",
-      "border_confidence": 1.0,
-      "pivot": [
-        0.5,
-        0.5
-      ]
-    },
-    {
-      "id": "03_Icon_Nav_FunctionTreasure_Default_023",
-      "category": "Icon_Nav",
-      "source_sha256": "b96c01d4297344e7344a17f559a7c26dbdb5578ecb7d97cd79d43cd211b3d690",
-      "asset_path": "Assets/_Generated/GameUI/xiuxian-ui-main-v1/Sprites/03_Icon_Nav_FunctionTreasure_Default_023.png",
-      "pixels_per_unit": 100.0,
-      "pixels_per_unit_origin": "default",
-      "layout_scale": null,
-      "layout_target_sizes": [
-        [
-          96.0,
-          96.0
-        ]
-      ],
-      "border": [
-        0,
-        0,
-        0,
-        0
-      ],
-      "border_origin": "not-applicable",
-      "border_confidence": 1.0,
-      "pivot": [
-        0.5,
-        0.5
-      ]
-    },
-    {
-      "id": "03_Icon_Nav_FunctionTalisman_Default_024",
-      "category": "Icon_Nav",
-      "source_sha256": "17e18a4fbcc820e00b76ff2ed73b108314a17370db798df84d36e36a6b1718bc",
-      "asset_path": "Assets/_Generated/GameUI/xiuxian-ui-main-v1/Sprites/03_Icon_Nav_FunctionTalisman_Default_024.png",
-      "pixels_per_unit": 100.0,
-      "pixels_per_unit_origin": "default",
-      "layout_scale": null,
-      "layout_target_sizes": [
-        [
-          96.0,
-          96.0
-        ]
-      ],
-      "border": [
-        0,
-        0,
-        0,
-        0
-      ],
-      "border_origin": "not-applicable",
-      "border_confidence": 1.0,
-      "pivot": [
-        0.5,
-        0.5
-      ]
-    },
-    {
-      "id": "03_Icon_Nav_FunctionShop_Default_025",
-      "category": "Icon_Nav",
-      "source_sha256": "9a1ad3b92ab9f93a7843b533352cf795d196699b9f64d5d0e07715049aaa8930",
-      "asset_path": "Assets/_Generated/GameUI/xiuxian-ui-main-v1/Sprites/03_Icon_Nav_FunctionShop_Default_025.png",
-      "pixels_per_unit": 100.0,
-      "pixels_per_unit_origin": "default",
-      "layout_scale": null,
-      "layout_target_sizes": [
-        [
-          96.0,
-          96.0
-        ]
-      ],
-      "border": [
-        0,
-        0,
-        0,
-        0
-      ],
-      "border_origin": "not-applicable",
-      "border_confidence": 1.0,
-      "pivot": [
-        0.5,
-        0.5
-      ]
-    },
-    {
-      "id": "03_Icon_Nav_FunctionScroll_Default_026",
-      "category": "Icon_Nav",
-      "source_sha256": "a3b77919c3383aa045831ab1db5ce43a13f1a2508d469c22efcfc0d64d9fff3c",
-      "asset_path": "Assets/_Generated/GameUI/xiuxian-ui-main-v1/Sprites/03_Icon_Nav_FunctionScroll_Default_026.png",
-      "pixels_per_unit": 100.0,
-      "pixels_per_unit_origin": "default",
-      "layout_scale": null,
-      "layout_target_sizes": [
-        [
-          96.0,
-          96.0
-        ]
-      ],
-      "border": [
-        0,
-        0,
-        0,
-        0
-      ],
-      "border_origin": "not-applicable",
-      "border_confidence": 1.0,
-      "pivot": [
-        0.5,
-        0.5
-      ]
-    },
-    {
-      "id": "03_Icon_Nav_FunctionWealth_Default_027",
-      "category": "Icon_Nav",
-      "source_sha256": "71c4a553d88fea57330cc74488ecadfef9315571cb27f26f28df2c8549f63e55",
-      "asset_path": "Assets/_Generated/GameUI/xiuxian-ui-main-v1/Sprites/03_Icon_Nav_FunctionWealth_Default_027.png",
-      "pixels_per_unit": 100.0,
-      "pixels_per_unit_origin": "default",
-      "layout_scale": null,
-      "layout_target_sizes": [
-        [
-          96.0,
-          96.0
-        ]
-      ],
-      "border": [
-        0,
-        0,
-        0,
-        0
-      ],
-      "border_origin": "not-applicable",
-      "border_confidence": 1.0,
-      "pivot": [
-        0.5,
-        0.5
-      ]
-    },
-    {
-      "id": "03_Icon_Nav_FunctionCompanion_Default_028",
-      "category": "Icon_Nav",
-      "source_sha256": "bac1c86f722e0d3d38c3de4a3961f4c3cc4e0f2d1ab0a862024921a2cf3edd12",
-      "asset_path": "Assets/_Generated/GameUI/xiuxian-ui-main-v1/Sprites/03_Icon_Nav_FunctionCompanion_Default_028.png",
-      "pixels_per_unit": 100.0,
-      "pixels_per_unit_origin": "default",
-      "layout_scale": null,
-      "layout_target_sizes": [
-        [
-          96.0,
-          96.0
-        ]
-      ],
-      "border": [
-        0,
-        0,
-        0,
-        0
-      ],
-      "border_origin": "not-applicable",
-      "border_confidence": 1.0,
-      "pivot": [
-        0.5,
-        0.5
-      ]
-    },
-    {
-      "id": "03_Icon_Nav_FunctionCharacter_Default_029",
-      "category": "Icon_Nav",
-      "source_sha256": "5c089ac73ad1b6db2d5977c2fa2b09777f99ca6a702cd2c866e2295eef8acd8e",
-      "asset_path": "Assets/_Generated/GameUI/xiuxian-ui-main-v1/Sprites/03_Icon_Nav_FunctionCharacter_Default_029.png",
-      "pixels_per_unit": 100.0,
-      "pixels_per_unit_origin": "default",
-      "layout_scale": null,
-      "layout_target_sizes": [
-        [
-          96.0,
-          96.0
-        ]
-      ],
-      "border": [
-        0,
-        0,
-        0,
-        0
-      ],
-      "border_origin": "not-applicable",
-      "border_confidence": 1.0,
-      "pivot": [
-        0.5,
-        0.5
-      ]
-    },
-    {
-      "id": "04_Icon_Status_CurrencyJade_Default_001",
-      "category": "Icon_Status",
-      "source_sha256": "093d3151c622b83f48c0dfa6297db492091da7bd258457a2d9f3dfaa318b6f67",
-      "asset_path": "Assets/_Generated/GameUI/xiuxian-ui-main-v1/Sprites/04_Icon_Status_CurrencyJade_Default_001.png",
-      "pixels_per_unit": 100.0,
-      "pixels_per_unit_origin": "default",
-      "layout_scale": null,
-      "layout_target_sizes": [
-        [
-          60.0,
-          60.0
-        ]
-      ],
-      "border": [
-        0,
-        0,
-        0,
-        0
-      ],
-      "border_origin": "not-applicable",
-      "border_confidence": 1.0,
-      "pivot": [
-        0.5,
-        0.5
-      ]
-    },
-    {
-      "id": "04_Icon_Status_CurrencyEssence_Default_002",
-      "category": "Icon_Status",
-      "source_sha256": "221eff7fd75757143db7be8cef8589c489b4133225c9978ca61f4abf9bb79719",
-      "asset_path": "Assets/_Generated/GameUI/xiuxian-ui-main-v1/Sprites/04_Icon_Status_CurrencyEssence_Default_002.png",
-      "pixels_per_unit": 100.0,
-      "pixels_per_unit_origin": "default",
-      "layout_scale": null,
-      "layout_target_sizes": [
-        [
-          60.0,
-          60.0
-        ]
-      ],
-      "border": [
-        0,
-        0,
-        0,
-        0
-      ],
-      "border_origin": "not-applicable",
-      "border_confidence": 1.0,
-      "pivot": [
-        0.5,
-        0.5
-      ]
-    },
-    {
-      "id": "04_Icon_Status_CurrencyVoucher_Default_003",
-      "category": "Icon_Status",
-      "source_sha256": "9708af48dbfc45733a14fad88cbde623e66ba1a301d3fcda9dd44a7de533eeaf",
-      "asset_path": "Assets/_Generated/GameUI/xiuxian-ui-main-v1/Sprites/04_Icon_Status_CurrencyVoucher_Default_003.png",
-      "pixels_per_unit": 100.0,
-      "pixels_per_unit_origin": "default",
-      "layout_scale": null,
-      "layout_target_sizes": [
-        [
-          60.0,
-          60.0
-        ]
-      ],
-      "border": [
-        0,
-        0,
-        0,
-        0
-      ],
-      "border_origin": "not-applicable",
-      "border_confidence": 1.0,
-      "pivot": [
-        0.5,
-        0.5
-      ]
-    },
-    {
-      "id": "04_Icon_Status_PlayerLevelBadge_Default_004",
-      "category": "Icon_Status",
-      "source_sha256": "10c454618463740b6dc54f7de4ea1c48d6aee7722c9f38234c06c055f8733717",
-      "asset_path": "Assets/_Generated/GameUI/xiuxian-ui-main-v1/Sprites/04_Icon_Status_PlayerLevelBadge_Default_004.png",
-      "pixels_per_unit": 100.0,
-      "pixels_per_unit_origin": "default",
-      "layout_scale": null,
-      "layout_target_sizes": [
-        [
-          48.0,
-          48.0
-        ]
-      ],
-      "border": [
-        0,
-        0,
-        0,
-        0
-      ],
-      "border_origin": "not-applicable",
-      "border_confidence": 1.0,
-      "pivot": [
-        0.5,
-        0.5
-      ]
-    },
-    {
-      "id": "04_Icon_Status_VipBadge_Default_005",
-      "category": "Icon_Status",
-      "source_sha256": "d9d99bf26504cdf26cd76240bcffc89150bf379cca89639c13ade55c741680ce",
-      "asset_path": "Assets/_Generated/GameUI/xiuxian-ui-main-v1/Sprites/04_Icon_Status_VipBadge_Default_005.png",
-      "pixels_per_unit": 100.0,
-      "pixels_per_unit_origin": "default",
-      "layout_scale": null,
-      "layout_target_sizes": [
-        [
-          82.0,
-          38.0
-        ]
-      ],
-      "border": [
-        0,
-        0,
-        0,
-        0
-      ],
-      "border_origin": "not-applicable",
-      "border_confidence": 1.0,
-      "pivot": [
-        0.5,
-        0.5
-      ]
-    },
-    {
-      "id": "04_Icon_Status_BuffBadge_Default_006",
-      "category": "Icon_Status",
-      "source_sha256": "dae5e23d4fccab70de129beeb64ea1b04980c89cde24e88889a55351c4b80e21",
-      "asset_path": "Assets/_Generated/GameUI/xiuxian-ui-main-v1/Sprites/04_Icon_Status_BuffBadge_Default_006.png",
-      "pixels_per_unit": 100.0,
-      "pixels_per_unit_origin": "default",
-      "layout_scale": null,
-      "layout_target_sizes": [
-        [
-          82.0,
-          38.0
-        ]
-      ],
-      "border": [
-        0,
-        0,
-        0,
-        0
-      ],
-      "border_origin": "not-applicable",
-      "border_confidence": 1.0,
-      "pivot": [
-        0.5,
-        0.5
-      ]
-    },
-    {
-      "id": "04_Icon_Status_QuestCompleted_Default_007",
-      "category": "Icon_Status",
-      "source_sha256": "adadf715412276aa6624bdef394ce4d5747d4d6ec7c3f0c6d9cb33b8982377f0",
-      "asset_path": "Assets/_Generated/GameUI/xiuxian-ui-main-v1/Sprites/04_Icon_Status_QuestCompleted_Default_007.png",
-      "pixels_per_unit": 100.0,
-      "pixels_per_unit_origin": "default",
-      "layout_scale": null,
-      "layout_target_sizes": [
-        [
-          36.0,
-          36.0
-        ]
-      ],
-      "border": [
-        0,
-        0,
-        0,
-        0
-      ],
-      "border_origin": "not-applicable",
-      "border_confidence": 1.0,
-      "pivot": [
-        0.5,
-        0.5
-      ]
-    },
-    {
-      "id": "04_Icon_Status_NotificationDot_Default_008",
-      "category": "Icon_Status",
-      "source_sha256": "291ddd317b5566063b6127282dd6ae8beae227b79074db474401e1a37ee707eb",
-      "asset_path": "Assets/_Generated/GameUI/xiuxian-ui-main-v1/Sprites/04_Icon_Status_NotificationDot_Default_008.png",
-      "pixels_per_unit": 100.0,
-      "pixels_per_unit_origin": "default",
-      "layout_scale": null,
-      "layout_target_sizes": [
-        [
-          30.0,
-          30.0
-        ]
-      ],
-      "border": [
-        0,
-        0,
-        0,
-        0
-      ],
-      "border_origin": "not-applicable",
-      "border_confidence": 1.0,
-      "pivot": [
-        0.5,
-        0.5
-      ]
-    },
-    {
-      "id": "09_Icon_Effect_SoftBlueGlow_Default_001",
-      "category": "Icon_Effect",
-      "source_sha256": "89a98f4ace17c2e90ee0a2e8057195465b283ddc07b7eeb2c653218e7d83539a",
-      "asset_path": "Assets/_Generated/GameUI/xiuxian-ui-main-v1/Sprites/09_Icon_Effect_SoftBlueGlow_Default_001.png",
-      "pixels_per_unit": 100.0,
-      "pixels_per_unit_origin": "default",
-      "layout_scale": null,
-      "layout_target_sizes": [
-        [
-          1580.0,
-          980.0
-        ]
-      ],
-      "border": [
-        0,
-        0,
-        0,
-        0
-      ],
-      "border_origin": "not-applicable",
-      "border_confidence": 1.0,
-      "pivot": [
-        0.5,
-        0.5
-      ]
-    },
-    {
-      "id": "09_Icon_Effect_GoldSelectedGlow_Default_002",
-      "category": "Icon_Effect",
-      "source_sha256": "428a3e13cc1437ae45141d34e919bf47632970d73e6343f1b8f4a52f2333086d",
-      "asset_path": "Assets/_Generated/GameUI/xiuxian-ui-main-v1/Sprites/09_Icon_Effect_GoldSelectedGlow_Default_002.png",
-      "pixels_per_unit": 100.0,
-      "pixels_per_unit_origin": "default",
-      "layout_scale": null,
-      "layout_target_sizes": [
-        [
-          175.0,
-          175.0
-        ],
-        [
-          145.0,
-          145.0
-        ]
-      ],
-      "border": [
-        0,
-        0,
-        0,
-        0
-      ],
-      "border_origin": "not-applicable",
-      "border_confidence": 1.0,
-      "pivot": [
-        0.5,
-        0.5
-      ]
-    },
-    {
-      "id": "09_Icon_Effect_StarSparkle_Default_003",
-      "category": "Icon_Effect",
-      "source_sha256": "ced19d3af5393a2c2e7c9d3786828f7477873726c5372b8ba99c74c262bf620b",
-      "asset_path": "Assets/_Generated/GameUI/xiuxian-ui-main-v1/Sprites/09_Icon_Effect_StarSparkle_Default_003.png",
-      "pixels_per_unit": 100.0,
-      "pixels_per_unit_origin": "default",
-      "layout_scale": null,
-      "layout_target_sizes": [],
-      "border": [
-        0,
-        0,
-        0,
-        0
-      ],
-      "border_origin": "not-applicable",
-      "border_confidence": 1.0,
-      "pivot": [
-        0.5,
-        0.5
-      ]
-    },
-    {
-      "id": "09_Icon_Effect_NotificationPulse_Default_004",
-      "category": "Icon_Effect",
-      "source_sha256": "633d8656746e0fc636c2b309c5d49e6bd109fdd77d7b835e78ba9dd15cab6443",
-      "asset_path": "Assets/_Generated/GameUI/xiuxian-ui-main-v1/Sprites/09_Icon_Effect_NotificationPulse_Default_004.png",
-      "pixels_per_unit": 100.0,
-      "pixels_per_unit_origin": "default",
-      "layout_scale": null,
-      "layout_target_sizes": [],
-      "border": [
-        0,
-        0,
-        0,
-        0
-      ],
-      "border_origin": "not-applicable",
-      "border_confidence": 1.0,
+      "border_confidence": 0.7425,
       "pivot": [
         0.5,
         0.5
@@ -2491,6 +323,1857 @@
       ]
     },
     {
+      "id": "02_Button_AddCurrency_Normal_001",
+      "category": "Button",
+      "source_sha256": "a18818ce97bced33c3b6cd9f9b5229bc614f703aec9b8e7170e86bb0c1a68de0",
+      "asset_path": "Assets/_Generated/GameUI/xiuxian-ui-main-v1/Sprites/02_Button_AddCurrency_Normal_001.png",
+      "pixels_per_unit": 537.931,
+      "pixels_per_unit_origin": "layout-derived",
+      "layout_scale": 0.185897,
+      "layout_target_sizes": [
+        [
+          58.0,
+          58.0
+        ],
+        [
+          58.0,
+          58.0
+        ],
+        [
+          58.0,
+          58.0
+        ]
+      ],
+      "border": [
+        52,
+        44,
+        50,
+        46
+      ],
+      "border_origin": "auto-inferred",
+      "border_confidence": 0.8309,
+      "pivot": [
+        0.5,
+        0.5
+      ]
+    },
+    {
+      "id": "02_Button_AddCurrency_Hover_002",
+      "category": "Button",
+      "source_sha256": "cb73600ca6de8bb5a9e65f6739691a5d9f77ecc673d8200a722ab421b5dd9dc6",
+      "asset_path": "Assets/_Generated/GameUI/xiuxian-ui-main-v1/Sprites/02_Button_AddCurrency_Hover_002.png",
+      "pixels_per_unit": 539.6552,
+      "pixels_per_unit_origin": "layout-derived",
+      "layout_scale": 0.185304,
+      "layout_target_sizes": [
+        [
+          58.0,
+          58.0
+        ],
+        [
+          58.0,
+          58.0
+        ],
+        [
+          58.0,
+          58.0
+        ]
+      ],
+      "border": [
+        54,
+        49,
+        52,
+        49
+      ],
+      "border_origin": "auto-inferred",
+      "border_confidence": 0.8419,
+      "pivot": [
+        0.5,
+        0.5
+      ]
+    },
+    {
+      "id": "02_Button_AddCurrency_Pressed_003",
+      "category": "Button",
+      "source_sha256": "6b78e715322037218d9173427458fba48b53daf8e23011469e46d70ab30edb53",
+      "asset_path": "Assets/_Generated/GameUI/xiuxian-ui-main-v1/Sprites/02_Button_AddCurrency_Pressed_003.png",
+      "pixels_per_unit": 537.931,
+      "pixels_per_unit_origin": "layout-derived",
+      "layout_scale": 0.185897,
+      "layout_target_sizes": [
+        [
+          58.0,
+          58.0
+        ],
+        [
+          58.0,
+          58.0
+        ],
+        [
+          58.0,
+          58.0
+        ]
+      ],
+      "border": [
+        37,
+        34,
+        38,
+        33
+      ],
+      "border_origin": "auto-inferred",
+      "border_confidence": 0.8146,
+      "pivot": [
+        0.5,
+        0.5
+      ]
+    },
+    {
+      "id": "02_Button_AddCurrency_Disabled_004",
+      "category": "Button",
+      "source_sha256": "b7eaa727b04dd41c735ad422ce328e7bf6f037467bb5f734a393e117dd76119c",
+      "asset_path": "Assets/_Generated/GameUI/xiuxian-ui-main-v1/Sprites/02_Button_AddCurrency_Disabled_004.png",
+      "pixels_per_unit": 532.7586,
+      "pixels_per_unit_origin": "layout-derived",
+      "layout_scale": 0.187702,
+      "layout_target_sizes": [
+        [
+          58.0,
+          58.0
+        ],
+        [
+          58.0,
+          58.0
+        ],
+        [
+          58.0,
+          58.0
+        ]
+      ],
+      "border": [
+        64,
+        53,
+        62,
+        59
+      ],
+      "border_origin": "auto-inferred",
+      "border_confidence": 0.8284,
+      "pivot": [
+        0.5,
+        0.5
+      ]
+    },
+    {
+      "id": "02_Button_ExitGame_Normal_005",
+      "category": "Button",
+      "source_sha256": "7a0e28d34038e355552735f5f12e27d87262d7540bda2e0789240c0563121890",
+      "asset_path": "Assets/_Generated/GameUI/xiuxian-ui-main-v1/Sprites/02_Button_ExitGame_Normal_005.png",
+      "pixels_per_unit": 275.7576,
+      "pixels_per_unit_origin": "layout-derived",
+      "layout_scale": 0.362637,
+      "layout_target_sizes": [
+        [
+          210.0,
+          66.0
+        ]
+      ],
+      "border": [
+        43,
+        46,
+        49,
+        46
+      ],
+      "border_origin": "auto-inferred",
+      "border_confidence": 0.8272,
+      "pivot": [
+        0.5,
+        0.5
+      ]
+    },
+    {
+      "id": "02_Button_ExitGame_Hover_006",
+      "category": "Button",
+      "source_sha256": "30e163fb569b0d35f4d1285298b47166835dbeedfaf705016afa863e05c65b2d",
+      "asset_path": "Assets/_Generated/GameUI/xiuxian-ui-main-v1/Sprites/02_Button_ExitGame_Hover_006.png",
+      "pixels_per_unit": 278.7879,
+      "pixels_per_unit_origin": "layout-derived",
+      "layout_scale": 0.358696,
+      "layout_target_sizes": [
+        [
+          210.0,
+          66.0
+        ]
+      ],
+      "border": [
+        44,
+        45,
+        42,
+        49
+      ],
+      "border_origin": "auto-inferred",
+      "border_confidence": 0.8498,
+      "pivot": [
+        0.5,
+        0.5
+      ]
+    },
+    {
+      "id": "02_Button_ExitGame_Pressed_007",
+      "category": "Button",
+      "source_sha256": "0419c944c8f572591dd5420253efe3f1b3e188b4b828bd2d4d4247c12a1b6a4e",
+      "asset_path": "Assets/_Generated/GameUI/xiuxian-ui-main-v1/Sprites/02_Button_ExitGame_Pressed_007.png",
+      "pixels_per_unit": 286.3636,
+      "pixels_per_unit_origin": "layout-derived",
+      "layout_scale": 0.349206,
+      "layout_target_sizes": [
+        [
+          210.0,
+          66.0
+        ]
+      ],
+      "border": [
+        43,
+        49,
+        43,
+        50
+      ],
+      "border_origin": "auto-inferred",
+      "border_confidence": 0.8657,
+      "pivot": [
+        0.5,
+        0.5
+      ]
+    },
+    {
+      "id": "02_Button_ExitGame_Disabled_008",
+      "category": "Button",
+      "source_sha256": "c0011375a797d41ef53871c91abc6d25841a5599266de337bd396daab97223f9",
+      "asset_path": "Assets/_Generated/GameUI/xiuxian-ui-main-v1/Sprites/02_Button_ExitGame_Disabled_008.png",
+      "pixels_per_unit": 284.8485,
+      "pixels_per_unit_origin": "layout-derived",
+      "layout_scale": 0.351064,
+      "layout_target_sizes": [
+        [
+          210.0,
+          66.0
+        ]
+      ],
+      "border": [
+        43,
+        46,
+        41,
+        52
+      ],
+      "border_origin": "auto-inferred",
+      "border_confidence": 0.8509,
+      "pivot": [
+        0.5,
+        0.5
+      ]
+    },
+    {
+      "id": "02_Button_WorldMap_Normal_009",
+      "category": "Button",
+      "source_sha256": "e37f584a19eaf4a19c77120c578f8d071ad4aec93df18128b4987a6d4babafe0",
+      "asset_path": "Assets/_Generated/GameUI/xiuxian-ui-main-v1/Sprites/02_Button_WorldMap_Normal_009.png",
+      "pixels_per_unit": 318.9655,
+      "pixels_per_unit_origin": "layout-derived",
+      "layout_scale": 0.313514,
+      "layout_target_sizes": [
+        [
+          190.0,
+          58.0
+        ]
+      ],
+      "border": [
+        43,
+        46,
+        43,
+        49
+      ],
+      "border_origin": "auto-inferred",
+      "border_confidence": 0.8639,
+      "pivot": [
+        0.5,
+        0.5
+      ]
+    },
+    {
+      "id": "02_Button_WorldMap_Hover_010",
+      "category": "Button",
+      "source_sha256": "b5fd7743831a4a532dd76b29752683c6898457e12eb15611226d9b07a1538299",
+      "asset_path": "Assets/_Generated/GameUI/xiuxian-ui-main-v1/Sprites/02_Button_WorldMap_Hover_010.png",
+      "pixels_per_unit": 313.7931,
+      "pixels_per_unit_origin": "layout-derived",
+      "layout_scale": 0.318681,
+      "layout_target_sizes": [
+        [
+          190.0,
+          58.0
+        ]
+      ],
+      "border": [
+        44,
+        46,
+        47,
+        46
+      ],
+      "border_origin": "auto-inferred",
+      "border_confidence": 0.8444,
+      "pivot": [
+        0.5,
+        0.5
+      ]
+    },
+    {
+      "id": "02_Button_WorldMap_Pressed_011",
+      "category": "Button",
+      "source_sha256": "8e7ffdfe3cdde68fcc18dce78de3301494267753de23f08214d7f36d09cddf55",
+      "asset_path": "Assets/_Generated/GameUI/xiuxian-ui-main-v1/Sprites/02_Button_WorldMap_Pressed_011.png",
+      "pixels_per_unit": 313.7931,
+      "pixels_per_unit_origin": "layout-derived",
+      "layout_scale": 0.318681,
+      "layout_target_sizes": [
+        [
+          190.0,
+          58.0
+        ]
+      ],
+      "border": [
+        44,
+        46,
+        44,
+        45
+      ],
+      "border_origin": "auto-inferred",
+      "border_confidence": 0.8652,
+      "pivot": [
+        0.5,
+        0.5
+      ]
+    },
+    {
+      "id": "02_Button_WorldMap_Disabled_012",
+      "category": "Button",
+      "source_sha256": "0b5b8a660a4d46d946bfc16b8f5700a3083f07496a5ed6860474c34ce2f0cc7a",
+      "asset_path": "Assets/_Generated/GameUI/xiuxian-ui-main-v1/Sprites/02_Button_WorldMap_Disabled_012.png",
+      "pixels_per_unit": 315.5172,
+      "pixels_per_unit_origin": "layout-derived",
+      "layout_scale": 0.31694,
+      "layout_target_sizes": [
+        [
+          190.0,
+          58.0
+        ]
+      ],
+      "border": [
+        43,
+        46,
+        43,
+        46
+      ],
+      "border_origin": "auto-inferred",
+      "border_confidence": 0.8646,
+      "pivot": [
+        0.5,
+        0.5
+      ]
+    },
+    {
+      "id": "02_Button_QuestTab_Normal_013",
+      "category": "Button",
+      "source_sha256": "8f461e62f7a5e498f699517672c090ff24ff6a7bdcd1740022fab80830eb075d",
+      "asset_path": "Assets/_Generated/GameUI/xiuxian-ui-main-v1/Sprites/02_Button_QuestTab_Normal_013.png",
+      "pixels_per_unit": 554.5455,
+      "pixels_per_unit_origin": "layout-derived",
+      "layout_scale": 0.180328,
+      "layout_target_sizes": [
+        [
+          88.0,
+          46.0
+        ],
+        [
+          88.0,
+          46.0
+        ],
+        [
+          88.0,
+          46.0
+        ]
+      ],
+      "border": [
+        71,
+        32,
+        75,
+        38
+      ],
+      "border_origin": "auto-inferred",
+      "border_confidence": 0.8265,
+      "pivot": [
+        0.5,
+        0.5
+      ]
+    },
+    {
+      "id": "02_Button_QuestTab_Hover_014",
+      "category": "Button",
+      "source_sha256": "c370e550d8e868f6b7c29748ca25515eabc4d8aca1af8d474ee9d2200f289bae",
+      "asset_path": "Assets/_Generated/GameUI/xiuxian-ui-main-v1/Sprites/02_Button_QuestTab_Hover_014.png",
+      "pixels_per_unit": 562.5,
+      "pixels_per_unit_origin": "layout-derived",
+      "layout_scale": 0.177778,
+      "layout_target_sizes": [
+        [
+          88.0,
+          46.0
+        ],
+        [
+          88.0,
+          46.0
+        ],
+        [
+          88.0,
+          46.0
+        ]
+      ],
+      "border": [
+        69,
+        29,
+        72,
+        35
+      ],
+      "border_origin": "auto-inferred",
+      "border_confidence": 0.8248,
+      "pivot": [
+        0.5,
+        0.5
+      ]
+    },
+    {
+      "id": "02_Button_QuestTab_Pressed_015",
+      "category": "Button",
+      "source_sha256": "10f081f8cff78aac3449d23627a3f42f7e42c4f40d9ffa44fb54544fc06f05ff",
+      "asset_path": "Assets/_Generated/GameUI/xiuxian-ui-main-v1/Sprites/02_Button_QuestTab_Pressed_015.png",
+      "pixels_per_unit": 564.7727,
+      "pixels_per_unit_origin": "layout-derived",
+      "layout_scale": 0.177062,
+      "layout_target_sizes": [
+        [
+          88.0,
+          46.0
+        ],
+        [
+          88.0,
+          46.0
+        ],
+        [
+          88.0,
+          46.0
+        ]
+      ],
+      "border": [
+        71,
+        27,
+        70,
+        31
+      ],
+      "border_origin": "auto-inferred",
+      "border_confidence": 0.8313,
+      "pivot": [
+        0.5,
+        0.5
+      ]
+    },
+    {
+      "id": "02_Button_QuestTab_Disabled_016",
+      "category": "Button",
+      "source_sha256": "4ce588a84ff108350e76868fc78b9718e417845eb788250f3744604b8479513c",
+      "asset_path": "Assets/_Generated/GameUI/xiuxian-ui-main-v1/Sprites/02_Button_QuestTab_Disabled_016.png",
+      "pixels_per_unit": 561.3636,
+      "pixels_per_unit_origin": "layout-derived",
+      "layout_scale": 0.178138,
+      "layout_target_sizes": [
+        [
+          88.0,
+          46.0
+        ],
+        [
+          88.0,
+          46.0
+        ],
+        [
+          88.0,
+          46.0
+        ]
+      ],
+      "border": [
+        70,
+        27,
+        70,
+        23
+      ],
+      "border_origin": "auto-inferred",
+      "border_confidence": 0.8196,
+      "pivot": [
+        0.5,
+        0.5
+      ]
+    },
+    {
+      "id": "02_Button_QuestComplete_Normal_017",
+      "category": "Button",
+      "source_sha256": "42ebe209cbc698fabd8d49a9f0ab0a1fb6f0972f0ea1df1506274819522b5540",
+      "asset_path": "Assets/_Generated/GameUI/xiuxian-ui-main-v1/Sprites/02_Button_QuestComplete_Normal_017.png",
+      "pixels_per_unit": 100.0,
+      "pixels_per_unit_origin": "default",
+      "layout_scale": null,
+      "layout_target_sizes": [],
+      "border": [
+        97,
+        40,
+        101,
+        51
+      ],
+      "border_origin": "auto-inferred",
+      "border_confidence": 0.8094,
+      "pivot": [
+        0.5,
+        0.5
+      ]
+    },
+    {
+      "id": "02_Button_QuestComplete_Hover_018",
+      "category": "Button",
+      "source_sha256": "1bfecc85aaac00276a7cd6e27d2b22a00e4dfbf66f11be4b9906fdaf1aa53eae",
+      "asset_path": "Assets/_Generated/GameUI/xiuxian-ui-main-v1/Sprites/02_Button_QuestComplete_Hover_018.png",
+      "pixels_per_unit": 100.0,
+      "pixels_per_unit_origin": "default",
+      "layout_scale": null,
+      "layout_target_sizes": [],
+      "border": [
+        99,
+        38,
+        99,
+        42
+      ],
+      "border_origin": "auto-inferred",
+      "border_confidence": 0.8381,
+      "pivot": [
+        0.5,
+        0.5
+      ]
+    },
+    {
+      "id": "02_Button_QuestComplete_Pressed_019",
+      "category": "Button",
+      "source_sha256": "d1f63f0090c4ad06a055cebf40089624569597fe999d575b7b5af39204d77c57",
+      "asset_path": "Assets/_Generated/GameUI/xiuxian-ui-main-v1/Sprites/02_Button_QuestComplete_Pressed_019.png",
+      "pixels_per_unit": 100.0,
+      "pixels_per_unit_origin": "default",
+      "layout_scale": null,
+      "layout_target_sizes": [],
+      "border": [
+        97,
+        39,
+        97,
+        45
+      ],
+      "border_origin": "auto-inferred",
+      "border_confidence": 0.8352,
+      "pivot": [
+        0.5,
+        0.5
+      ]
+    },
+    {
+      "id": "02_Button_QuestComplete_Disabled_020",
+      "category": "Button",
+      "source_sha256": "8b6c43ac7ac98615a69ba3c3f9a91309fd9419d41fbd7ae1a3c1f810bfb37e52",
+      "asset_path": "Assets/_Generated/GameUI/xiuxian-ui-main-v1/Sprites/02_Button_QuestComplete_Disabled_020.png",
+      "pixels_per_unit": 100.0,
+      "pixels_per_unit_origin": "default",
+      "layout_scale": null,
+      "layout_target_sizes": [],
+      "border": [
+        100,
+        36,
+        96,
+        37
+      ],
+      "border_origin": "auto-inferred",
+      "border_confidence": 0.8577,
+      "pivot": [
+        0.5,
+        0.5
+      ]
+    },
+    {
+      "id": "02_Button_QuestCompleteAll_Normal_021",
+      "category": "Button",
+      "source_sha256": "2e46e7b49b6a83385644fb8ae063ad70ade30d9aa194e24972d639b1f08192f4",
+      "asset_path": "Assets/_Generated/GameUI/xiuxian-ui-main-v1/Sprites/02_Button_QuestCompleteAll_Normal_021.png",
+      "pixels_per_unit": 475.8621,
+      "pixels_per_unit_origin": "layout-derived",
+      "layout_scale": 0.210145,
+      "layout_target_sizes": [
+        [
+          200.0,
+          58.0
+        ]
+      ],
+      "border": [
+        29,
+        73,
+        27,
+        73
+      ],
+      "border_origin": "auto-inferred",
+      "border_confidence": 0.8473,
+      "pivot": [
+        0.5,
+        0.5
+      ]
+    },
+    {
+      "id": "02_Button_QuestCompleteAll_Hover_022",
+      "category": "Button",
+      "source_sha256": "f061082206a46ce02be8ad08ab92d6f3ca6ccb90551eaffc6b10fb2f9c427fa0",
+      "asset_path": "Assets/_Generated/GameUI/xiuxian-ui-main-v1/Sprites/02_Button_QuestCompleteAll_Hover_022.png",
+      "pixels_per_unit": 481.0345,
+      "pixels_per_unit_origin": "layout-derived",
+      "layout_scale": 0.207885,
+      "layout_target_sizes": [
+        [
+          200.0,
+          58.0
+        ]
+      ],
+      "border": [
+        23,
+        75,
+        26,
+        76
+      ],
+      "border_origin": "auto-inferred",
+      "border_confidence": 0.834,
+      "pivot": [
+        0.5,
+        0.5
+      ]
+    },
+    {
+      "id": "02_Button_QuestCompleteAll_Pressed_023",
+      "category": "Button",
+      "source_sha256": "97e53b55d5d4773b8b34058a4af2779130498b4916323243fc988dee2f2c66c2",
+      "asset_path": "Assets/_Generated/GameUI/xiuxian-ui-main-v1/Sprites/02_Button_QuestCompleteAll_Pressed_023.png",
+      "pixels_per_unit": 479.3103,
+      "pixels_per_unit_origin": "layout-derived",
+      "layout_scale": 0.208633,
+      "layout_target_sizes": [
+        [
+          200.0,
+          58.0
+        ]
+      ],
+      "border": [
+        23,
+        70,
+        23,
+        71
+      ],
+      "border_origin": "auto-inferred",
+      "border_confidence": 0.8696,
+      "pivot": [
+        0.5,
+        0.5
+      ]
+    },
+    {
+      "id": "02_Button_QuestCompleteAll_Disabled_024",
+      "category": "Button",
+      "source_sha256": "366b88f05d699dc5ecba95f0b06f1f6018788cbf09e0f87dc188d5358e691132",
+      "asset_path": "Assets/_Generated/GameUI/xiuxian-ui-main-v1/Sprites/02_Button_QuestCompleteAll_Disabled_024.png",
+      "pixels_per_unit": 479.3103,
+      "pixels_per_unit_origin": "layout-derived",
+      "layout_scale": 0.208633,
+      "layout_target_sizes": [
+        [
+          200.0,
+          58.0
+        ]
+      ],
+      "border": [
+        26,
+        71,
+        23,
+        75
+      ],
+      "border_origin": "auto-inferred",
+      "border_confidence": 0.8361,
+      "pivot": [
+        0.5,
+        0.5
+      ]
+    },
+    {
+      "id": "02_Button_ChatTab_Normal_025",
+      "category": "Button",
+      "source_sha256": "ad5a7ac6774ab12e7ee84e648e92a5e24607f5534e4b777aea95d501f0a98d19",
+      "asset_path": "Assets/_Generated/GameUI/xiuxian-ui-main-v1/Sprites/02_Button_ChatTab_Normal_025.png",
+      "pixels_per_unit": 608.5366,
+      "pixels_per_unit_origin": "layout-derived",
+      "layout_scale": 0.164329,
+      "layout_target_sizes": [
+        [
+          82.0,
+          44.0
+        ],
+        [
+          82.0,
+          44.0
+        ],
+        [
+          82.0,
+          44.0
+        ],
+        [
+          82.0,
+          44.0
+        ]
+      ],
+      "border": [
+        91,
+        32,
+        92,
+        34
+      ],
+      "border_origin": "auto-inferred",
+      "border_confidence": 0.8397,
+      "pivot": [
+        0.5,
+        0.5
+      ]
+    },
+    {
+      "id": "02_Button_ChatTab_Hover_026",
+      "category": "Button",
+      "source_sha256": "f4c375d4e20bee9f1bf81fcb54f4e8230f513cc39643d7ec37d35e3fbe3cf14a",
+      "asset_path": "Assets/_Generated/GameUI/xiuxian-ui-main-v1/Sprites/02_Button_ChatTab_Hover_026.png",
+      "pixels_per_unit": 615.8537,
+      "pixels_per_unit_origin": "layout-derived",
+      "layout_scale": 0.162376,
+      "layout_target_sizes": [
+        [
+          82.0,
+          44.0
+        ],
+        [
+          82.0,
+          44.0
+        ],
+        [
+          82.0,
+          44.0
+        ],
+        [
+          82.0,
+          44.0
+        ]
+      ],
+      "border": [
+        91,
+        39,
+        93,
+        39
+      ],
+      "border_origin": "auto-inferred",
+      "border_confidence": 0.8683,
+      "pivot": [
+        0.5,
+        0.5
+      ]
+    },
+    {
+      "id": "02_Button_ChatTab_Pressed_027",
+      "category": "Button",
+      "source_sha256": "ee865e7a241a928bfcd9725f8a519241f3cdb966766d83ecb6b0d89c9f10d9fa",
+      "asset_path": "Assets/_Generated/GameUI/xiuxian-ui-main-v1/Sprites/02_Button_ChatTab_Pressed_027.png",
+      "pixels_per_unit": 610.9756,
+      "pixels_per_unit_origin": "layout-derived",
+      "layout_scale": 0.163673,
+      "layout_target_sizes": [
+        [
+          82.0,
+          44.0
+        ],
+        [
+          82.0,
+          44.0
+        ],
+        [
+          82.0,
+          44.0
+        ],
+        [
+          82.0,
+          44.0
+        ]
+      ],
+      "border": [
+        91,
+        31,
+        91,
+        42
+      ],
+      "border_origin": "auto-inferred",
+      "border_confidence": 0.788,
+      "pivot": [
+        0.5,
+        0.5
+      ]
+    },
+    {
+      "id": "02_Button_ChatTab_Disabled_028",
+      "category": "Button",
+      "source_sha256": "5ad24b3c207bafdff11e13c92c79173819df2bb3e986546f066a2eed447c9333",
+      "asset_path": "Assets/_Generated/GameUI/xiuxian-ui-main-v1/Sprites/02_Button_ChatTab_Disabled_028.png",
+      "pixels_per_unit": 606.0976,
+      "pixels_per_unit_origin": "layout-derived",
+      "layout_scale": 0.16499,
+      "layout_target_sizes": [
+        [
+          82.0,
+          44.0
+        ],
+        [
+          82.0,
+          44.0
+        ],
+        [
+          82.0,
+          44.0
+        ],
+        [
+          82.0,
+          44.0
+        ]
+      ],
+      "border": [
+        88,
+        31,
+        87,
+        31
+      ],
+      "border_origin": "auto-inferred",
+      "border_confidence": 0.8601,
+      "pivot": [
+        0.5,
+        0.5
+      ]
+    },
+    {
+      "id": "02_Button_VoiceChat_Normal_029",
+      "category": "Button",
+      "source_sha256": "9bd01c07742b0088cfd4d4f35454aae2b9b856fdd8ef14cc877a2934a780ce7c",
+      "asset_path": "Assets/_Generated/GameUI/xiuxian-ui-main-v1/Sprites/02_Button_VoiceChat_Normal_029.png",
+      "pixels_per_unit": 591.6667,
+      "pixels_per_unit_origin": "layout-derived",
+      "layout_scale": 0.169014,
+      "layout_target_sizes": [
+        [
+          60.0,
+          60.0
+        ]
+      ],
+      "border": [
+        49,
+        66,
+        49,
+        73
+      ],
+      "border_origin": "auto-inferred",
+      "border_confidence": 0.831,
+      "pivot": [
+        0.5,
+        0.5
+      ]
+    },
+    {
+      "id": "02_Button_VoiceChat_Hover_030",
+      "category": "Button",
+      "source_sha256": "8adc44a270c74d0a9fe4777c0bd2492ec0018cca0befca475aa2fb75b66610a0",
+      "asset_path": "Assets/_Generated/GameUI/xiuxian-ui-main-v1/Sprites/02_Button_VoiceChat_Hover_030.png",
+      "pixels_per_unit": 601.6667,
+      "pixels_per_unit_origin": "layout-derived",
+      "layout_scale": 0.166205,
+      "layout_target_sizes": [
+        [
+          60.0,
+          60.0
+        ]
+      ],
+      "border": [
+        51,
+        69,
+        52,
+        73
+      ],
+      "border_origin": "auto-inferred",
+      "border_confidence": 0.8446,
+      "pivot": [
+        0.5,
+        0.5
+      ]
+    },
+    {
+      "id": "02_Button_VoiceChat_Pressed_031",
+      "category": "Button",
+      "source_sha256": "ee94880a6c147523d254274b89db61763d040c7a261cc91134a75de5f5709a93",
+      "asset_path": "Assets/_Generated/GameUI/xiuxian-ui-main-v1/Sprites/02_Button_VoiceChat_Pressed_031.png",
+      "pixels_per_unit": 591.6667,
+      "pixels_per_unit_origin": "layout-derived",
+      "layout_scale": 0.169014,
+      "layout_target_sizes": [
+        [
+          60.0,
+          60.0
+        ]
+      ],
+      "border": [
+        44,
+        66,
+        44,
+        75
+      ],
+      "border_origin": "auto-inferred",
+      "border_confidence": 0.8128,
+      "pivot": [
+        0.5,
+        0.5
+      ]
+    },
+    {
+      "id": "02_Button_VoiceChat_Disabled_032",
+      "category": "Button",
+      "source_sha256": "b4ef2d39d2dda7e9373acb203fd7ca7f2375ab8ad7fd8f0adf7dc44aade92d71",
+      "asset_path": "Assets/_Generated/GameUI/xiuxian-ui-main-v1/Sprites/02_Button_VoiceChat_Disabled_032.png",
+      "pixels_per_unit": 591.6667,
+      "pixels_per_unit_origin": "layout-derived",
+      "layout_scale": 0.169014,
+      "layout_target_sizes": [
+        [
+          60.0,
+          60.0
+        ]
+      ],
+      "border": [
+        53,
+        70,
+        54,
+        73
+      ],
+      "border_origin": "auto-inferred",
+      "border_confidence": 0.8506,
+      "pivot": [
+        0.5,
+        0.5
+      ]
+    },
+    {
+      "id": "02_Button_SendChat_Normal_033",
+      "category": "Button",
+      "source_sha256": "ea67e95ec9b17be7b8cd2947b388e4eb2f93348d5aa4ca31a03ae98b27a63564",
+      "asset_path": "Assets/_Generated/GameUI/xiuxian-ui-main-v1/Sprites/02_Button_SendChat_Normal_033.png",
+      "pixels_per_unit": 514.0,
+      "pixels_per_unit_origin": "layout-derived",
+      "layout_scale": 0.194553,
+      "layout_target_sizes": [
+        [
+          100.0,
+          50.0
+        ]
+      ],
+      "border": [
+        112,
+        38,
+        114,
+        38
+      ],
+      "border_origin": "auto-inferred",
+      "border_confidence": 0.8667,
+      "pivot": [
+        0.5,
+        0.5
+      ]
+    },
+    {
+      "id": "02_Button_SendChat_Hover_034",
+      "category": "Button",
+      "source_sha256": "6724ef75ff8c240419cc275308891d50f4a83d240d1b001648c9632a67ae2478",
+      "asset_path": "Assets/_Generated/GameUI/xiuxian-ui-main-v1/Sprites/02_Button_SendChat_Hover_034.png",
+      "pixels_per_unit": 517.0,
+      "pixels_per_unit_origin": "layout-derived",
+      "layout_scale": 0.193424,
+      "layout_target_sizes": [
+        [
+          100.0,
+          50.0
+        ]
+      ],
+      "border": [
+        109,
+        42,
+        117,
+        41
+      ],
+      "border_origin": "auto-inferred",
+      "border_confidence": 0.8592,
+      "pivot": [
+        0.5,
+        0.5
+      ]
+    },
+    {
+      "id": "02_Button_SendChat_Pressed_035",
+      "category": "Button",
+      "source_sha256": "60c77697d04ca58325c5fcab9fd107995b0f54afba7ca95c11efca9e165be4bc",
+      "asset_path": "Assets/_Generated/GameUI/xiuxian-ui-main-v1/Sprites/02_Button_SendChat_Pressed_035.png",
+      "pixels_per_unit": 511.0,
+      "pixels_per_unit_origin": "layout-derived",
+      "layout_scale": 0.195695,
+      "layout_target_sizes": [
+        [
+          100.0,
+          50.0
+        ]
+      ],
+      "border": [
+        108,
+        38,
+        108,
+        39
+      ],
+      "border_origin": "auto-inferred",
+      "border_confidence": 0.8589,
+      "pivot": [
+        0.5,
+        0.5
+      ]
+    },
+    {
+      "id": "02_Button_SendChat_Disabled_036",
+      "category": "Button",
+      "source_sha256": "c7afc4f308b32715180ddc5fe3cc7a803142bb0780ff84f5d0aabd9503ff1597",
+      "asset_path": "Assets/_Generated/GameUI/xiuxian-ui-main-v1/Sprites/02_Button_SendChat_Disabled_036.png",
+      "pixels_per_unit": 515.0,
+      "pixels_per_unit_origin": "layout-derived",
+      "layout_scale": 0.194175,
+      "layout_target_sizes": [
+        [
+          100.0,
+          50.0
+        ]
+      ],
+      "border": [
+        114,
+        38,
+        108,
+        29
+      ],
+      "border_origin": "auto-inferred",
+      "border_confidence": 0.7929,
+      "pivot": [
+        0.5,
+        0.5
+      ]
+    },
+    {
+      "id": "03_Icon_Nav_GiftLotus_Default_001",
+      "category": "Icon_Nav",
+      "source_sha256": "eaecd5081c9b6782659acb40ac31ac8e380cbba83b63c7fe128de2d959858943",
+      "asset_path": "Assets/_Generated/GameUI/xiuxian-ui-main-v1/Sprites/03_Icon_Nav_GiftLotus_Default_001.png",
+      "pixels_per_unit": 100.0,
+      "pixels_per_unit_origin": "default",
+      "layout_scale": null,
+      "layout_target_sizes": [
+        [
+          82.0,
+          82.0
+        ]
+      ],
+      "border": [
+        0,
+        0,
+        0,
+        0
+      ],
+      "border_origin": "not-applicable",
+      "border_confidence": 1.0,
+      "pivot": [
+        0.5,
+        0.5
+      ]
+    },
+    {
+      "id": "03_Icon_Nav_GiftBox_Default_002",
+      "category": "Icon_Nav",
+      "source_sha256": "90f88e55d82247a87e8117e99da0bb55c0921234652cb5f3362967cd4be3d375",
+      "asset_path": "Assets/_Generated/GameUI/xiuxian-ui-main-v1/Sprites/03_Icon_Nav_GiftBox_Default_002.png",
+      "pixels_per_unit": 100.0,
+      "pixels_per_unit_origin": "default",
+      "layout_scale": null,
+      "layout_target_sizes": [
+        [
+          82.0,
+          82.0
+        ]
+      ],
+      "border": [
+        0,
+        0,
+        0,
+        0
+      ],
+      "border_origin": "not-applicable",
+      "border_confidence": 1.0,
+      "pivot": [
+        0.5,
+        0.5
+      ]
+    },
+    {
+      "id": "03_Icon_Nav_GiftPavilion_Default_003",
+      "category": "Icon_Nav",
+      "source_sha256": "614e897839b2a6284cabca26985aaa3b2c43dada974de0d4e046465d97e6d659",
+      "asset_path": "Assets/_Generated/GameUI/xiuxian-ui-main-v1/Sprites/03_Icon_Nav_GiftPavilion_Default_003.png",
+      "pixels_per_unit": 100.0,
+      "pixels_per_unit_origin": "default",
+      "layout_scale": null,
+      "layout_target_sizes": [
+        [
+          82.0,
+          82.0
+        ]
+      ],
+      "border": [
+        0,
+        0,
+        0,
+        0
+      ],
+      "border_origin": "not-applicable",
+      "border_confidence": 1.0,
+      "pivot": [
+        0.5,
+        0.5
+      ]
+    },
+    {
+      "id": "03_Icon_Nav_GiftMedallion_Default_004",
+      "category": "Icon_Nav",
+      "source_sha256": "ca61a4130b0a63fb286055f052918f730c1dd9410e1474b258dd6d6d8c46e878",
+      "asset_path": "Assets/_Generated/GameUI/xiuxian-ui-main-v1/Sprites/03_Icon_Nav_GiftMedallion_Default_004.png",
+      "pixels_per_unit": 100.0,
+      "pixels_per_unit_origin": "default",
+      "layout_scale": null,
+      "layout_target_sizes": [
+        [
+          82.0,
+          82.0
+        ]
+      ],
+      "border": [
+        0,
+        0,
+        0,
+        0
+      ],
+      "border_origin": "not-applicable",
+      "border_confidence": 1.0,
+      "pivot": [
+        0.5,
+        0.5
+      ]
+    },
+    {
+      "id": "03_Icon_Nav_GiftClock_Default_005",
+      "category": "Icon_Nav",
+      "source_sha256": "f001c4751bb1c1a63aff4a4b7677d690ba637ba3584e1aae9712b505a4d4142f",
+      "asset_path": "Assets/_Generated/GameUI/xiuxian-ui-main-v1/Sprites/03_Icon_Nav_GiftClock_Default_005.png",
+      "pixels_per_unit": 100.0,
+      "pixels_per_unit_origin": "default",
+      "layout_scale": null,
+      "layout_target_sizes": [
+        [
+          82.0,
+          82.0
+        ]
+      ],
+      "border": [
+        0,
+        0,
+        0,
+        0
+      ],
+      "border_origin": "not-applicable",
+      "border_confidence": 1.0,
+      "pivot": [
+        0.5,
+        0.5
+      ]
+    },
+    {
+      "id": "03_Icon_Nav_GiftTarget_Default_006",
+      "category": "Icon_Nav",
+      "source_sha256": "2f8b18e8ac803881dfbd82256702dd8065f3edcaf6cac64b80a93eaea2ca1b96",
+      "asset_path": "Assets/_Generated/GameUI/xiuxian-ui-main-v1/Sprites/03_Icon_Nav_GiftTarget_Default_006.png",
+      "pixels_per_unit": 100.0,
+      "pixels_per_unit_origin": "default",
+      "layout_scale": null,
+      "layout_target_sizes": [
+        [
+          82.0,
+          82.0
+        ]
+      ],
+      "border": [
+        0,
+        0,
+        0,
+        0
+      ],
+      "border_origin": "not-applicable",
+      "border_confidence": 1.0,
+      "pivot": [
+        0.5,
+        0.5
+      ]
+    },
+    {
+      "id": "03_Icon_Nav_GiftLotusReward_Default_007",
+      "category": "Icon_Nav",
+      "source_sha256": "46c818b5c61c3d211af35231e2c4b5a4b10f646009e22e9ec8221fdbdf61748f",
+      "asset_path": "Assets/_Generated/GameUI/xiuxian-ui-main-v1/Sprites/03_Icon_Nav_GiftLotusReward_Default_007.png",
+      "pixels_per_unit": 100.0,
+      "pixels_per_unit_origin": "default",
+      "layout_scale": null,
+      "layout_target_sizes": [
+        [
+          82.0,
+          82.0
+        ]
+      ],
+      "border": [
+        0,
+        0,
+        0,
+        0
+      ],
+      "border_origin": "not-applicable",
+      "border_confidence": 1.0,
+      "pivot": [
+        0.5,
+        0.5
+      ]
+    },
+    {
+      "id": "03_Icon_Nav_GiftCauldron_Default_008",
+      "category": "Icon_Nav",
+      "source_sha256": "ddff987b17af622450619ba21c4e455618512e1772c20fea4ca575c36c15f398",
+      "asset_path": "Assets/_Generated/GameUI/xiuxian-ui-main-v1/Sprites/03_Icon_Nav_GiftCauldron_Default_008.png",
+      "pixels_per_unit": 100.0,
+      "pixels_per_unit_origin": "default",
+      "layout_scale": null,
+      "layout_target_sizes": [
+        [
+          82.0,
+          82.0
+        ]
+      ],
+      "border": [
+        0,
+        0,
+        0,
+        0
+      ],
+      "border_origin": "not-applicable",
+      "border_confidence": 1.0,
+      "pivot": [
+        0.5,
+        0.5
+      ]
+    },
+    {
+      "id": "03_Icon_Nav_GiftBattle_Default_009",
+      "category": "Icon_Nav",
+      "source_sha256": "6037be27c1bfabe1b954ec1150b57a3dd991836cf90d70b5d5363097afc1a056",
+      "asset_path": "Assets/_Generated/GameUI/xiuxian-ui-main-v1/Sprites/03_Icon_Nav_GiftBattle_Default_009.png",
+      "pixels_per_unit": 100.0,
+      "pixels_per_unit_origin": "default",
+      "layout_scale": null,
+      "layout_target_sizes": [
+        [
+          82.0,
+          82.0
+        ]
+      ],
+      "border": [
+        0,
+        0,
+        0,
+        0
+      ],
+      "border_origin": "not-applicable",
+      "border_confidence": 1.0,
+      "pivot": [
+        0.5,
+        0.5
+      ]
+    },
+    {
+      "id": "03_Icon_Nav_GiftShield_Default_010",
+      "category": "Icon_Nav",
+      "source_sha256": "8bc33ff0f617d585c701782a42768ceec0e002b1c91b5650b880c501eac6ad9b",
+      "asset_path": "Assets/_Generated/GameUI/xiuxian-ui-main-v1/Sprites/03_Icon_Nav_GiftShield_Default_010.png",
+      "pixels_per_unit": 100.0,
+      "pixels_per_unit_origin": "default",
+      "layout_scale": null,
+      "layout_target_sizes": [
+        [
+          82.0,
+          82.0
+        ]
+      ],
+      "border": [
+        0,
+        0,
+        0,
+        0
+      ],
+      "border_origin": "not-applicable",
+      "border_confidence": 1.0,
+      "pivot": [
+        0.5,
+        0.5
+      ]
+    },
+    {
+      "id": "03_Icon_Nav_GiftPouch_Default_011",
+      "category": "Icon_Nav",
+      "source_sha256": "b3251731d1df572470477fee5271a62347a4dfb20a7f5451f663734b72cbac48",
+      "asset_path": "Assets/_Generated/GameUI/xiuxian-ui-main-v1/Sprites/03_Icon_Nav_GiftPouch_Default_011.png",
+      "pixels_per_unit": 100.0,
+      "pixels_per_unit_origin": "default",
+      "layout_scale": null,
+      "layout_target_sizes": [
+        [
+          82.0,
+          82.0
+        ]
+      ],
+      "border": [
+        0,
+        0,
+        0,
+        0
+      ],
+      "border_origin": "not-applicable",
+      "border_confidence": 1.0,
+      "pivot": [
+        0.5,
+        0.5
+      ]
+    },
+    {
+      "id": "03_Icon_Nav_ActivityShield_Default_012",
+      "category": "Icon_Nav",
+      "source_sha256": "4d22cf9d7e4d49182eed6267fc539c9eb7c7c551b8427fff5c9db1c921a5e9dc",
+      "asset_path": "Assets/_Generated/GameUI/xiuxian-ui-main-v1/Sprites/03_Icon_Nav_ActivityShield_Default_012.png",
+      "pixels_per_unit": 100.0,
+      "pixels_per_unit_origin": "default",
+      "layout_scale": null,
+      "layout_target_sizes": [
+        [
+          82.0,
+          82.0
+        ]
+      ],
+      "border": [
+        0,
+        0,
+        0,
+        0
+      ],
+      "border_origin": "not-applicable",
+      "border_confidence": 1.0,
+      "pivot": [
+        0.5,
+        0.5
+      ]
+    },
+    {
+      "id": "03_Icon_Nav_ActivityEmblem_Default_013",
+      "category": "Icon_Nav",
+      "source_sha256": "10fa5c647f17b2c9e8f2e62f63e875c57b4093170b5d4e07f627fdd82b94fb3a",
+      "asset_path": "Assets/_Generated/GameUI/xiuxian-ui-main-v1/Sprites/03_Icon_Nav_ActivityEmblem_Default_013.png",
+      "pixels_per_unit": 100.0,
+      "pixels_per_unit_origin": "default",
+      "layout_scale": null,
+      "layout_target_sizes": [
+        [
+          82.0,
+          82.0
+        ]
+      ],
+      "border": [
+        0,
+        0,
+        0,
+        0
+      ],
+      "border_origin": "not-applicable",
+      "border_confidence": 1.0,
+      "pivot": [
+        0.5,
+        0.5
+      ]
+    },
+    {
+      "id": "03_Icon_Nav_ActivityTwinBlades_Default_014",
+      "category": "Icon_Nav",
+      "source_sha256": "b208f89a5f553c5faab7ab8d9da936c615dce971b5719772fe29714d6dbaf94f",
+      "asset_path": "Assets/_Generated/GameUI/xiuxian-ui-main-v1/Sprites/03_Icon_Nav_ActivityTwinBlades_Default_014.png",
+      "pixels_per_unit": 100.0,
+      "pixels_per_unit_origin": "default",
+      "layout_scale": null,
+      "layout_target_sizes": [
+        [
+          82.0,
+          82.0
+        ]
+      ],
+      "border": [
+        0,
+        0,
+        0,
+        0
+      ],
+      "border_origin": "not-applicable",
+      "border_confidence": 1.0,
+      "pivot": [
+        0.5,
+        0.5
+      ]
+    },
+    {
+      "id": "03_Icon_Nav_ActivityCrossedSwords_Default_015",
+      "category": "Icon_Nav",
+      "source_sha256": "3ccb1ef335c206c173e77dea3615a6f2cb1acde3c168dc805adb599cd129cdb9",
+      "asset_path": "Assets/_Generated/GameUI/xiuxian-ui-main-v1/Sprites/03_Icon_Nav_ActivityCrossedSwords_Default_015.png",
+      "pixels_per_unit": 100.0,
+      "pixels_per_unit_origin": "default",
+      "layout_scale": null,
+      "layout_target_sizes": [
+        [
+          82.0,
+          82.0
+        ]
+      ],
+      "border": [
+        0,
+        0,
+        0,
+        0
+      ],
+      "border_origin": "not-applicable",
+      "border_confidence": 1.0,
+      "pivot": [
+        0.5,
+        0.5
+      ]
+    },
+    {
+      "id": "03_Icon_Nav_ActivityGate_Default_016",
+      "category": "Icon_Nav",
+      "source_sha256": "b3b21e2c7368c92f89545675f300c696ebea62ea427a0fa6601445f85f254cb1",
+      "asset_path": "Assets/_Generated/GameUI/xiuxian-ui-main-v1/Sprites/03_Icon_Nav_ActivityGate_Default_016.png",
+      "pixels_per_unit": 100.0,
+      "pixels_per_unit_origin": "default",
+      "layout_scale": null,
+      "layout_target_sizes": [
+        [
+          82.0,
+          82.0
+        ]
+      ],
+      "border": [
+        0,
+        0,
+        0,
+        0
+      ],
+      "border_origin": "not-applicable",
+      "border_confidence": 1.0,
+      "pivot": [
+        0.5,
+        0.5
+      ]
+    },
+    {
+      "id": "03_Icon_Nav_ActivityDrum_Default_017",
+      "category": "Icon_Nav",
+      "source_sha256": "bb07a577b7f897cfdb68b283aafd7086bd42f552f79d89a74c735036418e411e",
+      "asset_path": "Assets/_Generated/GameUI/xiuxian-ui-main-v1/Sprites/03_Icon_Nav_ActivityDrum_Default_017.png",
+      "pixels_per_unit": 100.0,
+      "pixels_per_unit_origin": "default",
+      "layout_scale": null,
+      "layout_target_sizes": [
+        [
+          82.0,
+          82.0
+        ]
+      ],
+      "border": [
+        0,
+        0,
+        0,
+        0
+      ],
+      "border_origin": "not-applicable",
+      "border_confidence": 1.0,
+      "pivot": [
+        0.5,
+        0.5
+      ]
+    },
+    {
+      "id": "03_Icon_Nav_ActivityAchievement_Default_018",
+      "category": "Icon_Nav",
+      "source_sha256": "927757aac8ff4112f474a8796589ce86704e768a6084da066503829f914fab63",
+      "asset_path": "Assets/_Generated/GameUI/xiuxian-ui-main-v1/Sprites/03_Icon_Nav_ActivityAchievement_Default_018.png",
+      "pixels_per_unit": 100.0,
+      "pixels_per_unit_origin": "default",
+      "layout_scale": null,
+      "layout_target_sizes": [
+        [
+          82.0,
+          82.0
+        ]
+      ],
+      "border": [
+        0,
+        0,
+        0,
+        0
+      ],
+      "border_origin": "not-applicable",
+      "border_confidence": 1.0,
+      "pivot": [
+        0.5,
+        0.5
+      ]
+    },
+    {
+      "id": "03_Icon_Nav_ActivityAlliance_Default_019",
+      "category": "Icon_Nav",
+      "source_sha256": "304c936535702f836ce4d56ac7b2c55cb8b3debfd3fcba484005a329d55ac878",
+      "asset_path": "Assets/_Generated/GameUI/xiuxian-ui-main-v1/Sprites/03_Icon_Nav_ActivityAlliance_Default_019.png",
+      "pixels_per_unit": 100.0,
+      "pixels_per_unit_origin": "default",
+      "layout_scale": null,
+      "layout_target_sizes": [
+        [
+          82.0,
+          82.0
+        ]
+      ],
+      "border": [
+        0,
+        0,
+        0,
+        0
+      ],
+      "border_origin": "not-applicable",
+      "border_confidence": 1.0,
+      "pivot": [
+        0.5,
+        0.5
+      ]
+    },
+    {
+      "id": "03_Icon_Nav_ActivityBanner_Default_020",
+      "category": "Icon_Nav",
+      "source_sha256": "bd5a4bfc5ff6d135e1c5b32c3511814c994ce1833f8449accf21923a98694ef5",
+      "asset_path": "Assets/_Generated/GameUI/xiuxian-ui-main-v1/Sprites/03_Icon_Nav_ActivityBanner_Default_020.png",
+      "pixels_per_unit": 100.0,
+      "pixels_per_unit_origin": "default",
+      "layout_scale": null,
+      "layout_target_sizes": [
+        [
+          82.0,
+          82.0
+        ]
+      ],
+      "border": [
+        0,
+        0,
+        0,
+        0
+      ],
+      "border_origin": "not-applicable",
+      "border_confidence": 1.0,
+      "pivot": [
+        0.5,
+        0.5
+      ]
+    },
+    {
+      "id": "03_Icon_Nav_ActivityRanking_Default_021",
+      "category": "Icon_Nav",
+      "source_sha256": "369c68de2c53b8e0dfc057de8c07c797665104cb973cbd69f39e495d28f1bc55",
+      "asset_path": "Assets/_Generated/GameUI/xiuxian-ui-main-v1/Sprites/03_Icon_Nav_ActivityRanking_Default_021.png",
+      "pixels_per_unit": 100.0,
+      "pixels_per_unit_origin": "default",
+      "layout_scale": null,
+      "layout_target_sizes": [
+        [
+          82.0,
+          82.0
+        ]
+      ],
+      "border": [
+        0,
+        0,
+        0,
+        0
+      ],
+      "border_origin": "not-applicable",
+      "border_confidence": 1.0,
+      "pivot": [
+        0.5,
+        0.5
+      ]
+    },
+    {
+      "id": "03_Icon_Nav_FunctionPavilion_Default_022",
+      "category": "Icon_Nav",
+      "source_sha256": "b106217b4bc690109fcd0d9f41e9ba03694735f5e4a4b2af8858cb57da57523a",
+      "asset_path": "Assets/_Generated/GameUI/xiuxian-ui-main-v1/Sprites/03_Icon_Nav_FunctionPavilion_Default_022.png",
+      "pixels_per_unit": 100.0,
+      "pixels_per_unit_origin": "default",
+      "layout_scale": null,
+      "layout_target_sizes": [
+        [
+          78.0,
+          78.0
+        ],
+        [
+          96.0,
+          96.0
+        ]
+      ],
+      "border": [
+        0,
+        0,
+        0,
+        0
+      ],
+      "border_origin": "not-applicable",
+      "border_confidence": 1.0,
+      "pivot": [
+        0.5,
+        0.5
+      ]
+    },
+    {
+      "id": "03_Icon_Nav_FunctionTreasure_Default_023",
+      "category": "Icon_Nav",
+      "source_sha256": "fda628a7ca350adc0e4ee4c81065c386ae85bbd67dc20cc645a204e56ee1abb9",
+      "asset_path": "Assets/_Generated/GameUI/xiuxian-ui-main-v1/Sprites/03_Icon_Nav_FunctionTreasure_Default_023.png",
+      "pixels_per_unit": 100.0,
+      "pixels_per_unit_origin": "default",
+      "layout_scale": null,
+      "layout_target_sizes": [
+        [
+          96.0,
+          96.0
+        ]
+      ],
+      "border": [
+        0,
+        0,
+        0,
+        0
+      ],
+      "border_origin": "not-applicable",
+      "border_confidence": 1.0,
+      "pivot": [
+        0.5,
+        0.5
+      ]
+    },
+    {
+      "id": "03_Icon_Nav_FunctionTalisman_Default_024",
+      "category": "Icon_Nav",
+      "source_sha256": "82a26556f0160612c2704ee1e5310a9f0684d7517f2972b5ea9027ecf2c93883",
+      "asset_path": "Assets/_Generated/GameUI/xiuxian-ui-main-v1/Sprites/03_Icon_Nav_FunctionTalisman_Default_024.png",
+      "pixels_per_unit": 100.0,
+      "pixels_per_unit_origin": "default",
+      "layout_scale": null,
+      "layout_target_sizes": [
+        [
+          96.0,
+          96.0
+        ]
+      ],
+      "border": [
+        0,
+        0,
+        0,
+        0
+      ],
+      "border_origin": "not-applicable",
+      "border_confidence": 1.0,
+      "pivot": [
+        0.5,
+        0.5
+      ]
+    },
+    {
+      "id": "03_Icon_Nav_FunctionShop_Default_025",
+      "category": "Icon_Nav",
+      "source_sha256": "f803ea87f03ff2c8257c5344f1a581608e2cf75eebadb88d0322fbea6cb438b5",
+      "asset_path": "Assets/_Generated/GameUI/xiuxian-ui-main-v1/Sprites/03_Icon_Nav_FunctionShop_Default_025.png",
+      "pixels_per_unit": 100.0,
+      "pixels_per_unit_origin": "default",
+      "layout_scale": null,
+      "layout_target_sizes": [
+        [
+          96.0,
+          96.0
+        ]
+      ],
+      "border": [
+        0,
+        0,
+        0,
+        0
+      ],
+      "border_origin": "not-applicable",
+      "border_confidence": 1.0,
+      "pivot": [
+        0.5,
+        0.5
+      ]
+    },
+    {
+      "id": "03_Icon_Nav_FunctionScroll_Default_026",
+      "category": "Icon_Nav",
+      "source_sha256": "cb90dc835d59221a27dbc519c0b1f69862ee25df652ed4806423635055042f0c",
+      "asset_path": "Assets/_Generated/GameUI/xiuxian-ui-main-v1/Sprites/03_Icon_Nav_FunctionScroll_Default_026.png",
+      "pixels_per_unit": 100.0,
+      "pixels_per_unit_origin": "default",
+      "layout_scale": null,
+      "layout_target_sizes": [
+        [
+          96.0,
+          96.0
+        ]
+      ],
+      "border": [
+        0,
+        0,
+        0,
+        0
+      ],
+      "border_origin": "not-applicable",
+      "border_confidence": 1.0,
+      "pivot": [
+        0.5,
+        0.5
+      ]
+    },
+    {
+      "id": "03_Icon_Nav_FunctionWealth_Default_027",
+      "category": "Icon_Nav",
+      "source_sha256": "f9c326d125628a22d77bd6d42c5c3190b4fc480747ff9e12b65739f720994b41",
+      "asset_path": "Assets/_Generated/GameUI/xiuxian-ui-main-v1/Sprites/03_Icon_Nav_FunctionWealth_Default_027.png",
+      "pixels_per_unit": 100.0,
+      "pixels_per_unit_origin": "default",
+      "layout_scale": null,
+      "layout_target_sizes": [
+        [
+          96.0,
+          96.0
+        ]
+      ],
+      "border": [
+        0,
+        0,
+        0,
+        0
+      ],
+      "border_origin": "not-applicable",
+      "border_confidence": 1.0,
+      "pivot": [
+        0.5,
+        0.5
+      ]
+    },
+    {
+      "id": "03_Icon_Nav_FunctionCompanion_Default_028",
+      "category": "Icon_Nav",
+      "source_sha256": "8825121ec479c9eac22661eab28ec388296786747d9a4ace01f8fc5dc8ef23d6",
+      "asset_path": "Assets/_Generated/GameUI/xiuxian-ui-main-v1/Sprites/03_Icon_Nav_FunctionCompanion_Default_028.png",
+      "pixels_per_unit": 100.0,
+      "pixels_per_unit_origin": "default",
+      "layout_scale": null,
+      "layout_target_sizes": [
+        [
+          96.0,
+          96.0
+        ]
+      ],
+      "border": [
+        0,
+        0,
+        0,
+        0
+      ],
+      "border_origin": "not-applicable",
+      "border_confidence": 1.0,
+      "pivot": [
+        0.5,
+        0.5
+      ]
+    },
+    {
+      "id": "03_Icon_Nav_FunctionCharacter_Default_029",
+      "category": "Icon_Nav",
+      "source_sha256": "1084a646c79bcc41b91dd46d876c29f6b033b178363afa6249d780fcdd5484bf",
+      "asset_path": "Assets/_Generated/GameUI/xiuxian-ui-main-v1/Sprites/03_Icon_Nav_FunctionCharacter_Default_029.png",
+      "pixels_per_unit": 100.0,
+      "pixels_per_unit_origin": "default",
+      "layout_scale": null,
+      "layout_target_sizes": [
+        [
+          96.0,
+          96.0
+        ]
+      ],
+      "border": [
+        0,
+        0,
+        0,
+        0
+      ],
+      "border_origin": "not-applicable",
+      "border_confidence": 1.0,
+      "pivot": [
+        0.5,
+        0.5
+      ]
+    },
+    {
       "id": "03_Icon_Nav_PlayerAvatar_Default_030",
       "category": "Icon_Nav",
       "source_sha256": "25f532ac3f06ad82b6d8a3f4f872dceb443786499102a48b98ba25ef69c6d319",
@@ -2504,6 +2187,324 @@
           118.0
         ]
       ],
+      "border": [
+        0,
+        0,
+        0,
+        0
+      ],
+      "border_origin": "not-applicable",
+      "border_confidence": 1.0,
+      "pivot": [
+        0.5,
+        0.5
+      ]
+    },
+    {
+      "id": "04_Icon_Status_CurrencyJade_Default_001",
+      "category": "Icon_Status",
+      "source_sha256": "9827452836642f1d15f36f851e7343bf8033db3fe0c70f444fa883fd97f837e2",
+      "asset_path": "Assets/_Generated/GameUI/xiuxian-ui-main-v1/Sprites/04_Icon_Status_CurrencyJade_Default_001.png",
+      "pixels_per_unit": 100.0,
+      "pixels_per_unit_origin": "default",
+      "layout_scale": null,
+      "layout_target_sizes": [
+        [
+          60.0,
+          60.0
+        ]
+      ],
+      "border": [
+        0,
+        0,
+        0,
+        0
+      ],
+      "border_origin": "not-applicable",
+      "border_confidence": 1.0,
+      "pivot": [
+        0.5,
+        0.5
+      ]
+    },
+    {
+      "id": "04_Icon_Status_CurrencyEssence_Default_002",
+      "category": "Icon_Status",
+      "source_sha256": "547c01c99e247474b56c1b89e83c5ab112e8ad1075682dd4decc75e2d9ec1873",
+      "asset_path": "Assets/_Generated/GameUI/xiuxian-ui-main-v1/Sprites/04_Icon_Status_CurrencyEssence_Default_002.png",
+      "pixels_per_unit": 100.0,
+      "pixels_per_unit_origin": "default",
+      "layout_scale": null,
+      "layout_target_sizes": [
+        [
+          60.0,
+          60.0
+        ]
+      ],
+      "border": [
+        0,
+        0,
+        0,
+        0
+      ],
+      "border_origin": "not-applicable",
+      "border_confidence": 1.0,
+      "pivot": [
+        0.5,
+        0.5
+      ]
+    },
+    {
+      "id": "04_Icon_Status_CurrencyVoucher_Default_003",
+      "category": "Icon_Status",
+      "source_sha256": "7817e0a97590ae5079a6f8b274d1d341c7276c50c8f214355dd757e38d4d29f7",
+      "asset_path": "Assets/_Generated/GameUI/xiuxian-ui-main-v1/Sprites/04_Icon_Status_CurrencyVoucher_Default_003.png",
+      "pixels_per_unit": 100.0,
+      "pixels_per_unit_origin": "default",
+      "layout_scale": null,
+      "layout_target_sizes": [
+        [
+          60.0,
+          60.0
+        ]
+      ],
+      "border": [
+        0,
+        0,
+        0,
+        0
+      ],
+      "border_origin": "not-applicable",
+      "border_confidence": 1.0,
+      "pivot": [
+        0.5,
+        0.5
+      ]
+    },
+    {
+      "id": "04_Icon_Status_PlayerLevelBadge_Default_004",
+      "category": "Icon_Status",
+      "source_sha256": "d9e498ac7169b5bb1280e60b443399fe02859540a8a4193192fc9c7a54ef5b5d",
+      "asset_path": "Assets/_Generated/GameUI/xiuxian-ui-main-v1/Sprites/04_Icon_Status_PlayerLevelBadge_Default_004.png",
+      "pixels_per_unit": 100.0,
+      "pixels_per_unit_origin": "default",
+      "layout_scale": null,
+      "layout_target_sizes": [
+        [
+          48.0,
+          48.0
+        ]
+      ],
+      "border": [
+        0,
+        0,
+        0,
+        0
+      ],
+      "border_origin": "not-applicable",
+      "border_confidence": 1.0,
+      "pivot": [
+        0.5,
+        0.5
+      ]
+    },
+    {
+      "id": "04_Icon_Status_VipBadge_Default_005",
+      "category": "Icon_Status",
+      "source_sha256": "3fd307f7cf69593a534eeac58e8e386da6df1ff41f31b6dfb803973f8ec6d4d7",
+      "asset_path": "Assets/_Generated/GameUI/xiuxian-ui-main-v1/Sprites/04_Icon_Status_VipBadge_Default_005.png",
+      "pixels_per_unit": 100.0,
+      "pixels_per_unit_origin": "default",
+      "layout_scale": null,
+      "layout_target_sizes": [
+        [
+          82.0,
+          38.0
+        ]
+      ],
+      "border": [
+        0,
+        0,
+        0,
+        0
+      ],
+      "border_origin": "not-applicable",
+      "border_confidence": 1.0,
+      "pivot": [
+        0.5,
+        0.5
+      ]
+    },
+    {
+      "id": "04_Icon_Status_BuffBadge_Default_006",
+      "category": "Icon_Status",
+      "source_sha256": "e5c738730ace691868d33558d4651cd404900927f8e6a8158d0930176dba9b64",
+      "asset_path": "Assets/_Generated/GameUI/xiuxian-ui-main-v1/Sprites/04_Icon_Status_BuffBadge_Default_006.png",
+      "pixels_per_unit": 100.0,
+      "pixels_per_unit_origin": "default",
+      "layout_scale": null,
+      "layout_target_sizes": [
+        [
+          82.0,
+          38.0
+        ]
+      ],
+      "border": [
+        0,
+        0,
+        0,
+        0
+      ],
+      "border_origin": "not-applicable",
+      "border_confidence": 1.0,
+      "pivot": [
+        0.5,
+        0.5
+      ]
+    },
+    {
+      "id": "04_Icon_Status_QuestCompleted_Default_007",
+      "category": "Icon_Status",
+      "source_sha256": "75b824cede1439aaad25d934ef4c2742f4aef5e382a12ffff5bf04c46aea25ab",
+      "asset_path": "Assets/_Generated/GameUI/xiuxian-ui-main-v1/Sprites/04_Icon_Status_QuestCompleted_Default_007.png",
+      "pixels_per_unit": 100.0,
+      "pixels_per_unit_origin": "default",
+      "layout_scale": null,
+      "layout_target_sizes": [
+        [
+          36.0,
+          36.0
+        ]
+      ],
+      "border": [
+        0,
+        0,
+        0,
+        0
+      ],
+      "border_origin": "not-applicable",
+      "border_confidence": 1.0,
+      "pivot": [
+        0.5,
+        0.5
+      ]
+    },
+    {
+      "id": "04_Icon_Status_NotificationDot_Default_008",
+      "category": "Icon_Status",
+      "source_sha256": "9d7b7ad5ba1bb07fe9b10eb34e15505e7bbcb82232c6379bba6cd46cc7dcb2cf",
+      "asset_path": "Assets/_Generated/GameUI/xiuxian-ui-main-v1/Sprites/04_Icon_Status_NotificationDot_Default_008.png",
+      "pixels_per_unit": 100.0,
+      "pixels_per_unit_origin": "default",
+      "layout_scale": null,
+      "layout_target_sizes": [
+        [
+          30.0,
+          30.0
+        ]
+      ],
+      "border": [
+        0,
+        0,
+        0,
+        0
+      ],
+      "border_origin": "not-applicable",
+      "border_confidence": 1.0,
+      "pivot": [
+        0.5,
+        0.5
+      ]
+    },
+    {
+      "id": "09_Icon_Effect_SoftBlueGlow_Default_001",
+      "category": "Icon_Effect",
+      "source_sha256": "fc2fc4ccd2ce3f2492415bdf29996867878c4bf78629f0cb2cd418482f90163a",
+      "asset_path": "Assets/_Generated/GameUI/xiuxian-ui-main-v1/Sprites/09_Icon_Effect_SoftBlueGlow_Default_001.png",
+      "pixels_per_unit": 100.0,
+      "pixels_per_unit_origin": "default",
+      "layout_scale": null,
+      "layout_target_sizes": [
+        [
+          1580.0,
+          980.0
+        ]
+      ],
+      "border": [
+        0,
+        0,
+        0,
+        0
+      ],
+      "border_origin": "not-applicable",
+      "border_confidence": 1.0,
+      "pivot": [
+        0.5,
+        0.5
+      ]
+    },
+    {
+      "id": "09_Icon_Effect_GoldSelectedGlow_Default_002",
+      "category": "Icon_Effect",
+      "source_sha256": "681aa6fe6d15aea37b69d6fdaaab23500d4712c128f7c6a6ee663584f6421115",
+      "asset_path": "Assets/_Generated/GameUI/xiuxian-ui-main-v1/Sprites/09_Icon_Effect_GoldSelectedGlow_Default_002.png",
+      "pixels_per_unit": 100.0,
+      "pixels_per_unit_origin": "default",
+      "layout_scale": null,
+      "layout_target_sizes": [
+        [
+          175.0,
+          175.0
+        ],
+        [
+          145.0,
+          145.0
+        ]
+      ],
+      "border": [
+        0,
+        0,
+        0,
+        0
+      ],
+      "border_origin": "not-applicable",
+      "border_confidence": 1.0,
+      "pivot": [
+        0.5,
+        0.5
+      ]
+    },
+    {
+      "id": "09_Icon_Effect_StarSparkle_Default_003",
+      "category": "Icon_Effect",
+      "source_sha256": "0fa49d03a77f12db3069908f819fcea32520ad51b979e3b2fffda72d9c39fcae",
+      "asset_path": "Assets/_Generated/GameUI/xiuxian-ui-main-v1/Sprites/09_Icon_Effect_StarSparkle_Default_003.png",
+      "pixels_per_unit": 100.0,
+      "pixels_per_unit_origin": "default",
+      "layout_scale": null,
+      "layout_target_sizes": [],
+      "border": [
+        0,
+        0,
+        0,
+        0
+      ],
+      "border_origin": "not-applicable",
+      "border_confidence": 1.0,
+      "pivot": [
+        0.5,
+        0.5
+      ]
+    },
+    {
+      "id": "09_Icon_Effect_NotificationPulse_Default_004",
+      "category": "Icon_Effect",
+      "source_sha256": "c0451e6fa19a5e0ed10815c7183bf82ad7f0d2e17334603dcd522dcd142bc292",
+      "asset_path": "Assets/_Generated/GameUI/xiuxian-ui-main-v1/Sprites/09_Icon_Effect_NotificationPulse_Default_004.png",
+      "pixels_per_unit": 100.0,
+      "pixels_per_unit_origin": "default",
+      "layout_scale": null,
+      "layout_target_sizes": [],
       "border": [
         0,
         0,
@@ -2562,7 +2563,17 @@
           "raycast_target": false,
           "highlighted_asset_id": "",
           "pressed_asset_id": "",
-          "disabled_asset_id": ""
+          "disabled_asset_id": "",
+          "spacing": 0.0,
+          "padding": [
+            0,
+            0,
+            0,
+            0
+          ],
+          "child_alignment": "MiddleCenter",
+          "control_child_size": false,
+          "child_force_expand": false
         },
         {
           "id": "AmbientGlow",
@@ -2599,7 +2610,17 @@
           "raycast_target": false,
           "highlighted_asset_id": "",
           "pressed_asset_id": "",
-          "disabled_asset_id": ""
+          "disabled_asset_id": "",
+          "spacing": 0.0,
+          "padding": [
+            0,
+            0,
+            0,
+            0
+          ],
+          "child_alignment": "MiddleCenter",
+          "control_child_size": false,
+          "child_force_expand": false
         },
         {
           "id": "ProfileFrame",
@@ -2636,7 +2657,17 @@
           "raycast_target": false,
           "highlighted_asset_id": "",
           "pressed_asset_id": "",
-          "disabled_asset_id": ""
+          "disabled_asset_id": "",
+          "spacing": 0.0,
+          "padding": [
+            0,
+            0,
+            0,
+            0
+          ],
+          "child_alignment": "MiddleCenter",
+          "control_child_size": false,
+          "child_force_expand": false
         },
         {
           "id": "ProfilePortrait",
@@ -2673,7 +2704,17 @@
           "raycast_target": false,
           "highlighted_asset_id": "",
           "pressed_asset_id": "",
-          "disabled_asset_id": ""
+          "disabled_asset_id": "",
+          "spacing": 0.0,
+          "padding": [
+            0,
+            0,
+            0,
+            0
+          ],
+          "child_alignment": "MiddleCenter",
+          "control_child_size": false,
+          "child_force_expand": false
         },
         {
           "id": "PlayerLevel",
@@ -2710,7 +2751,17 @@
           "raycast_target": false,
           "highlighted_asset_id": "",
           "pressed_asset_id": "",
-          "disabled_asset_id": ""
+          "disabled_asset_id": "",
+          "spacing": 0.0,
+          "padding": [
+            0,
+            0,
+            0,
+            0
+          ],
+          "child_alignment": "MiddleCenter",
+          "control_child_size": false,
+          "child_force_expand": false
         },
         {
           "id": "VipBadge",
@@ -2747,7 +2798,17 @@
           "raycast_target": false,
           "highlighted_asset_id": "",
           "pressed_asset_id": "",
-          "disabled_asset_id": ""
+          "disabled_asset_id": "",
+          "spacing": 0.0,
+          "padding": [
+            0,
+            0,
+            0,
+            0
+          ],
+          "child_alignment": "MiddleCenter",
+          "control_child_size": false,
+          "child_force_expand": false
         },
         {
           "id": "BuffBadge",
@@ -2784,11 +2845,68 @@
           "raycast_target": false,
           "highlighted_asset_id": "",
           "pressed_asset_id": "",
-          "disabled_asset_id": ""
+          "disabled_asset_id": "",
+          "spacing": 0.0,
+          "padding": [
+            0,
+            0,
+            0,
+            0
+          ],
+          "child_alignment": "MiddleCenter",
+          "control_child_size": false,
+          "child_force_expand": false
+        },
+        {
+          "id": "CurrencyRow",
+          "parent_id": "Backdrop",
+          "asset_id": "",
+          "kind": "HorizontalLayoutGroup",
+          "anchor_min": [
+            0.5,
+            0.5
+          ],
+          "anchor_max": [
+            0.5,
+            0.5
+          ],
+          "pivot": [
+            0.5,
+            0.5
+          ],
+          "anchored_position": [
+            -35,
+            470
+          ],
+          "size": [
+            960,
+            70
+          ],
+          "color": [
+            1.0,
+            1.0,
+            1.0,
+            1.0
+          ],
+          "preserve_aspect": false,
+          "raycast_target": false,
+          "highlighted_asset_id": "",
+          "pressed_asset_id": "",
+          "disabled_asset_id": "",
+          "spacing": 30.0,
+          "padding": [
+            0,
+            0,
+            0,
+            0
+          ],
+          "child_alignment": "MiddleCenter",
+          "control_child_size": false,
+          "child_force_expand": false
         },
         {
           "id": "CurrencyFrame1",
-          "parent_id": "Backdrop",
+          "parent_id": "CurrencyRow",
           "asset_id": "01_Panel_CurrencyCounterFrame_Default_002",
           "kind": "Image",
           "anchor_min": [
@@ -2804,8 +2922,8 @@
             0.5
           ],
           "anchored_position": [
-            -365,
-            470
+            0.0,
+            0.0
           ],
           "size": [
             300,
@@ -2821,7 +2939,17 @@
           "raycast_target": false,
           "highlighted_asset_id": "",
           "pressed_asset_id": "",
-          "disabled_asset_id": ""
+          "disabled_asset_id": "",
+          "spacing": 0.0,
+          "padding": [
+            0,
+            0,
+            0,
+            0
+          ],
+          "child_alignment": "MiddleCenter",
+          "control_child_size": false,
+          "child_force_expand": false
         },
         {
           "id": "CurrencyIcon1",
@@ -2858,7 +2986,17 @@
           "raycast_target": false,
           "highlighted_asset_id": "",
           "pressed_asset_id": "",
-          "disabled_asset_id": ""
+          "disabled_asset_id": "",
+          "spacing": 0.0,
+          "padding": [
+            0,
+            0,
+            0,
+            0
+          ],
+          "child_alignment": "MiddleCenter",
+          "control_child_size": false,
+          "child_force_expand": false
         },
         {
           "id": "AddCurrency1",
@@ -2895,11 +3033,21 @@
           "raycast_target": true,
           "highlighted_asset_id": "02_Button_AddCurrency_Hover_002",
           "pressed_asset_id": "02_Button_AddCurrency_Pressed_003",
-          "disabled_asset_id": "02_Button_AddCurrency_Disabled_004"
+          "disabled_asset_id": "02_Button_AddCurrency_Disabled_004",
+          "spacing": 0.0,
+          "padding": [
+            0,
+            0,
+            0,
+            0
+          ],
+          "child_alignment": "MiddleCenter",
+          "control_child_size": false,
+          "child_force_expand": false
         },
         {
           "id": "CurrencyFrame2",
-          "parent_id": "Backdrop",
+          "parent_id": "CurrencyRow",
           "asset_id": "01_Panel_CurrencyCounterFrame_Default_002",
           "kind": "Image",
           "anchor_min": [
@@ -2915,8 +3063,8 @@
             0.5
           ],
           "anchored_position": [
-            -35,
-            470
+            0.0,
+            0.0
           ],
           "size": [
             300,
@@ -2932,7 +3080,17 @@
           "raycast_target": false,
           "highlighted_asset_id": "",
           "pressed_asset_id": "",
-          "disabled_asset_id": ""
+          "disabled_asset_id": "",
+          "spacing": 0.0,
+          "padding": [
+            0,
+            0,
+            0,
+            0
+          ],
+          "child_alignment": "MiddleCenter",
+          "control_child_size": false,
+          "child_force_expand": false
         },
         {
           "id": "CurrencyIcon2",
@@ -2969,7 +3127,17 @@
           "raycast_target": false,
           "highlighted_asset_id": "",
           "pressed_asset_id": "",
-          "disabled_asset_id": ""
+          "disabled_asset_id": "",
+          "spacing": 0.0,
+          "padding": [
+            0,
+            0,
+            0,
+            0
+          ],
+          "child_alignment": "MiddleCenter",
+          "control_child_size": false,
+          "child_force_expand": false
         },
         {
           "id": "AddCurrency2",
@@ -3006,11 +3174,21 @@
           "raycast_target": true,
           "highlighted_asset_id": "02_Button_AddCurrency_Hover_002",
           "pressed_asset_id": "02_Button_AddCurrency_Pressed_003",
-          "disabled_asset_id": "02_Button_AddCurrency_Disabled_004"
+          "disabled_asset_id": "02_Button_AddCurrency_Disabled_004",
+          "spacing": 0.0,
+          "padding": [
+            0,
+            0,
+            0,
+            0
+          ],
+          "child_alignment": "MiddleCenter",
+          "control_child_size": false,
+          "child_force_expand": false
         },
         {
           "id": "CurrencyFrame3",
-          "parent_id": "Backdrop",
+          "parent_id": "CurrencyRow",
           "asset_id": "01_Panel_CurrencyCounterFrame_Default_002",
           "kind": "Image",
           "anchor_min": [
@@ -3026,8 +3204,8 @@
             0.5
           ],
           "anchored_position": [
-            295,
-            470
+            0.0,
+            0.0
           ],
           "size": [
             300,
@@ -3043,7 +3221,17 @@
           "raycast_target": false,
           "highlighted_asset_id": "",
           "pressed_asset_id": "",
-          "disabled_asset_id": ""
+          "disabled_asset_id": "",
+          "spacing": 0.0,
+          "padding": [
+            0,
+            0,
+            0,
+            0
+          ],
+          "child_alignment": "MiddleCenter",
+          "control_child_size": false,
+          "child_force_expand": false
         },
         {
           "id": "CurrencyIcon3",
@@ -3080,7 +3268,17 @@
           "raycast_target": false,
           "highlighted_asset_id": "",
           "pressed_asset_id": "",
-          "disabled_asset_id": ""
+          "disabled_asset_id": "",
+          "spacing": 0.0,
+          "padding": [
+            0,
+            0,
+            0,
+            0
+          ],
+          "child_alignment": "MiddleCenter",
+          "control_child_size": false,
+          "child_force_expand": false
         },
         {
           "id": "AddCurrency3",
@@ -3117,7 +3315,17 @@
           "raycast_target": true,
           "highlighted_asset_id": "02_Button_AddCurrency_Hover_002",
           "pressed_asset_id": "02_Button_AddCurrency_Pressed_003",
-          "disabled_asset_id": "02_Button_AddCurrency_Disabled_004"
+          "disabled_asset_id": "02_Button_AddCurrency_Disabled_004",
+          "spacing": 0.0,
+          "padding": [
+            0,
+            0,
+            0,
+            0
+          ],
+          "child_alignment": "MiddleCenter",
+          "control_child_size": false,
+          "child_force_expand": false
         },
         {
           "id": "ExitGame",
@@ -3154,198 +3362,23 @@
           "raycast_target": true,
           "highlighted_asset_id": "02_Button_ExitGame_Hover_006",
           "pressed_asset_id": "02_Button_ExitGame_Pressed_007",
-          "disabled_asset_id": "02_Button_ExitGame_Disabled_008"
+          "disabled_asset_id": "02_Button_ExitGame_Disabled_008",
+          "spacing": 0.0,
+          "padding": [
+            0,
+            0,
+            0,
+            0
+          ],
+          "child_alignment": "MiddleCenter",
+          "control_child_size": false,
+          "child_force_expand": false
         },
         {
-          "id": "Gift01",
+          "id": "GiftRow",
           "parent_id": "Backdrop",
-          "asset_id": "03_Icon_Nav_GiftLotus_Default_001",
-          "kind": "Image",
-          "anchor_min": [
-            0.5,
-            0.5
-          ],
-          "anchor_max": [
-            0.5,
-            0.5
-          ],
-          "pivot": [
-            0.5,
-            0.5
-          ],
-          "anchored_position": [
-            -590,
-            365
-          ],
-          "size": [
-            82,
-            82
-          ],
-          "color": [
-            1.0,
-            1.0,
-            1.0,
-            1.0
-          ],
-          "preserve_aspect": true,
-          "raycast_target": false,
-          "highlighted_asset_id": "",
-          "pressed_asset_id": "",
-          "disabled_asset_id": ""
-        },
-        {
-          "id": "Gift02",
-          "parent_id": "Backdrop",
-          "asset_id": "03_Icon_Nav_GiftBox_Default_002",
-          "kind": "Image",
-          "anchor_min": [
-            0.5,
-            0.5
-          ],
-          "anchor_max": [
-            0.5,
-            0.5
-          ],
-          "pivot": [
-            0.5,
-            0.5
-          ],
-          "anchored_position": [
-            -495,
-            365
-          ],
-          "size": [
-            82,
-            82
-          ],
-          "color": [
-            1.0,
-            1.0,
-            1.0,
-            1.0
-          ],
-          "preserve_aspect": true,
-          "raycast_target": false,
-          "highlighted_asset_id": "",
-          "pressed_asset_id": "",
-          "disabled_asset_id": ""
-        },
-        {
-          "id": "Gift03",
-          "parent_id": "Backdrop",
-          "asset_id": "03_Icon_Nav_GiftPavilion_Default_003",
-          "kind": "Image",
-          "anchor_min": [
-            0.5,
-            0.5
-          ],
-          "anchor_max": [
-            0.5,
-            0.5
-          ],
-          "pivot": [
-            0.5,
-            0.5
-          ],
-          "anchored_position": [
-            -400,
-            365
-          ],
-          "size": [
-            82,
-            82
-          ],
-          "color": [
-            1.0,
-            1.0,
-            1.0,
-            1.0
-          ],
-          "preserve_aspect": true,
-          "raycast_target": false,
-          "highlighted_asset_id": "",
-          "pressed_asset_id": "",
-          "disabled_asset_id": ""
-        },
-        {
-          "id": "Gift04",
-          "parent_id": "Backdrop",
-          "asset_id": "03_Icon_Nav_GiftMedallion_Default_004",
-          "kind": "Image",
-          "anchor_min": [
-            0.5,
-            0.5
-          ],
-          "anchor_max": [
-            0.5,
-            0.5
-          ],
-          "pivot": [
-            0.5,
-            0.5
-          ],
-          "anchored_position": [
-            -305,
-            365
-          ],
-          "size": [
-            82,
-            82
-          ],
-          "color": [
-            1.0,
-            1.0,
-            1.0,
-            1.0
-          ],
-          "preserve_aspect": true,
-          "raycast_target": false,
-          "highlighted_asset_id": "",
-          "pressed_asset_id": "",
-          "disabled_asset_id": ""
-        },
-        {
-          "id": "Gift05",
-          "parent_id": "Backdrop",
-          "asset_id": "03_Icon_Nav_GiftClock_Default_005",
-          "kind": "Image",
-          "anchor_min": [
-            0.5,
-            0.5
-          ],
-          "anchor_max": [
-            0.5,
-            0.5
-          ],
-          "pivot": [
-            0.5,
-            0.5
-          ],
-          "anchored_position": [
-            -210,
-            365
-          ],
-          "size": [
-            82,
-            82
-          ],
-          "color": [
-            1.0,
-            1.0,
-            1.0,
-            1.0
-          ],
-          "preserve_aspect": true,
-          "raycast_target": false,
-          "highlighted_asset_id": "",
-          "pressed_asset_id": "",
-          "disabled_asset_id": ""
-        },
-        {
-          "id": "Gift06",
-          "parent_id": "Backdrop",
-          "asset_id": "03_Icon_Nav_GiftTarget_Default_006",
-          "kind": "Image",
+          "asset_id": "",
+          "kind": "HorizontalLayoutGroup",
           "anchor_min": [
             0.5,
             0.5
@@ -3363,6 +3396,53 @@
             365
           ],
           "size": [
+            1032,
+            82
+          ],
+          "color": [
+            1.0,
+            1.0,
+            1.0,
+            1.0
+          ],
+          "preserve_aspect": false,
+          "raycast_target": false,
+          "highlighted_asset_id": "",
+          "pressed_asset_id": "",
+          "disabled_asset_id": "",
+          "spacing": 13.0,
+          "padding": [
+            0,
+            0,
+            0,
+            0
+          ],
+          "child_alignment": "MiddleCenter",
+          "control_child_size": false,
+          "child_force_expand": false
+        },
+        {
+          "id": "Gift01",
+          "parent_id": "GiftRow",
+          "asset_id": "03_Icon_Nav_GiftLotus_Default_001",
+          "kind": "Image",
+          "anchor_min": [
+            0.5,
+            0.5
+          ],
+          "anchor_max": [
+            0.5,
+            0.5
+          ],
+          "pivot": [
+            0.5,
+            0.5
+          ],
+          "anchored_position": [
+            0.0,
+            0.0
+          ],
+          "size": [
             82,
             82
           ],
@@ -3376,11 +3456,256 @@
           "raycast_target": false,
           "highlighted_asset_id": "",
           "pressed_asset_id": "",
-          "disabled_asset_id": ""
+          "disabled_asset_id": "",
+          "spacing": 0.0,
+          "padding": [
+            0,
+            0,
+            0,
+            0
+          ],
+          "child_alignment": "MiddleCenter",
+          "control_child_size": false,
+          "child_force_expand": false
+        },
+        {
+          "id": "Gift02",
+          "parent_id": "GiftRow",
+          "asset_id": "03_Icon_Nav_GiftBox_Default_002",
+          "kind": "Image",
+          "anchor_min": [
+            0.5,
+            0.5
+          ],
+          "anchor_max": [
+            0.5,
+            0.5
+          ],
+          "pivot": [
+            0.5,
+            0.5
+          ],
+          "anchored_position": [
+            0.0,
+            0.0
+          ],
+          "size": [
+            82,
+            82
+          ],
+          "color": [
+            1.0,
+            1.0,
+            1.0,
+            1.0
+          ],
+          "preserve_aspect": true,
+          "raycast_target": false,
+          "highlighted_asset_id": "",
+          "pressed_asset_id": "",
+          "disabled_asset_id": "",
+          "spacing": 0.0,
+          "padding": [
+            0,
+            0,
+            0,
+            0
+          ],
+          "child_alignment": "MiddleCenter",
+          "control_child_size": false,
+          "child_force_expand": false
+        },
+        {
+          "id": "Gift03",
+          "parent_id": "GiftRow",
+          "asset_id": "03_Icon_Nav_GiftPavilion_Default_003",
+          "kind": "Image",
+          "anchor_min": [
+            0.5,
+            0.5
+          ],
+          "anchor_max": [
+            0.5,
+            0.5
+          ],
+          "pivot": [
+            0.5,
+            0.5
+          ],
+          "anchored_position": [
+            0.0,
+            0.0
+          ],
+          "size": [
+            82,
+            82
+          ],
+          "color": [
+            1.0,
+            1.0,
+            1.0,
+            1.0
+          ],
+          "preserve_aspect": true,
+          "raycast_target": false,
+          "highlighted_asset_id": "",
+          "pressed_asset_id": "",
+          "disabled_asset_id": "",
+          "spacing": 0.0,
+          "padding": [
+            0,
+            0,
+            0,
+            0
+          ],
+          "child_alignment": "MiddleCenter",
+          "control_child_size": false,
+          "child_force_expand": false
+        },
+        {
+          "id": "Gift04",
+          "parent_id": "GiftRow",
+          "asset_id": "03_Icon_Nav_GiftMedallion_Default_004",
+          "kind": "Image",
+          "anchor_min": [
+            0.5,
+            0.5
+          ],
+          "anchor_max": [
+            0.5,
+            0.5
+          ],
+          "pivot": [
+            0.5,
+            0.5
+          ],
+          "anchored_position": [
+            0.0,
+            0.0
+          ],
+          "size": [
+            82,
+            82
+          ],
+          "color": [
+            1.0,
+            1.0,
+            1.0,
+            1.0
+          ],
+          "preserve_aspect": true,
+          "raycast_target": false,
+          "highlighted_asset_id": "",
+          "pressed_asset_id": "",
+          "disabled_asset_id": "",
+          "spacing": 0.0,
+          "padding": [
+            0,
+            0,
+            0,
+            0
+          ],
+          "child_alignment": "MiddleCenter",
+          "control_child_size": false,
+          "child_force_expand": false
+        },
+        {
+          "id": "Gift05",
+          "parent_id": "GiftRow",
+          "asset_id": "03_Icon_Nav_GiftClock_Default_005",
+          "kind": "Image",
+          "anchor_min": [
+            0.5,
+            0.5
+          ],
+          "anchor_max": [
+            0.5,
+            0.5
+          ],
+          "pivot": [
+            0.5,
+            0.5
+          ],
+          "anchored_position": [
+            0.0,
+            0.0
+          ],
+          "size": [
+            82,
+            82
+          ],
+          "color": [
+            1.0,
+            1.0,
+            1.0,
+            1.0
+          ],
+          "preserve_aspect": true,
+          "raycast_target": false,
+          "highlighted_asset_id": "",
+          "pressed_asset_id": "",
+          "disabled_asset_id": "",
+          "spacing": 0.0,
+          "padding": [
+            0,
+            0,
+            0,
+            0
+          ],
+          "child_alignment": "MiddleCenter",
+          "control_child_size": false,
+          "child_force_expand": false
+        },
+        {
+          "id": "Gift06",
+          "parent_id": "GiftRow",
+          "asset_id": "03_Icon_Nav_GiftTarget_Default_006",
+          "kind": "Image",
+          "anchor_min": [
+            0.5,
+            0.5
+          ],
+          "anchor_max": [
+            0.5,
+            0.5
+          ],
+          "pivot": [
+            0.5,
+            0.5
+          ],
+          "anchored_position": [
+            0.0,
+            0.0
+          ],
+          "size": [
+            82,
+            82
+          ],
+          "color": [
+            1.0,
+            1.0,
+            1.0,
+            1.0
+          ],
+          "preserve_aspect": true,
+          "raycast_target": false,
+          "highlighted_asset_id": "",
+          "pressed_asset_id": "",
+          "disabled_asset_id": "",
+          "spacing": 0.0,
+          "padding": [
+            0,
+            0,
+            0,
+            0
+          ],
+          "child_alignment": "MiddleCenter",
+          "control_child_size": false,
+          "child_force_expand": false
         },
         {
           "id": "Gift07",
-          "parent_id": "Backdrop",
+          "parent_id": "GiftRow",
           "asset_id": "03_Icon_Nav_GiftLotusReward_Default_007",
           "kind": "Image",
           "anchor_min": [
@@ -3396,8 +3721,8 @@
             0.5
           ],
           "anchored_position": [
-            -20,
-            365
+            0.0,
+            0.0
           ],
           "size": [
             82,
@@ -3413,11 +3738,21 @@
           "raycast_target": false,
           "highlighted_asset_id": "",
           "pressed_asset_id": "",
-          "disabled_asset_id": ""
+          "disabled_asset_id": "",
+          "spacing": 0.0,
+          "padding": [
+            0,
+            0,
+            0,
+            0
+          ],
+          "child_alignment": "MiddleCenter",
+          "control_child_size": false,
+          "child_force_expand": false
         },
         {
           "id": "Gift08",
-          "parent_id": "Backdrop",
+          "parent_id": "GiftRow",
           "asset_id": "03_Icon_Nav_GiftCauldron_Default_008",
           "kind": "Image",
           "anchor_min": [
@@ -3433,8 +3768,8 @@
             0.5
           ],
           "anchored_position": [
-            75,
-            365
+            0.0,
+            0.0
           ],
           "size": [
             82,
@@ -3450,11 +3785,21 @@
           "raycast_target": false,
           "highlighted_asset_id": "",
           "pressed_asset_id": "",
-          "disabled_asset_id": ""
+          "disabled_asset_id": "",
+          "spacing": 0.0,
+          "padding": [
+            0,
+            0,
+            0,
+            0
+          ],
+          "child_alignment": "MiddleCenter",
+          "control_child_size": false,
+          "child_force_expand": false
         },
         {
           "id": "Gift09",
-          "parent_id": "Backdrop",
+          "parent_id": "GiftRow",
           "asset_id": "03_Icon_Nav_GiftBattle_Default_009",
           "kind": "Image",
           "anchor_min": [
@@ -3470,8 +3815,8 @@
             0.5
           ],
           "anchored_position": [
-            170,
-            365
+            0.0,
+            0.0
           ],
           "size": [
             82,
@@ -3487,11 +3832,21 @@
           "raycast_target": false,
           "highlighted_asset_id": "",
           "pressed_asset_id": "",
-          "disabled_asset_id": ""
+          "disabled_asset_id": "",
+          "spacing": 0.0,
+          "padding": [
+            0,
+            0,
+            0,
+            0
+          ],
+          "child_alignment": "MiddleCenter",
+          "control_child_size": false,
+          "child_force_expand": false
         },
         {
           "id": "Gift10",
-          "parent_id": "Backdrop",
+          "parent_id": "GiftRow",
           "asset_id": "03_Icon_Nav_GiftShield_Default_010",
           "kind": "Image",
           "anchor_min": [
@@ -3507,8 +3862,8 @@
             0.5
           ],
           "anchored_position": [
-            265,
-            365
+            0.0,
+            0.0
           ],
           "size": [
             82,
@@ -3524,11 +3879,21 @@
           "raycast_target": false,
           "highlighted_asset_id": "",
           "pressed_asset_id": "",
-          "disabled_asset_id": ""
+          "disabled_asset_id": "",
+          "spacing": 0.0,
+          "padding": [
+            0,
+            0,
+            0,
+            0
+          ],
+          "child_alignment": "MiddleCenter",
+          "control_child_size": false,
+          "child_force_expand": false
         },
         {
           "id": "Gift11",
-          "parent_id": "Backdrop",
+          "parent_id": "GiftRow",
           "asset_id": "03_Icon_Nav_GiftPouch_Default_011",
           "kind": "Image",
           "anchor_min": [
@@ -3544,8 +3909,8 @@
             0.5
           ],
           "anchored_position": [
-            360,
-            365
+            0.0,
+            0.0
           ],
           "size": [
             82,
@@ -3561,11 +3926,68 @@
           "raycast_target": false,
           "highlighted_asset_id": "",
           "pressed_asset_id": "",
-          "disabled_asset_id": ""
+          "disabled_asset_id": "",
+          "spacing": 0.0,
+          "padding": [
+            0,
+            0,
+            0,
+            0
+          ],
+          "child_alignment": "MiddleCenter",
+          "control_child_size": false,
+          "child_force_expand": false
+        },
+        {
+          "id": "ActivityRow",
+          "parent_id": "Backdrop",
+          "asset_id": "",
+          "kind": "HorizontalLayoutGroup",
+          "anchor_min": [
+            0.5,
+            0.5
+          ],
+          "anchor_max": [
+            0.5,
+            0.5
+          ],
+          "pivot": [
+            0.5,
+            0.5
+          ],
+          "anchored_position": [
+            -442.5,
+            245
+          ],
+          "size": [
+            937,
+            82
+          ],
+          "color": [
+            1.0,
+            1.0,
+            1.0,
+            1.0
+          ],
+          "preserve_aspect": false,
+          "raycast_target": false,
+          "highlighted_asset_id": "",
+          "pressed_asset_id": "",
+          "disabled_asset_id": "",
+          "spacing": 13.0,
+          "padding": [
+            0,
+            0,
+            0,
+            0
+          ],
+          "child_alignment": "MiddleCenter",
+          "control_child_size": false,
+          "child_force_expand": false
         },
         {
           "id": "Activity01",
-          "parent_id": "Backdrop",
+          "parent_id": "ActivityRow",
           "asset_id": "03_Icon_Nav_ActivityShield_Default_012",
           "kind": "Image",
           "anchor_min": [
@@ -3581,8 +4003,8 @@
             0.5
           ],
           "anchored_position": [
-            -870,
-            245
+            0.0,
+            0.0
           ],
           "size": [
             82,
@@ -3598,11 +4020,21 @@
           "raycast_target": false,
           "highlighted_asset_id": "",
           "pressed_asset_id": "",
-          "disabled_asset_id": ""
+          "disabled_asset_id": "",
+          "spacing": 0.0,
+          "padding": [
+            0,
+            0,
+            0,
+            0
+          ],
+          "child_alignment": "MiddleCenter",
+          "control_child_size": false,
+          "child_force_expand": false
         },
         {
           "id": "Activity02",
-          "parent_id": "Backdrop",
+          "parent_id": "ActivityRow",
           "asset_id": "03_Icon_Nav_ActivityEmblem_Default_013",
           "kind": "Image",
           "anchor_min": [
@@ -3618,8 +4050,8 @@
             0.5
           ],
           "anchored_position": [
-            -775,
-            245
+            0.0,
+            0.0
           ],
           "size": [
             82,
@@ -3635,11 +4067,21 @@
           "raycast_target": false,
           "highlighted_asset_id": "",
           "pressed_asset_id": "",
-          "disabled_asset_id": ""
+          "disabled_asset_id": "",
+          "spacing": 0.0,
+          "padding": [
+            0,
+            0,
+            0,
+            0
+          ],
+          "child_alignment": "MiddleCenter",
+          "control_child_size": false,
+          "child_force_expand": false
         },
         {
           "id": "Activity03",
-          "parent_id": "Backdrop",
+          "parent_id": "ActivityRow",
           "asset_id": "03_Icon_Nav_ActivityTwinBlades_Default_014",
           "kind": "Image",
           "anchor_min": [
@@ -3655,8 +4097,8 @@
             0.5
           ],
           "anchored_position": [
-            -680,
-            245
+            0.0,
+            0.0
           ],
           "size": [
             82,
@@ -3672,11 +4114,21 @@
           "raycast_target": false,
           "highlighted_asset_id": "",
           "pressed_asset_id": "",
-          "disabled_asset_id": ""
+          "disabled_asset_id": "",
+          "spacing": 0.0,
+          "padding": [
+            0,
+            0,
+            0,
+            0
+          ],
+          "child_alignment": "MiddleCenter",
+          "control_child_size": false,
+          "child_force_expand": false
         },
         {
           "id": "Activity04",
-          "parent_id": "Backdrop",
+          "parent_id": "ActivityRow",
           "asset_id": "03_Icon_Nav_ActivityCrossedSwords_Default_015",
           "kind": "Image",
           "anchor_min": [
@@ -3692,8 +4144,8 @@
             0.5
           ],
           "anchored_position": [
-            -585,
-            245
+            0.0,
+            0.0
           ],
           "size": [
             82,
@@ -3709,11 +4161,21 @@
           "raycast_target": false,
           "highlighted_asset_id": "",
           "pressed_asset_id": "",
-          "disabled_asset_id": ""
+          "disabled_asset_id": "",
+          "spacing": 0.0,
+          "padding": [
+            0,
+            0,
+            0,
+            0
+          ],
+          "child_alignment": "MiddleCenter",
+          "control_child_size": false,
+          "child_force_expand": false
         },
         {
           "id": "Activity05",
-          "parent_id": "Backdrop",
+          "parent_id": "ActivityRow",
           "asset_id": "03_Icon_Nav_ActivityGate_Default_016",
           "kind": "Image",
           "anchor_min": [
@@ -3729,8 +4191,8 @@
             0.5
           ],
           "anchored_position": [
-            -490,
-            245
+            0.0,
+            0.0
           ],
           "size": [
             82,
@@ -3746,11 +4208,21 @@
           "raycast_target": false,
           "highlighted_asset_id": "",
           "pressed_asset_id": "",
-          "disabled_asset_id": ""
+          "disabled_asset_id": "",
+          "spacing": 0.0,
+          "padding": [
+            0,
+            0,
+            0,
+            0
+          ],
+          "child_alignment": "MiddleCenter",
+          "control_child_size": false,
+          "child_force_expand": false
         },
         {
           "id": "Activity06",
-          "parent_id": "Backdrop",
+          "parent_id": "ActivityRow",
           "asset_id": "03_Icon_Nav_ActivityDrum_Default_017",
           "kind": "Image",
           "anchor_min": [
@@ -3766,8 +4238,8 @@
             0.5
           ],
           "anchored_position": [
-            -395,
-            245
+            0.0,
+            0.0
           ],
           "size": [
             82,
@@ -3783,11 +4255,21 @@
           "raycast_target": false,
           "highlighted_asset_id": "",
           "pressed_asset_id": "",
-          "disabled_asset_id": ""
+          "disabled_asset_id": "",
+          "spacing": 0.0,
+          "padding": [
+            0,
+            0,
+            0,
+            0
+          ],
+          "child_alignment": "MiddleCenter",
+          "control_child_size": false,
+          "child_force_expand": false
         },
         {
           "id": "Activity07",
-          "parent_id": "Backdrop",
+          "parent_id": "ActivityRow",
           "asset_id": "03_Icon_Nav_ActivityAchievement_Default_018",
           "kind": "Image",
           "anchor_min": [
@@ -3803,8 +4285,8 @@
             0.5
           ],
           "anchored_position": [
-            -300,
-            245
+            0.0,
+            0.0
           ],
           "size": [
             82,
@@ -3820,11 +4302,21 @@
           "raycast_target": false,
           "highlighted_asset_id": "",
           "pressed_asset_id": "",
-          "disabled_asset_id": ""
+          "disabled_asset_id": "",
+          "spacing": 0.0,
+          "padding": [
+            0,
+            0,
+            0,
+            0
+          ],
+          "child_alignment": "MiddleCenter",
+          "control_child_size": false,
+          "child_force_expand": false
         },
         {
           "id": "Activity08",
-          "parent_id": "Backdrop",
+          "parent_id": "ActivityRow",
           "asset_id": "03_Icon_Nav_ActivityAlliance_Default_019",
           "kind": "Image",
           "anchor_min": [
@@ -3840,8 +4332,8 @@
             0.5
           ],
           "anchored_position": [
-            -205,
-            245
+            0.0,
+            0.0
           ],
           "size": [
             82,
@@ -3857,11 +4349,21 @@
           "raycast_target": false,
           "highlighted_asset_id": "",
           "pressed_asset_id": "",
-          "disabled_asset_id": ""
+          "disabled_asset_id": "",
+          "spacing": 0.0,
+          "padding": [
+            0,
+            0,
+            0,
+            0
+          ],
+          "child_alignment": "MiddleCenter",
+          "control_child_size": false,
+          "child_force_expand": false
         },
         {
           "id": "Activity09",
-          "parent_id": "Backdrop",
+          "parent_id": "ActivityRow",
           "asset_id": "03_Icon_Nav_ActivityBanner_Default_020",
           "kind": "Image",
           "anchor_min": [
@@ -3877,8 +4379,8 @@
             0.5
           ],
           "anchored_position": [
-            -110,
-            245
+            0.0,
+            0.0
           ],
           "size": [
             82,
@@ -3894,11 +4396,21 @@
           "raycast_target": false,
           "highlighted_asset_id": "",
           "pressed_asset_id": "",
-          "disabled_asset_id": ""
+          "disabled_asset_id": "",
+          "spacing": 0.0,
+          "padding": [
+            0,
+            0,
+            0,
+            0
+          ],
+          "child_alignment": "MiddleCenter",
+          "control_child_size": false,
+          "child_force_expand": false
         },
         {
           "id": "Activity10",
-          "parent_id": "Backdrop",
+          "parent_id": "ActivityRow",
           "asset_id": "03_Icon_Nav_ActivityRanking_Default_021",
           "kind": "Image",
           "anchor_min": [
@@ -3914,8 +4426,8 @@
             0.5
           ],
           "anchored_position": [
-            -15,
-            245
+            0.0,
+            0.0
           ],
           "size": [
             82,
@@ -3931,7 +4443,17 @@
           "raycast_target": false,
           "highlighted_asset_id": "",
           "pressed_asset_id": "",
-          "disabled_asset_id": ""
+          "disabled_asset_id": "",
+          "spacing": 0.0,
+          "padding": [
+            0,
+            0,
+            0,
+            0
+          ],
+          "child_alignment": "MiddleCenter",
+          "control_child_size": false,
+          "child_force_expand": false
         },
         {
           "id": "LeftBanner",
@@ -3968,7 +4490,17 @@
           "raycast_target": false,
           "highlighted_asset_id": "",
           "pressed_asset_id": "",
-          "disabled_asset_id": ""
+          "disabled_asset_id": "",
+          "spacing": 0.0,
+          "padding": [
+            0,
+            0,
+            0,
+            0
+          ],
+          "child_alignment": "MiddleCenter",
+          "control_child_size": false,
+          "child_force_expand": false
         },
         {
           "id": "RightBanner",
@@ -4005,7 +4537,17 @@
           "raycast_target": false,
           "highlighted_asset_id": "",
           "pressed_asset_id": "",
-          "disabled_asset_id": ""
+          "disabled_asset_id": "",
+          "spacing": 0.0,
+          "padding": [
+            0,
+            0,
+            0,
+            0
+          ],
+          "child_alignment": "MiddleCenter",
+          "control_child_size": false,
+          "child_force_expand": false
         },
         {
           "id": "Minimap",
@@ -4042,7 +4584,17 @@
           "raycast_target": false,
           "highlighted_asset_id": "",
           "pressed_asset_id": "",
-          "disabled_asset_id": ""
+          "disabled_asset_id": "",
+          "spacing": 0.0,
+          "padding": [
+            0,
+            0,
+            0,
+            0
+          ],
+          "child_alignment": "MiddleCenter",
+          "control_child_size": false,
+          "child_force_expand": false
         },
         {
           "id": "MinimapGlow",
@@ -4079,7 +4631,17 @@
           "raycast_target": false,
           "highlighted_asset_id": "",
           "pressed_asset_id": "",
-          "disabled_asset_id": ""
+          "disabled_asset_id": "",
+          "spacing": 0.0,
+          "padding": [
+            0,
+            0,
+            0,
+            0
+          ],
+          "child_alignment": "MiddleCenter",
+          "control_child_size": false,
+          "child_force_expand": false
         },
         {
           "id": "MinimapMarker",
@@ -4116,7 +4678,17 @@
           "raycast_target": false,
           "highlighted_asset_id": "",
           "pressed_asset_id": "",
-          "disabled_asset_id": ""
+          "disabled_asset_id": "",
+          "spacing": 0.0,
+          "padding": [
+            0,
+            0,
+            0,
+            0
+          ],
+          "child_alignment": "MiddleCenter",
+          "control_child_size": false,
+          "child_force_expand": false
         },
         {
           "id": "WorldMap",
@@ -4153,7 +4725,17 @@
           "raycast_target": true,
           "highlighted_asset_id": "02_Button_WorldMap_Hover_010",
           "pressed_asset_id": "02_Button_WorldMap_Pressed_011",
-          "disabled_asset_id": "02_Button_WorldMap_Disabled_012"
+          "disabled_asset_id": "02_Button_WorldMap_Disabled_012",
+          "spacing": 0.0,
+          "padding": [
+            0,
+            0,
+            0,
+            0
+          ],
+          "child_alignment": "MiddleCenter",
+          "control_child_size": false,
+          "child_force_expand": false
         },
         {
           "id": "QuestPanel",
@@ -4190,50 +4772,23 @@
           "raycast_target": false,
           "highlighted_asset_id": "",
           "pressed_asset_id": "",
-          "disabled_asset_id": ""
+          "disabled_asset_id": "",
+          "spacing": 0.0,
+          "padding": [
+            0,
+            0,
+            0,
+            0
+          ],
+          "child_alignment": "MiddleCenter",
+          "control_child_size": false,
+          "child_force_expand": false
         },
         {
-          "id": "QuestTab1",
+          "id": "QuestTabRow",
           "parent_id": "QuestPanel",
-          "asset_id": "02_Button_QuestTab_Normal_013",
-          "kind": "Button",
-          "anchor_min": [
-            0.5,
-            0.5
-          ],
-          "anchor_max": [
-            0.5,
-            0.5
-          ],
-          "pivot": [
-            0.5,
-            0.5
-          ],
-          "anchored_position": [
-            -92,
-            115
-          ],
-          "size": [
-            88,
-            46
-          ],
-          "color": [
-            1.0,
-            1.0,
-            1.0,
-            1.0
-          ],
-          "preserve_aspect": false,
-          "raycast_target": true,
-          "highlighted_asset_id": "02_Button_QuestTab_Hover_014",
-          "pressed_asset_id": "02_Button_QuestTab_Pressed_015",
-          "disabled_asset_id": "02_Button_QuestTab_Disabled_016"
-        },
-        {
-          "id": "QuestTab2",
-          "parent_id": "QuestPanel",
-          "asset_id": "02_Button_QuestTab_Normal_013",
-          "kind": "Button",
+          "asset_id": "",
+          "kind": "HorizontalLayoutGroup",
           "anchor_min": [
             0.5,
             0.5
@@ -4251,82 +4806,8 @@
             115
           ],
           "size": [
-            88,
+            272,
             46
-          ],
-          "color": [
-            1.0,
-            1.0,
-            1.0,
-            1.0
-          ],
-          "preserve_aspect": false,
-          "raycast_target": true,
-          "highlighted_asset_id": "02_Button_QuestTab_Hover_014",
-          "pressed_asset_id": "02_Button_QuestTab_Pressed_015",
-          "disabled_asset_id": "02_Button_QuestTab_Disabled_016"
-        },
-        {
-          "id": "QuestTab3",
-          "parent_id": "QuestPanel",
-          "asset_id": "02_Button_QuestTab_Normal_013",
-          "kind": "Button",
-          "anchor_min": [
-            0.5,
-            0.5
-          ],
-          "anchor_max": [
-            0.5,
-            0.5
-          ],
-          "pivot": [
-            0.5,
-            0.5
-          ],
-          "anchored_position": [
-            92,
-            115
-          ],
-          "size": [
-            88,
-            46
-          ],
-          "color": [
-            1.0,
-            1.0,
-            1.0,
-            1.0
-          ],
-          "preserve_aspect": false,
-          "raycast_target": true,
-          "highlighted_asset_id": "02_Button_QuestTab_Hover_014",
-          "pressed_asset_id": "02_Button_QuestTab_Pressed_015",
-          "disabled_asset_id": "02_Button_QuestTab_Disabled_016"
-        },
-        {
-          "id": "QuestRow1",
-          "parent_id": "QuestPanel",
-          "asset_id": "01_Panel_QuestRowFrame_Default_005",
-          "kind": "Image",
-          "anchor_min": [
-            0.5,
-            0.5
-          ],
-          "anchor_max": [
-            0.5,
-            0.5
-          ],
-          "pivot": [
-            0.5,
-            0.5
-          ],
-          "anchored_position": [
-            0,
-            50
-          ],
-          "size": [
-            260,
-            62
           ],
           "color": [
             1.0,
@@ -4338,13 +4819,164 @@
           "raycast_target": false,
           "highlighted_asset_id": "",
           "pressed_asset_id": "",
-          "disabled_asset_id": ""
+          "disabled_asset_id": "",
+          "spacing": 4.0,
+          "padding": [
+            0,
+            0,
+            0,
+            0
+          ],
+          "child_alignment": "MiddleCenter",
+          "control_child_size": false,
+          "child_force_expand": false
         },
         {
-          "id": "QuestRow2",
+          "id": "QuestTab1",
+          "parent_id": "QuestTabRow",
+          "asset_id": "02_Button_QuestTab_Normal_013",
+          "kind": "Button",
+          "anchor_min": [
+            0.5,
+            0.5
+          ],
+          "anchor_max": [
+            0.5,
+            0.5
+          ],
+          "pivot": [
+            0.5,
+            0.5
+          ],
+          "anchored_position": [
+            0.0,
+            0.0
+          ],
+          "size": [
+            88,
+            46
+          ],
+          "color": [
+            1.0,
+            1.0,
+            1.0,
+            1.0
+          ],
+          "preserve_aspect": false,
+          "raycast_target": true,
+          "highlighted_asset_id": "02_Button_QuestTab_Hover_014",
+          "pressed_asset_id": "02_Button_QuestTab_Pressed_015",
+          "disabled_asset_id": "02_Button_QuestTab_Disabled_016",
+          "spacing": 0.0,
+          "padding": [
+            0,
+            0,
+            0,
+            0
+          ],
+          "child_alignment": "MiddleCenter",
+          "control_child_size": false,
+          "child_force_expand": false
+        },
+        {
+          "id": "QuestTab2",
+          "parent_id": "QuestTabRow",
+          "asset_id": "02_Button_QuestTab_Normal_013",
+          "kind": "Button",
+          "anchor_min": [
+            0.5,
+            0.5
+          ],
+          "anchor_max": [
+            0.5,
+            0.5
+          ],
+          "pivot": [
+            0.5,
+            0.5
+          ],
+          "anchored_position": [
+            0.0,
+            0.0
+          ],
+          "size": [
+            88,
+            46
+          ],
+          "color": [
+            1.0,
+            1.0,
+            1.0,
+            1.0
+          ],
+          "preserve_aspect": false,
+          "raycast_target": true,
+          "highlighted_asset_id": "02_Button_QuestTab_Hover_014",
+          "pressed_asset_id": "02_Button_QuestTab_Pressed_015",
+          "disabled_asset_id": "02_Button_QuestTab_Disabled_016",
+          "spacing": 0.0,
+          "padding": [
+            0,
+            0,
+            0,
+            0
+          ],
+          "child_alignment": "MiddleCenter",
+          "control_child_size": false,
+          "child_force_expand": false
+        },
+        {
+          "id": "QuestTab3",
+          "parent_id": "QuestTabRow",
+          "asset_id": "02_Button_QuestTab_Normal_013",
+          "kind": "Button",
+          "anchor_min": [
+            0.5,
+            0.5
+          ],
+          "anchor_max": [
+            0.5,
+            0.5
+          ],
+          "pivot": [
+            0.5,
+            0.5
+          ],
+          "anchored_position": [
+            0.0,
+            0.0
+          ],
+          "size": [
+            88,
+            46
+          ],
+          "color": [
+            1.0,
+            1.0,
+            1.0,
+            1.0
+          ],
+          "preserve_aspect": false,
+          "raycast_target": true,
+          "highlighted_asset_id": "02_Button_QuestTab_Hover_014",
+          "pressed_asset_id": "02_Button_QuestTab_Pressed_015",
+          "disabled_asset_id": "02_Button_QuestTab_Disabled_016",
+          "spacing": 0.0,
+          "padding": [
+            0,
+            0,
+            0,
+            0
+          ],
+          "child_alignment": "MiddleCenter",
+          "control_child_size": false,
+          "child_force_expand": false
+        },
+        {
+          "id": "QuestRowColumn",
           "parent_id": "QuestPanel",
-          "asset_id": "01_Panel_QuestRowFrame_Default_005",
-          "kind": "Image",
+          "asset_id": "",
+          "kind": "VerticalLayoutGroup",
           "anchor_min": [
             0.5,
             0.5
@@ -4363,7 +4995,7 @@
           ],
           "size": [
             260,
-            62
+            202
           ],
           "color": [
             1.0,
@@ -4375,11 +5007,21 @@
           "raycast_target": false,
           "highlighted_asset_id": "",
           "pressed_asset_id": "",
-          "disabled_asset_id": ""
+          "disabled_asset_id": "",
+          "spacing": 8.0,
+          "padding": [
+            0,
+            0,
+            0,
+            0
+          ],
+          "child_alignment": "MiddleCenter",
+          "control_child_size": false,
+          "child_force_expand": false
         },
         {
-          "id": "QuestRow3",
-          "parent_id": "QuestPanel",
+          "id": "QuestRow1",
+          "parent_id": "QuestRowColumn",
           "asset_id": "01_Panel_QuestRowFrame_Default_005",
           "kind": "Image",
           "anchor_min": [
@@ -4395,8 +5037,8 @@
             0.5
           ],
           "anchored_position": [
-            0,
-            -90
+            0.0,
+            0.0
           ],
           "size": [
             260,
@@ -4412,7 +5054,111 @@
           "raycast_target": false,
           "highlighted_asset_id": "",
           "pressed_asset_id": "",
-          "disabled_asset_id": ""
+          "disabled_asset_id": "",
+          "spacing": 0.0,
+          "padding": [
+            0,
+            0,
+            0,
+            0
+          ],
+          "child_alignment": "MiddleCenter",
+          "control_child_size": false,
+          "child_force_expand": false
+        },
+        {
+          "id": "QuestRow2",
+          "parent_id": "QuestRowColumn",
+          "asset_id": "01_Panel_QuestRowFrame_Default_005",
+          "kind": "Image",
+          "anchor_min": [
+            0.5,
+            0.5
+          ],
+          "anchor_max": [
+            0.5,
+            0.5
+          ],
+          "pivot": [
+            0.5,
+            0.5
+          ],
+          "anchored_position": [
+            0.0,
+            0.0
+          ],
+          "size": [
+            260,
+            62
+          ],
+          "color": [
+            1.0,
+            1.0,
+            1.0,
+            1.0
+          ],
+          "preserve_aspect": false,
+          "raycast_target": false,
+          "highlighted_asset_id": "",
+          "pressed_asset_id": "",
+          "disabled_asset_id": "",
+          "spacing": 0.0,
+          "padding": [
+            0,
+            0,
+            0,
+            0
+          ],
+          "child_alignment": "MiddleCenter",
+          "control_child_size": false,
+          "child_force_expand": false
+        },
+        {
+          "id": "QuestRow3",
+          "parent_id": "QuestRowColumn",
+          "asset_id": "01_Panel_QuestRowFrame_Default_005",
+          "kind": "Image",
+          "anchor_min": [
+            0.5,
+            0.5
+          ],
+          "anchor_max": [
+            0.5,
+            0.5
+          ],
+          "pivot": [
+            0.5,
+            0.5
+          ],
+          "anchored_position": [
+            0.0,
+            0.0
+          ],
+          "size": [
+            260,
+            62
+          ],
+          "color": [
+            1.0,
+            1.0,
+            1.0,
+            1.0
+          ],
+          "preserve_aspect": false,
+          "raycast_target": false,
+          "highlighted_asset_id": "",
+          "pressed_asset_id": "",
+          "disabled_asset_id": "",
+          "spacing": 0.0,
+          "padding": [
+            0,
+            0,
+            0,
+            0
+          ],
+          "child_alignment": "MiddleCenter",
+          "control_child_size": false,
+          "child_force_expand": false
         },
         {
           "id": "QuestDone",
@@ -4449,7 +5195,17 @@
           "raycast_target": false,
           "highlighted_asset_id": "",
           "pressed_asset_id": "",
-          "disabled_asset_id": ""
+          "disabled_asset_id": "",
+          "spacing": 0.0,
+          "padding": [
+            0,
+            0,
+            0,
+            0
+          ],
+          "child_alignment": "MiddleCenter",
+          "control_child_size": false,
+          "child_force_expand": false
         },
         {
           "id": "QuestCompleteAll",
@@ -4486,7 +5242,17 @@
           "raycast_target": true,
           "highlighted_asset_id": "02_Button_QuestCompleteAll_Hover_022",
           "pressed_asset_id": "02_Button_QuestCompleteAll_Pressed_023",
-          "disabled_asset_id": "02_Button_QuestCompleteAll_Disabled_024"
+          "disabled_asset_id": "02_Button_QuestCompleteAll_Disabled_024",
+          "spacing": 0.0,
+          "padding": [
+            0,
+            0,
+            0,
+            0
+          ],
+          "child_alignment": "MiddleCenter",
+          "control_child_size": false,
+          "child_force_expand": false
         },
         {
           "id": "ChatPanel",
@@ -4523,11 +5289,68 @@
           "raycast_target": false,
           "highlighted_asset_id": "",
           "pressed_asset_id": "",
-          "disabled_asset_id": ""
+          "disabled_asset_id": "",
+          "spacing": 0.0,
+          "padding": [
+            0,
+            0,
+            0,
+            0
+          ],
+          "child_alignment": "MiddleCenter",
+          "control_child_size": false,
+          "child_force_expand": false
+        },
+        {
+          "id": "ChatTabRow",
+          "parent_id": "ChatPanel",
+          "asset_id": "",
+          "kind": "HorizontalLayoutGroup",
+          "anchor_min": [
+            0.5,
+            0.5
+          ],
+          "anchor_max": [
+            0.5,
+            0.5
+          ],
+          "pivot": [
+            0.5,
+            0.5
+          ],
+          "anchored_position": [
+            0,
+            105
+          ],
+          "size": [
+            352,
+            44
+          ],
+          "color": [
+            1.0,
+            1.0,
+            1.0,
+            1.0
+          ],
+          "preserve_aspect": false,
+          "raycast_target": false,
+          "highlighted_asset_id": "",
+          "pressed_asset_id": "",
+          "disabled_asset_id": "",
+          "spacing": 8.0,
+          "padding": [
+            0,
+            0,
+            0,
+            0
+          ],
+          "child_alignment": "MiddleCenter",
+          "control_child_size": false,
+          "child_force_expand": false
         },
         {
           "id": "ChatTab1",
-          "parent_id": "ChatPanel",
+          "parent_id": "ChatTabRow",
           "asset_id": "02_Button_ChatTab_Normal_025",
           "kind": "Button",
           "anchor_min": [
@@ -4543,8 +5366,8 @@
             0.5
           ],
           "anchored_position": [
-            -135,
-            105
+            0.0,
+            0.0
           ],
           "size": [
             82,
@@ -4560,11 +5383,21 @@
           "raycast_target": true,
           "highlighted_asset_id": "02_Button_ChatTab_Hover_026",
           "pressed_asset_id": "02_Button_ChatTab_Pressed_027",
-          "disabled_asset_id": "02_Button_ChatTab_Disabled_028"
+          "disabled_asset_id": "02_Button_ChatTab_Disabled_028",
+          "spacing": 0.0,
+          "padding": [
+            0,
+            0,
+            0,
+            0
+          ],
+          "child_alignment": "MiddleCenter",
+          "control_child_size": false,
+          "child_force_expand": false
         },
         {
           "id": "ChatTab2",
-          "parent_id": "ChatPanel",
+          "parent_id": "ChatTabRow",
           "asset_id": "02_Button_ChatTab_Normal_025",
           "kind": "Button",
           "anchor_min": [
@@ -4580,8 +5413,8 @@
             0.5
           ],
           "anchored_position": [
-            -45,
-            105
+            0.0,
+            0.0
           ],
           "size": [
             82,
@@ -4597,11 +5430,21 @@
           "raycast_target": true,
           "highlighted_asset_id": "02_Button_ChatTab_Hover_026",
           "pressed_asset_id": "02_Button_ChatTab_Pressed_027",
-          "disabled_asset_id": "02_Button_ChatTab_Disabled_028"
+          "disabled_asset_id": "02_Button_ChatTab_Disabled_028",
+          "spacing": 0.0,
+          "padding": [
+            0,
+            0,
+            0,
+            0
+          ],
+          "child_alignment": "MiddleCenter",
+          "control_child_size": false,
+          "child_force_expand": false
         },
         {
           "id": "ChatTab3",
-          "parent_id": "ChatPanel",
+          "parent_id": "ChatTabRow",
           "asset_id": "02_Button_ChatTab_Normal_025",
           "kind": "Button",
           "anchor_min": [
@@ -4617,8 +5460,8 @@
             0.5
           ],
           "anchored_position": [
-            45,
-            105
+            0.0,
+            0.0
           ],
           "size": [
             82,
@@ -4634,11 +5477,21 @@
           "raycast_target": true,
           "highlighted_asset_id": "02_Button_ChatTab_Hover_026",
           "pressed_asset_id": "02_Button_ChatTab_Pressed_027",
-          "disabled_asset_id": "02_Button_ChatTab_Disabled_028"
+          "disabled_asset_id": "02_Button_ChatTab_Disabled_028",
+          "spacing": 0.0,
+          "padding": [
+            0,
+            0,
+            0,
+            0
+          ],
+          "child_alignment": "MiddleCenter",
+          "control_child_size": false,
+          "child_force_expand": false
         },
         {
           "id": "ChatTab4",
-          "parent_id": "ChatPanel",
+          "parent_id": "ChatTabRow",
           "asset_id": "02_Button_ChatTab_Normal_025",
           "kind": "Button",
           "anchor_min": [
@@ -4654,8 +5507,8 @@
             0.5
           ],
           "anchored_position": [
-            135,
-            105
+            0.0,
+            0.0
           ],
           "size": [
             82,
@@ -4671,7 +5524,17 @@
           "raycast_target": true,
           "highlighted_asset_id": "02_Button_ChatTab_Hover_026",
           "pressed_asset_id": "02_Button_ChatTab_Pressed_027",
-          "disabled_asset_id": "02_Button_ChatTab_Disabled_028"
+          "disabled_asset_id": "02_Button_ChatTab_Disabled_028",
+          "spacing": 0.0,
+          "padding": [
+            0,
+            0,
+            0,
+            0
+          ],
+          "child_alignment": "MiddleCenter",
+          "control_child_size": false,
+          "child_force_expand": false
         },
         {
           "id": "VoiceChat",
@@ -4708,7 +5571,17 @@
           "raycast_target": true,
           "highlighted_asset_id": "02_Button_VoiceChat_Hover_030",
           "pressed_asset_id": "02_Button_VoiceChat_Pressed_031",
-          "disabled_asset_id": "02_Button_VoiceChat_Disabled_032"
+          "disabled_asset_id": "02_Button_VoiceChat_Disabled_032",
+          "spacing": 0.0,
+          "padding": [
+            0,
+            0,
+            0,
+            0
+          ],
+          "child_alignment": "MiddleCenter",
+          "control_child_size": false,
+          "child_force_expand": false
         },
         {
           "id": "SendChat",
@@ -4745,11 +5618,68 @@
           "raycast_target": true,
           "highlighted_asset_id": "02_Button_SendChat_Hover_034",
           "pressed_asset_id": "02_Button_SendChat_Pressed_035",
-          "disabled_asset_id": "02_Button_SendChat_Disabled_036"
+          "disabled_asset_id": "02_Button_SendChat_Disabled_036",
+          "spacing": 0.0,
+          "padding": [
+            0,
+            0,
+            0,
+            0
+          ],
+          "child_alignment": "MiddleCenter",
+          "control_child_size": false,
+          "child_force_expand": false
+        },
+        {
+          "id": "BottomNavRow",
+          "parent_id": "Backdrop",
+          "asset_id": "",
+          "kind": "HorizontalLayoutGroup",
+          "anchor_min": [
+            0.5,
+            0.5
+          ],
+          "anchor_max": [
+            0.5,
+            0.5
+          ],
+          "pivot": [
+            0.5,
+            0.5
+          ],
+          "anchored_position": [
+            240,
+            -445
+          ],
+          "size": [
+            1120,
+            132
+          ],
+          "color": [
+            1.0,
+            1.0,
+            1.0,
+            1.0
+          ],
+          "preserve_aspect": false,
+          "raycast_target": false,
+          "highlighted_asset_id": "",
+          "pressed_asset_id": "",
+          "disabled_asset_id": "",
+          "spacing": 8.0,
+          "padding": [
+            0,
+            0,
+            0,
+            0
+          ],
+          "child_alignment": "MiddleCenter",
+          "control_child_size": false,
+          "child_force_expand": false
         },
         {
           "id": "Nav01",
-          "parent_id": "Backdrop",
+          "parent_id": "BottomNavRow",
           "asset_id": "01_Panel_BottomNavSlotFrame_Default_007",
           "kind": "Image",
           "anchor_min": [
@@ -4765,8 +5695,8 @@
             0.5
           ],
           "anchored_position": [
-            -250,
-            -445
+            0.0,
+            0.0
           ],
           "size": [
             132,
@@ -4782,7 +5712,17 @@
           "raycast_target": false,
           "highlighted_asset_id": "",
           "pressed_asset_id": "",
-          "disabled_asset_id": ""
+          "disabled_asset_id": "",
+          "spacing": 0.0,
+          "padding": [
+            0,
+            0,
+            0,
+            0
+          ],
+          "child_alignment": "MiddleCenter",
+          "control_child_size": false,
+          "child_force_expand": false
         },
         {
           "id": "NavIcon01",
@@ -4819,11 +5759,21 @@
           "raycast_target": false,
           "highlighted_asset_id": "",
           "pressed_asset_id": "",
-          "disabled_asset_id": ""
+          "disabled_asset_id": "",
+          "spacing": 0.0,
+          "padding": [
+            0,
+            0,
+            0,
+            0
+          ],
+          "child_alignment": "MiddleCenter",
+          "control_child_size": false,
+          "child_force_expand": false
         },
         {
           "id": "Nav02",
-          "parent_id": "Backdrop",
+          "parent_id": "BottomNavRow",
           "asset_id": "01_Panel_BottomNavSlotFrame_Default_007",
           "kind": "Image",
           "anchor_min": [
@@ -4839,8 +5789,8 @@
             0.5
           ],
           "anchored_position": [
-            -110,
-            -445
+            0.0,
+            0.0
           ],
           "size": [
             132,
@@ -4856,7 +5806,17 @@
           "raycast_target": false,
           "highlighted_asset_id": "",
           "pressed_asset_id": "",
-          "disabled_asset_id": ""
+          "disabled_asset_id": "",
+          "spacing": 0.0,
+          "padding": [
+            0,
+            0,
+            0,
+            0
+          ],
+          "child_alignment": "MiddleCenter",
+          "control_child_size": false,
+          "child_force_expand": false
         },
         {
           "id": "NavIcon02",
@@ -4893,11 +5853,21 @@
           "raycast_target": false,
           "highlighted_asset_id": "",
           "pressed_asset_id": "",
-          "disabled_asset_id": ""
+          "disabled_asset_id": "",
+          "spacing": 0.0,
+          "padding": [
+            0,
+            0,
+            0,
+            0
+          ],
+          "child_alignment": "MiddleCenter",
+          "control_child_size": false,
+          "child_force_expand": false
         },
         {
           "id": "Nav03",
-          "parent_id": "Backdrop",
+          "parent_id": "BottomNavRow",
           "asset_id": "01_Panel_BottomNavSlotFrame_Default_007",
           "kind": "Image",
           "anchor_min": [
@@ -4913,8 +5883,8 @@
             0.5
           ],
           "anchored_position": [
-            30,
-            -445
+            0.0,
+            0.0
           ],
           "size": [
             132,
@@ -4930,7 +5900,17 @@
           "raycast_target": false,
           "highlighted_asset_id": "",
           "pressed_asset_id": "",
-          "disabled_asset_id": ""
+          "disabled_asset_id": "",
+          "spacing": 0.0,
+          "padding": [
+            0,
+            0,
+            0,
+            0
+          ],
+          "child_alignment": "MiddleCenter",
+          "control_child_size": false,
+          "child_force_expand": false
         },
         {
           "id": "NavIcon03",
@@ -4967,11 +5947,21 @@
           "raycast_target": false,
           "highlighted_asset_id": "",
           "pressed_asset_id": "",
-          "disabled_asset_id": ""
+          "disabled_asset_id": "",
+          "spacing": 0.0,
+          "padding": [
+            0,
+            0,
+            0,
+            0
+          ],
+          "child_alignment": "MiddleCenter",
+          "control_child_size": false,
+          "child_force_expand": false
         },
         {
           "id": "Nav04",
-          "parent_id": "Backdrop",
+          "parent_id": "BottomNavRow",
           "asset_id": "01_Panel_BottomNavSlotFrame_Default_007",
           "kind": "Image",
           "anchor_min": [
@@ -4987,8 +5977,8 @@
             0.5
           ],
           "anchored_position": [
-            170,
-            -445
+            0.0,
+            0.0
           ],
           "size": [
             132,
@@ -5004,7 +5994,17 @@
           "raycast_target": false,
           "highlighted_asset_id": "",
           "pressed_asset_id": "",
-          "disabled_asset_id": ""
+          "disabled_asset_id": "",
+          "spacing": 0.0,
+          "padding": [
+            0,
+            0,
+            0,
+            0
+          ],
+          "child_alignment": "MiddleCenter",
+          "control_child_size": false,
+          "child_force_expand": false
         },
         {
           "id": "NavIcon04",
@@ -5041,11 +6041,21 @@
           "raycast_target": false,
           "highlighted_asset_id": "",
           "pressed_asset_id": "",
-          "disabled_asset_id": ""
+          "disabled_asset_id": "",
+          "spacing": 0.0,
+          "padding": [
+            0,
+            0,
+            0,
+            0
+          ],
+          "child_alignment": "MiddleCenter",
+          "control_child_size": false,
+          "child_force_expand": false
         },
         {
           "id": "Nav05",
-          "parent_id": "Backdrop",
+          "parent_id": "BottomNavRow",
           "asset_id": "01_Panel_BottomNavSlotFrame_Default_007",
           "kind": "Image",
           "anchor_min": [
@@ -5061,8 +6071,8 @@
             0.5
           ],
           "anchored_position": [
-            310,
-            -445
+            0.0,
+            0.0
           ],
           "size": [
             132,
@@ -5078,7 +6088,17 @@
           "raycast_target": false,
           "highlighted_asset_id": "",
           "pressed_asset_id": "",
-          "disabled_asset_id": ""
+          "disabled_asset_id": "",
+          "spacing": 0.0,
+          "padding": [
+            0,
+            0,
+            0,
+            0
+          ],
+          "child_alignment": "MiddleCenter",
+          "control_child_size": false,
+          "child_force_expand": false
         },
         {
           "id": "NavIcon05",
@@ -5115,11 +6135,21 @@
           "raycast_target": false,
           "highlighted_asset_id": "",
           "pressed_asset_id": "",
-          "disabled_asset_id": ""
+          "disabled_asset_id": "",
+          "spacing": 0.0,
+          "padding": [
+            0,
+            0,
+            0,
+            0
+          ],
+          "child_alignment": "MiddleCenter",
+          "control_child_size": false,
+          "child_force_expand": false
         },
         {
           "id": "Nav06",
-          "parent_id": "Backdrop",
+          "parent_id": "BottomNavRow",
           "asset_id": "01_Panel_BottomNavSlotFrame_Default_007",
           "kind": "Image",
           "anchor_min": [
@@ -5135,8 +6165,8 @@
             0.5
           ],
           "anchored_position": [
-            450,
-            -445
+            0.0,
+            0.0
           ],
           "size": [
             132,
@@ -5152,7 +6182,17 @@
           "raycast_target": false,
           "highlighted_asset_id": "",
           "pressed_asset_id": "",
-          "disabled_asset_id": ""
+          "disabled_asset_id": "",
+          "spacing": 0.0,
+          "padding": [
+            0,
+            0,
+            0,
+            0
+          ],
+          "child_alignment": "MiddleCenter",
+          "control_child_size": false,
+          "child_force_expand": false
         },
         {
           "id": "NavIcon06",
@@ -5189,11 +6229,21 @@
           "raycast_target": false,
           "highlighted_asset_id": "",
           "pressed_asset_id": "",
-          "disabled_asset_id": ""
+          "disabled_asset_id": "",
+          "spacing": 0.0,
+          "padding": [
+            0,
+            0,
+            0,
+            0
+          ],
+          "child_alignment": "MiddleCenter",
+          "control_child_size": false,
+          "child_force_expand": false
         },
         {
           "id": "Nav07",
-          "parent_id": "Backdrop",
+          "parent_id": "BottomNavRow",
           "asset_id": "01_Panel_BottomNavSlotFrame_Default_007",
           "kind": "Image",
           "anchor_min": [
@@ -5209,8 +6259,8 @@
             0.5
           ],
           "anchored_position": [
-            590,
-            -445
+            0.0,
+            0.0
           ],
           "size": [
             132,
@@ -5226,7 +6276,17 @@
           "raycast_target": false,
           "highlighted_asset_id": "",
           "pressed_asset_id": "",
-          "disabled_asset_id": ""
+          "disabled_asset_id": "",
+          "spacing": 0.0,
+          "padding": [
+            0,
+            0,
+            0,
+            0
+          ],
+          "child_alignment": "MiddleCenter",
+          "control_child_size": false,
+          "child_force_expand": false
         },
         {
           "id": "NavIcon07",
@@ -5263,11 +6323,21 @@
           "raycast_target": false,
           "highlighted_asset_id": "",
           "pressed_asset_id": "",
-          "disabled_asset_id": ""
+          "disabled_asset_id": "",
+          "spacing": 0.0,
+          "padding": [
+            0,
+            0,
+            0,
+            0
+          ],
+          "child_alignment": "MiddleCenter",
+          "control_child_size": false,
+          "child_force_expand": false
         },
         {
           "id": "Nav08",
-          "parent_id": "Backdrop",
+          "parent_id": "BottomNavRow",
           "asset_id": "01_Panel_BottomNavSlotFrame_Default_007",
           "kind": "Image",
           "anchor_min": [
@@ -5283,8 +6353,8 @@
             0.5
           ],
           "anchored_position": [
-            730,
-            -445
+            0.0,
+            0.0
           ],
           "size": [
             132,
@@ -5300,7 +6370,17 @@
           "raycast_target": false,
           "highlighted_asset_id": "",
           "pressed_asset_id": "",
-          "disabled_asset_id": ""
+          "disabled_asset_id": "",
+          "spacing": 0.0,
+          "padding": [
+            0,
+            0,
+            0,
+            0
+          ],
+          "child_alignment": "MiddleCenter",
+          "control_child_size": false,
+          "child_force_expand": false
         },
         {
           "id": "NavIcon08",
@@ -5337,7 +6417,17 @@
           "raycast_target": false,
           "highlighted_asset_id": "",
           "pressed_asset_id": "",
-          "disabled_asset_id": ""
+          "disabled_asset_id": "",
+          "spacing": 0.0,
+          "padding": [
+            0,
+            0,
+            0,
+            0
+          ],
+          "child_alignment": "MiddleCenter",
+          "control_child_size": false,
+          "child_force_expand": false
         },
         {
           "id": "NavSelectedGlow",
@@ -5374,7 +6464,17 @@
           "raycast_target": false,
           "highlighted_asset_id": "",
           "pressed_asset_id": "",
-          "disabled_asset_id": ""
+          "disabled_asset_id": "",
+          "spacing": 0.0,
+          "padding": [
+            0,
+            0,
+            0,
+            0
+          ],
+          "child_alignment": "MiddleCenter",
+          "control_child_size": false,
+          "child_force_expand": false
         },
         {
           "id": "NotificationDot",
@@ -5411,7 +6511,17 @@
           "raycast_target": false,
           "highlighted_asset_id": "",
           "pressed_asset_id": "",
-          "disabled_asset_id": ""
+          "disabled_asset_id": "",
+          "spacing": 0.0,
+          "padding": [
+            0,
+            0,
+            0,
+            0
+          ],
+          "child_alignment": "MiddleCenter",
+          "control_child_size": false,
+          "child_force_expand": false
         }
       ]
     }

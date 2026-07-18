@@ -1,35 +1,80 @@
 {
-  "schema_version": 1,
+  "schema_version": 3,
   "ok": true,
   "expected_count": 88,
   "manifest_count": 88,
   "valid_assets": 88,
-  "pass_count": 85,
-  "warning_count": 3,
+  "pass_count": 87,
+  "warning_count": 1,
   "fail_count": 0,
   "issues": [
-    {
-      "severity": "warning",
-      "code": "detached-components",
-      "file": "final/Panel/01_Panel_PlayerProfileFrame_Default_001.png",
-      "source_index": 1,
-      "component_count": 40,
-      "merged_component_count": 34,
-      "detached_component_count": 6
-    },
-    {
-      "severity": "warning",
-      "code": "detached-components",
-      "file": "final/Panel/01_Panel_CurrencyCounterFrame_Default_002.png",
-      "source_index": 2,
-      "component_count": 66,
-      "merged_component_count": 51,
-      "detached_component_count": 15
-    },
     {
       "severity": "warning",
       "code": "no-transparent-padding",
       "file": "final/Panel/01_Panel_SceneBackground_Default_010.png"
     }
-  ]
+  ],
+  "jobs": [
+    {
+      "id": "panel-sheet-01",
+      "ok": true,
+      "expected_count": 4,
+      "exported_count": 4
+    },
+    {
+      "id": "panel-sheet-02",
+      "ok": true,
+      "expected_count": 4,
+      "exported_count": 4
+    },
+    {
+      "id": "panel-sheet-03",
+      "ok": true,
+      "expected_count": 1,
+      "exported_count": 1
+    },
+    {
+      "id": "button-sheet-01",
+      "ok": true,
+      "expected_count": 12,
+      "exported_count": 12
+    },
+    {
+      "id": "button-sheet-02",
+      "ok": true,
+      "expected_count": 12,
+      "exported_count": 12
+    },
+    {
+      "id": "button-sheet-03",
+      "ok": true,
+      "expected_count": 12,
+      "exported_count": 12
+    },
+    {
+      "id": "icon-nav-sheet-01",
+      "ok": true,
+      "expected_count": 16,
+      "exported_count": 16
+    },
+    {
+      "id": "icon-nav-sheet-02",
+      "ok": true,
+      "expected_count": 13,
+      "exported_count": 13
+    },
+    {
+      "id": "icon-status-sheet-01",
+      "ok": true,
+      "expected_count": 8,
+      "exported_count": 8
+    },
+    {
+      "id": "icon-effect-sheet-01",
+      "ok": true,
+      "expected_count": 4,
+      "exported_count": 4
+    }
+  ],
+  "manual_action_required": []
 }

@@ -129,7 +129,11 @@ def _union(parent: list[int], left: int, right: int) -> int:
     return right_root
 
 
-def connected_components(mask: np.ndarray, minimum_pixels: int = 1) -> list[dict[str, int]]:
+def connected_components(
+    mask: np.ndarray,
+    minimum_pixels: int = 1,
+    include_runs: bool = False,
+) -> list[dict[str, Any]]:
     """Return 8-connected run-length components without OpenCV or SciPy."""
     if mask.ndim != 2:
         raise ValueError("mask must be a 2D array")
@@ -165,7 +169,7 @@ def connected_components(mask: np.ndarray, minimum_pixels: int = 1) -> list[dict
                 all_runs.append((y, start, end, label))
         previous_runs = current_runs
 
-    components: dict[int, dict[str, int]] = {}
+    components: dict[int, dict[str, Any]] = {}
     for y, start, end, label in all_runs:
         root = _find(parent, label)
         count = end - start + 1
@@ -178,12 +182,120 @@ def connected_components(mask: np.ndarray, minimum_pixels: int = 1) -> list[dict
         component["top"] = min(component["top"], y)
         component["right"] = max(component["right"], end + 1)
         component["bottom"] = max(component["bottom"], y + 1)
+        if include_runs:
+            component.setdefault("runs", []).append((y, start, end + 1))
 
     return sorted(
         (component for component in components.values() if component["pixels"] >= minimum_pixels),
         key=lambda component: component["pixels"],
         reverse=True,
     )
+
+
+def assign_components_to_slots(
+    components: list[dict[str, Any]],
+    slot_centers: list[tuple[float, float]],
+) -> list[list[dict[str, Any]]]:
+    """Seed every slot, then attach fragments by nearest component geometry.
+
+    Hollow frames can have a detached crest whose centroid crosses a row/column
+    bisector. Slot-center-only assignment sends that crest to the neighbouring
+    asset. A component whose bbox encloses the slot center is a stronger seed;
+    remaining fragments then follow the nearest seeded silhouette.
+    """
+    assigned: list[list[dict[str, Any]]] = [[] for _ in slot_centers]
+    remaining = list(components)
+    for slot_index, (center_x, center_y) in enumerate(slot_centers):
+        if not remaining:
+            break
+        containing = [
+            component
+            for component in remaining
+            if component["left"] <= center_x < component["right"]
+            and component["top"] <= center_y < component["bottom"]
+        ]
+        candidates = containing or remaining
+        seed = min(
+            candidates,
+            key=lambda component: (
+                0 if component in containing else 1,
+                -int(component["pixels"]) if component in containing else 0,
+                max(component["left"] - center_x, 0, center_x - component["right"]) ** 2
+                + max(component["top"] - center_y, 0, center_y - component["bottom"]) ** 2,
+                component["top"],
+                component["left"],
+            ),
+        )
+        assigned[slot_index].append(seed)
+        remaining.remove(seed)
+
+    while remaining and any(assigned):
+        best: tuple[float, float, int, int] | None = None
+        for component_index, component in enumerate(remaining):
+            component_center = (
+                (component["left"] + component["right"]) / 2.0,
+                (component["top"] + component["bottom"]) / 2.0,
+            )
+            for slot_index, group in enumerate(assigned):
+                if not group:
+                    continue
+                gap = min(component_gap(component, member) for member in group)
+                center_distance = (
+                    (component_center[0] - slot_centers[slot_index][0]) ** 2
+                    + (component_center[1] - slot_centers[slot_index][1]) ** 2
+                )
+                candidate = (gap, center_distance, slot_index, component_index)
+                if best is None or candidate < best:
+                    best = candidate
+        if best is None:
+            break
+        _, _, slot_index, component_index = best
+        assigned[slot_index].append(remaining.pop(component_index))
+    return assigned
+
+
+def crop_assigned_components(
+    source: Image.Image,
+    bbox: tuple[int, int, int, int],
+    components: list[dict[str, Any]],
+    halo: int = 2,
+) -> Image.Image:
+    """Crop one asset while clearing pixels owned by neighbouring slots.
+
+    Component ownership uses the visible Alpha threshold, but the export must
+    retain the associated sub-threshold anti-aliased edge. Expand ownership by
+    a small deterministic halo and intersect it with non-zero source Alpha.
+    """
+    left, top, right, bottom = bbox
+    rgba = np.asarray(source.crop(bbox), dtype=np.uint8).copy()
+    keep = np.zeros((bottom - top, right - left), dtype=bool)
+    for component in components:
+        for y, run_left, run_right in component.get("runs", []):
+            if top <= y < bottom:
+                local_left = max(left, run_left) - left
+                local_right = min(right, run_right) - left
+                if local_left < local_right:
+                    keep[y - top, local_left:local_right] = True
+    if halo > 0:
+        expanded = keep.copy()
+        for offset_y in range(-halo, halo + 1):
+            for offset_x in range(-halo, halo + 1):
+                source_top = max(0, -offset_y)
+                source_bottom = keep.shape[0] - max(0, offset_y)
+                source_left = max(0, -offset_x)
+                source_right = keep.shape[1] - max(0, offset_x)
+                target_top = max(0, offset_y)
+                target_bottom = keep.shape[0] - max(0, -offset_y)
+                target_left = max(0, offset_x)
+                target_right = keep.shape[1] - max(0, -offset_x)
+                expanded[target_top:target_bottom, target_left:target_right] |= keep[
+                    source_top:source_bottom,
+                    source_left:source_right,
+                ]
+        keep = expanded
+    keep &= rgba[:, :, 3] > 0
+    rgba[~keep] = 0
+    return Image.fromarray(rgba, mode="RGBA")
 
 
 def combined_bbox(components: list[dict[str, int]], padding: int, width: int, height: int) -> tuple[int, int, int, int]:
@@ -292,8 +404,11 @@ def extract_assets(
     # nearest-center assignment still keeps extraction deterministic and makes
     # touching/merged neighbours fail as an empty assigned slot.
     source_alpha = np.asarray(source.getchannel("A"), dtype=np.uint8)
-    global_components = connected_components(source_alpha >= alpha_threshold, minimum_component_pixels)
-    assigned_components: list[list[dict[str, int]]] = [[] for _ in slots]
+    global_components = connected_components(
+        source_alpha >= alpha_threshold,
+        minimum_component_pixels,
+        include_runs=True,
+    )
     slot_centers: list[tuple[float, float]] = []
     for slot_data in slots:
         slot_box = slot_data["slot"]
@@ -320,19 +435,7 @@ def extract_assets(
                     "pixels": component["pixels"],
                 }
             )
-        component_center = (
-            (component["left"] + component["right"]) / 2.0,
-            (component["top"] + component["bottom"]) / 2.0,
-        )
-        nearest_slot = min(
-            range(len(slot_centers)),
-            key=lambda index: (
-                (component_center[0] - slot_centers[index][0]) ** 2
-                + (component_center[1] - slot_centers[index][1]) ** 2,
-                index,
-            ),
-        )
-        assigned_components[nearest_slot].append(component)
+    assigned_components = assign_components_to_slots(global_components, slot_centers)
 
     for visual_index, asset in enumerate(assets, start=1):
         components = assigned_components[visual_index - 1]
@@ -415,7 +518,7 @@ def extract_assets(
         filename = (
             f"{CATEGORY_PREFIX[category]}_{category}_{semantic_name}_{state}_{category_index:03d}.png"
         )
-        extracted = source.crop(bbox)
+        extracted = crop_assigned_components(source, bbox, components, halo=trim_padding)
         output_path = output_dir / filename
         extracted.save(output_path, format="PNG")
         source_bbox = list(bbox)
@@ -448,7 +551,7 @@ def extract_assets(
         "project_id": request.get("project_id", "game-ui"),
         "category": category,
         "source_image_size": [source.width, source.height],
-        "assignment_mode": "global-components-nearest-slot-center",
+        "assignment_mode": "global-components-slot-seeded-nearest-geometry-masked",
         "fragment_policy": fragment_policy,
         "expected_count": len(assets),
         "exported_count": len(entries),

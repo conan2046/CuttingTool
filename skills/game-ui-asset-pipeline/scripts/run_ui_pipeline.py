@@ -349,6 +349,27 @@ def run_pipeline(
             }
         )
 
+    supplemental_manifest_path = run_dir / "supplemental-manifest.json"
+    supplemental_entries: list[dict[str, Any]] = []
+    if supplemental_manifest_path.is_file():
+        supplemental_payload = read_json(supplemental_manifest_path)
+        supplemental_entries = list(supplemental_payload.get("assets", []))
+        existing_ids = {str(entry["id"]) for entry in all_entries}
+        for entry_index, entry in enumerate(supplemental_entries):
+            asset_id = str(entry.get("id", ""))
+            output = str(entry.get("output", ""))
+            if not asset_id or asset_id in existing_ids:
+                raise ValueError(f"invalid or duplicate supplemental asset id at index {entry_index}: {asset_id}")
+            output_path = (run_dir / output).resolve()
+            try:
+                output_path.relative_to((run_dir / "final").resolve())
+            except ValueError as error:
+                raise ValueError(f"supplemental asset output must stay under final/: {output}") from error
+            if not output_path.is_file():
+                raise FileNotFoundError(f"supplemental asset output missing: {output_path}")
+            existing_ids.add(asset_id)
+        all_entries.extend(supplemental_entries)
+
     all_entries.sort(key=lambda entry: (str(entry["id"])[:2], int(entry.get("category_index", 0))))
     final_manifest = {
         "schema_version": 3,
@@ -359,6 +380,7 @@ def run_pipeline(
         "fragment_policies": fragment_policies,
         "native_alpha_verified_sheets": len(native_reports),
         "model_matte_verified_sheets": len(matte_reports),
+        "supplemental_asset_count": len(supplemental_entries),
         "assets": all_entries,
     }
     write_json(final_manifest_path, final_manifest)
@@ -368,7 +390,12 @@ def run_pipeline(
     all_issues.extend(validation.get("issues", []))
     failures = [issue for issue in all_issues if issue.get("severity") == "fail"]
     warnings = [issue for issue in all_issues if issue.get("severity") == "warning"]
-    warned_assets = {issue.get("asset_id") for issue in warnings if issue.get("asset_id")}
+    output_to_id = {str(entry.get("output", "")): str(entry["id"]) for entry in all_entries}
+    warned_assets = {
+        str(issue.get("asset_id") or output_to_id.get(str(issue.get("file", "")), ""))
+        for issue in warnings
+        if issue.get("asset_id") or output_to_id.get(str(issue.get("file", "")))
+    }
     qa_report = {
         "schema_version": 3,
         "ok": not failures and validation.get("ok", False) and contact_report.get("ok", False),

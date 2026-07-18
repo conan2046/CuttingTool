@@ -2,6 +2,86 @@
 
 记录每次正式功能提交的目标、主要改动、验证结果和兼容性影响。按时间倒序维护；纯格式整理或无功能影响的微小修正可以合并记录。
 
+## 2026-07-18｜v0.13.1｜跨槽碎片裁剪与 Sprite Editor 依赖修复
+
+提交：随本记录同提交。
+
+### 目标
+
+修复空心面板装饰跨越槽位中线时被错误归属、矩形裁剪夹带相邻资源的问题，并确保 Unity 2022.3 项目可直接打开 Sprite Editor。
+
+### 主要改动
+
+- 连通组件改为“槽位中心播种 + 最近组件几何归属”，裁剪时按已归属组件像素生成遮罩，避免重叠包围框夹带相邻槽位内容；补充 2px Alpha 抗锯齿安全边。
+- Runner 支持受校验的 `supplemental-manifest.json`，强制重跑时可稳定合并手工补充资源，避免正式资源被遗漏。
+- Unity 嵌入包显式声明 `com.unity.2d.sprite@1.0.0`；版本升级至 `0.13.1`。
+- 修正 `PlayerProfileFrame`、`CurrencyCounterFrame`，并对不适合九宫格拉伸的两个面板显式使用零 Border。
+
+### 验证
+
+- 源码与安装态全量 `unittest`：各 104/104 通过。
+- 正式 Runner：88/88 导出，87 pass、1 warning、0 fail；唯一 warning 为全屏不透明背景没有透明留白。
+- Unity `2022.3.62f3c1` 实测：88 Sprite、88 资源 Prefab、1 Screen Prefab、1 Preview Scene、1 Preview PNG、0 issue。
+- `packages-lock.json` 已解析内置 `com.unity.2d.sprite@1.0.0`；日志确认导入 `SpriteEditorWindow.cs`，并生成 `Unity.2D.Sprite.Editor.dll`。
+
+### 兼容性
+
+- 不改变请求与正式 Manifest schema；旧运行目录无 `supplemental-manifest.json` 时行为不变。
+- Unity 2022.3 项目会自动解析内置 2D Sprite 包，无需手工从 Package Manager 安装。
+
+## 2026-07-18｜v0.13.0｜Unity 单行/单列 LayoutGroup 规则与修仙 HUD 重建
+
+提交：随本记录同提交。
+
+### 目标
+
+禁止用逐个绝对坐标表达规律单行/单列 UI；改为真实父节点与 UGUI LayoutGroup，并重新生成 `XiuxianMainHUDReferenceAligned`。
+
+### 主要改动
+
+- `unity-layout.json` schema v2 新增 `HorizontalLayoutGroup`、`VerticalLayoutGroup`，支持间距、Padding、子对齐、尺寸控制和拉伸开关；schema v1 继续兼容。
+- LayoutGroup 禁止绑定 Sprite，要求至少两个直接子节点；Unity 导入器创建真实 UGUI 组件并在保存 Prefab 前强制重建布局。
+- 修仙 HUD 将货币、礼包、活动、任务页签、任务行、聊天页签和底部导航改为 7 个父布局组，其中横向 6 个、纵向 1 个。
+- 同步 Skill、Unity 导出契约、README、项目制作标准和安装副本；版本升级至 `0.13.0`。
+
+### 验证
+
+- Unity 导出专项：15/15 通过；源码与安装态全量 `unittest`：各 102/102 通过。
+- Skill 源码与安装副本：63 个正式文件 SHA-256 一致，0 差异。
+- Unity `2022.3.62f3c1` 实测：88 Sprite、88 资源 Prefab、1 Screen Prefab、1 Preview Scene、1 Preview PNG、0 issue。
+- Screen Prefab 已核验 6 个 `HorizontalLayoutGroup` 和 1 个 `VerticalLayoutGroup`；1980×1080 渲染图视觉检查无缺图、错位、裁切或紫色材质。
+
+### 兼容性
+
+- 旧 schema v1 Image/Button 布局继续可导入；使用 LayoutGroup 的新布局必须声明 schema v2。
+- 不改变正式 PNG、Manifest、资源 Prefab 路径、Button SpriteSwap、九宫格或回滚边界。
+
+## 2026-07-18｜v0.12.3｜Unity 空白工程 UGUI 依赖修复与修仙 HUD 复验
+
+提交：随本记录同提交。
+
+### 目标
+
+修复嵌入 Unity 包依赖目标工程预装 UGUI，导致新建 Unity 2022.3 工程无法编译 `UnityEngine.UI` 与 `EventSystems` 的问题，并使用 `xiuxian` 正式资源重新完成 HUD 拼装验收。
+
+### 主要改动
+
+- Unity 嵌入包显式声明 `com.unity.ugui@1.0.0`，不再依赖目标项目隐式提供 UGUI。
+- 增加包依赖复制测试，并同步 README、Unity 导出契约与项目制作标准。
+- 项目版本升级至 `0.12.3`。
+
+### 验证
+
+- 源码与安装态全量 `unittest`：各 99/99 通过；Unity 导出专项 12/12 通过。
+- Skill 源码与安装副本：63 个正式文件 SHA-256 一致，0 差异。
+- 新建 Unity `2022.3.62f3c1` 空白工程实测：88 Sprite、88 资源 Prefab、1 Screen Prefab、1 Preview Scene、1 Preview PNG、0 issue。
+- Unity 渲染图为 `1980×1080`；已视觉检查，无缺失纹理、紫色材质、明显裁切或错层。
+
+### 兼容性
+
+- 继续支持 Unity `2022.3.x` 与 UGUI；首次导入会由 Package Manager 解析 `com.unity.ugui@1.0.0`。
+- 不改变正式 PNG、Manifest、布局 schema、Prefab 路径或回滚边界。
+
 ## 2026-07-17｜v0.12.2｜九宫格 PPU 联动修复
 
 提交：待本轮确认后提交。

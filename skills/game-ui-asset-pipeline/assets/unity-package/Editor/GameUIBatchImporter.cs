@@ -66,6 +66,11 @@ namespace CuttingTool.GameUI.Editor
             public string highlighted_asset_id = string.Empty;
             public string pressed_asset_id = string.Empty;
             public string disabled_asset_id = string.Empty;
+            public float spacing;
+            public int[] padding = Array.Empty<int>();
+            public string child_alignment = "MiddleCenter";
+            public bool control_child_size;
+            public bool child_force_expand;
         }
 
         [Serializable]
@@ -230,7 +235,9 @@ namespace CuttingTool.GameUI.Editor
                         AddIssue(issues, "layout-sprite-missing", element.id, $"Unknown sprite ID: {element.asset_id}");
                         continue;
                     }
-                    var item = CreateVisualObject(element.id, element.id, element.kind, sprite, element.preserve_aspect, element.raycast_target);
+                    var item = IsLayoutGroup(element.kind)
+                        ? CreateLayoutGroupObject(element)
+                        : CreateVisualObject(element.id, element.id, element.kind, sprite, element.preserve_aspect, element.raycast_target);
                     var parent = root.transform;
                     if (!string.IsNullOrWhiteSpace(element.parent_id) && objects.TryGetValue(element.parent_id, out var parentObject))
                     {
@@ -243,9 +250,17 @@ namespace CuttingTool.GameUI.Editor
                     rect.pivot = ReadVector2(element.pivot, new Vector2(0.5f, 0.5f));
                     rect.anchoredPosition = ReadVector2(element.anchored_position, Vector2.zero);
                     rect.sizeDelta = ReadVector2(element.size, new Vector2(100f, 100f));
-                    item.GetComponent<Image>().color = ReadColor(element.color, Color.white);
-                    ConfigureButtonSprites(item, element, sprites, issues);
+                    var image = item.GetComponent<Image>();
+                    if (image != null)
+                    {
+                        image.color = ReadColor(element.color, Color.white);
+                        ConfigureButtonSprites(item, element, sprites, issues);
+                    }
                     objects[element.id] = item;
+                }
+                foreach (var layoutGroup in root.GetComponentsInChildren<LayoutGroup>(true))
+                {
+                    LayoutRebuilder.ForceRebuildLayoutImmediate(layoutGroup.GetComponent<RectTransform>());
                 }
 
                 var path = $"{directory}/{SanitizeFileName(screen.id)}.prefab";
@@ -437,6 +452,38 @@ namespace CuttingTool.GameUI.Editor
             return item;
         }
 
+        private static bool IsLayoutGroup(string kind)
+        {
+            return string.Equals(kind, "HorizontalLayoutGroup", StringComparison.Ordinal)
+                || string.Equals(kind, "VerticalLayoutGroup", StringComparison.Ordinal);
+        }
+
+        private static GameObject CreateLayoutGroupObject(ElementPlan element)
+        {
+            var item = new GameObject(
+                string.IsNullOrWhiteSpace(element.id) ? "LayoutGroup" : element.id,
+                typeof(RectTransform),
+                typeof(GameUIElementBinding));
+            item.GetComponent<GameUIElementBinding>().Configure(element.id);
+            HorizontalOrVerticalLayoutGroup group;
+            if (string.Equals(element.kind, "VerticalLayoutGroup", StringComparison.Ordinal))
+            {
+                group = item.AddComponent<VerticalLayoutGroup>();
+            }
+            else
+            {
+                group = item.AddComponent<HorizontalLayoutGroup>();
+            }
+            group.spacing = element.spacing;
+            group.padding = ReadPadding(element.padding);
+            group.childAlignment = ReadTextAnchor(element.child_alignment, TextAnchor.MiddleCenter);
+            group.childControlWidth = element.control_child_size;
+            group.childControlHeight = element.control_child_size;
+            group.childForceExpandWidth = element.child_force_expand;
+            group.childForceExpandHeight = element.child_force_expand;
+            return item;
+        }
+
         private static string ReadArgument(IReadOnlyList<string> args, string name)
         {
             for (var index = 0; index < args.Count - 1; index++)
@@ -466,6 +513,18 @@ namespace CuttingTool.GameUI.Editor
             return values != null && values.Count == 4
                 ? new Color(values[0], values[1], values[2], values[3])
                 : fallback;
+        }
+
+        private static RectOffset ReadPadding(IReadOnlyList<int> values)
+        {
+            return values != null && values.Count == 4
+                ? new RectOffset(values[0], values[1], values[2], values[3])
+                : new RectOffset();
+        }
+
+        private static TextAnchor ReadTextAnchor(string value, TextAnchor fallback)
+        {
+            return Enum.TryParse(value, false, out TextAnchor parsed) ? parsed : fallback;
         }
 
         private static void EnsureAssetDirectory(string assetPath)
