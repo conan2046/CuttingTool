@@ -133,6 +133,56 @@ class BatchPipelineTest(unittest.TestCase):
             with self.assertRaises(FileNotFoundError):
                 RUNNER.run_pipeline(run_dir)
 
+    def test_runner_merges_tracked_supplemental_assets(self) -> None:
+        with tempfile.TemporaryDirectory() as temporary_directory:
+            run_dir = Path(temporary_directory) / "run"
+            PREPARE.prepare_batch(self.request_spec(), run_dir)
+            self.create_generated_sheets(run_dir)
+            supplemental_output = run_dir / "final" / "Icon_Item" / "06_Icon_Item_Bonus_Default_006.png"
+            supplemental_output.parent.mkdir(parents=True)
+            Image.new("RGBA", (64, 64), (40, 90, 180, 255)).save(supplemental_output)
+            (run_dir / "supplemental-manifest.json").write_text(
+                json.dumps(
+                    {
+                        "schema_version": 1,
+                        "assets": [
+                            {
+                                "id": "06_Icon_Item_Bonus_Default_006",
+                                "category": "Icon_Item",
+                                "semantic_name": "Bonus",
+                                "state": "Default",
+                                "category_index": 6,
+                                "output": "final/Icon_Item/06_Icon_Item_Bonus_Default_006.png",
+                                "width": 64,
+                                "height": 64,
+                                "padding": 0,
+                                "alignment": "center",
+                                "pivot": [0.5, 0.5],
+                                "chroma_key": None,
+                                "transparency_mode": "existing-alpha",
+                                "alpha_origin": "existing-alpha-unverified",
+                                "qa": "pass",
+                            }
+                        ],
+                    }
+                ),
+                encoding="utf-8",
+            )
+            request = json.loads((run_dir / "request.json").read_text(encoding="utf-8"))
+            request["expected_count"] = 9
+            (run_dir / "request.json").write_text(json.dumps(request), encoding="utf-8")
+
+            result = RUNNER.run_pipeline(run_dir)
+
+            self.assertTrue(result["ok"], result)
+            manifest = json.loads((run_dir / "final" / "manifest.json").read_text(encoding="utf-8"))
+            self.assertEqual(manifest["exported_count"], 9)
+            self.assertEqual(manifest["supplemental_asset_count"], 1)
+            self.assertIn(
+                "06_Icon_Item_Bonus_Default_006",
+                {entry["id"] for entry in manifest["assets"]},
+            )
+
     def test_state_group_is_not_split_across_sheets(self) -> None:
         assets = [
             {"semantic_name": "Confirm", "state": "Normal"},

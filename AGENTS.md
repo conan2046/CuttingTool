@@ -51,7 +51,7 @@ V1 必须支持：
 - 支持从需求接收、生成、已有 Sheet 后处理、未知整图诊断、仅 QA 和断点续跑阶段独立进入；从最靠后的安全阶段开始，但不得跳过后续 QA。
 - 对没有 Layout Guide 的未知整图先执行背景诊断，生成候选 bbox、可编辑修正 JSON 和标注预览。
 - 在不引入桌面 GUI 的前提下，用批准后的 bbox 修正文件完成透明切割和正式 QA。
-- 正式 QA 通过后可导入 Unity 2022.3：配置 Sprite Single/Alpha/PPU/Pivot/Border，生成资源 Prefab 和基于显式布局的 Image/Button 界面 Prefab。
+- 正式 QA 通过后可导入 Unity 2022.3：配置 Sprite Single/Alpha/PPU/Pivot/Border，生成资源 Prefab 和基于显式布局的 Image/Button/LayoutGroup 界面 Prefab。
 - Panel/Button 自动推断九宫格 Border；只有高置信且中心区有效时写入，低置信必须失败并使用人工覆写。
 - Unity 导出必须限定在 `Assets/_Generated/GameUI/<project-id>`，生成预检、导入报告、日志和回滚清单。
 
@@ -90,10 +90,12 @@ V1 不包含：
 ### P7/P8 Unity 交付链路
 
 - 当前支持 Unity `2022.3.x` 与 UGUI；其他 Unity 主版本必须先兼容性验证。
+- Unity 嵌入包必须在 `package.json` 显式依赖 `com.unity.ugui` 与 `com.unity.2d.sprite`，不得依赖目标项目预先安装 UGUI 或 Sprite Editor；真实验收至少覆盖一个新建 Unity 2022.3 空白工程，确认 `UnityEngine.UI`、`EventSystems`、`Unity.ugui` 可编译且 Sprite Editor 窗口已注册。
 - 默认导入 `Assets/_Generated/GameUI/<project-id>`，安装嵌入包 `Packages/com.hongda.game-ui-asset-pipeline`；不得改写用户手工 Prefab。
 - TextureImporter 固定为 Sprite Single、Alpha Is Transparency、无 Mipmap、Clamp、Bilinear、Uncompressed；默认 PPU 100，Panel/Button 按源图与全部布局目标的最小缩放比自动提高 PPU，也可显式覆写。Pivot、Border、PPU 来源均须可追溯。
 - Panel/Button 自动九宫格推断必须记录置信度和来源。低置信、中心区无效、覆写越界，或 Border 经 PPU 换算后不适配任一布局目标尺寸，必须在启动 Unity 前失败。
-- 最终界面 Prefab 只从 schema v1 显式布局生成；父元素必须先声明，元素正式支持 Image/Button，并写入稳定 BindingId。
+- 最终界面 Prefab 只从显式布局生成；schema v1 兼容 Image/Button，schema v2 增加 HorizontalLayoutGroup/VerticalLayoutGroup 父节点，所有节点写入稳定 BindingId。
+- UI 中两个或以上同级资源呈单行或单列规律排版时，必须先建立独立父节点，并分别挂 HorizontalLayoutGroup 或 VerticalLayoutGroup；子资源挂到该父节点下，不得继续用逐个 anchored_position 冒充布局组。
 - 布局允许 RGBA 纯色 Image；Button 状态资源必须显式引用正式 Manifest，并配置 SpriteSwap，不得用 ColorTint 冒充已有四态资源。
 - 每个正式 Screen 必须生成 Preview Scene 与同目标尺寸 Unity 渲染 PNG；Prefab 结构正确但未完成视觉渲染检查，不得视为完整验收。
 - Unity 导出前必须确认项目、版本、Editor、导入根和回滚范围；失败不得报告完成。
@@ -417,6 +419,8 @@ GPT Image 2 不提供原生透明背景时，默认使用：
 
 连通域默认最低可见 Alpha 阈值为 `16`。单一组件同时跨过两个或更多槽位中心时必须报告 `cross-slot-connected-component` 并失败；合法主体伸入 gutter 但未覆盖相邻槽位中心时继续允许。
 
+空心面板、边框等多组件资源必须先以各槽中心包围主件建立唯一种子，再按组件几何间距归属装饰；禁止仅按碎片质心到槽中心的距离分配。导出重叠 bbox 时只保留本槽已归属组件及其低 Alpha 抗锯齿邻域，禁止把邻槽像素随矩形裁图带入。
+
 ### 3. Alpha 和净边
 
 输出必须为 RGBA PNG。验证：
@@ -516,6 +520,8 @@ output/<project-id>-<timestamp>/
 ```
 
 多分类或多 Sheet 任务先运行 `prepare_ui_batch.py` 生成 Job、独立请求、Prompt 和 Layout Guide。所有 `generated_output` 及适用的 `alpha_matte_output` 就绪后运行 `run_ui_pipeline.py --run-dir <run-dir>`；Runner 负责 Matte/原生 Alpha/色键分流、单次生产尺寸归一、逐 Job 切割、分类连续编号、总 Manifest、Contact Sheet、严格 QA 和 `run-summary.json`。Runner 不调用图片 API，缺少任何必需生成图时必须在写入正式输出前失败。
+
+批量准备后通过独立链路追加的正式资源必须写入运行根目录 `supplemental-manifest.json`，使用正式 Manifest 同构条目并指向本运行目录 `final/`；Runner 合并前必须验证 ID 唯一、路径不越界和文件存在。禁止只遗留后补 PNG 或仅手改一次总 Manifest，导致 `--force` 重跑丢失资源记录。
 
 自然语言完整交付默认改用 `orchestrate_ui_delivery.py`。首次传入 `--request` 和 `--run-dir`，补图后仅传 `--run-dir`；脚本按 `unprepared → awaiting-generation → ready-for-processing → complete|failed` 状态机推进，并持续写交付摘要。`prepare_ui_batch.py` 与 `run_ui_pipeline.py` 保留为分步调试入口。
 

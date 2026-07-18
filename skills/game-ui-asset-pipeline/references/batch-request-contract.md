@@ -78,3 +78,9 @@
 `model-matte-derived` 使用内置 `built-in-imagegen`，每个 Job 必须同时生成 `generated/<job-id>.png` 与 `generated/<job-id>-alpha-matte.png`。Matte 生成时把彩色 Sheet 作为编辑目标，禁止独立重画；Runner 在正式输出前验证双图对齐和连续灰度层次。
 
 自然语言完整交付由 Codex 先建立本契约的请求 JSON，再交给 `orchestrate_ui_delivery.py`。编排器不解析自然语言、不调用图片 API；它负责生成 Job、报告精确缺图、补图续跑和汇总正式交付。状态机和摘要格式见 `orchestration-contract.md`。
+
+## 后补资源
+
+已完成批量准备后新增、且走独立可追溯处理链路的资源，写入运行根目录 `supplemental-manifest.json`。每条资源必须使用与正式 Manifest 相同的字段，`output` 必须位于本运行目录 `final/` 下且文件已通过独立 QA。统一 Runner 在正式校验前合并这些条目，检查 ID 唯一、路径不越界和文件存在，并记录 `supplemental_asset_count`。
+
+禁止只把后补 PNG 留在 `final/` 目录或临时手工修改总 Manifest；否则 `--force` 重跑会出现 `unexpected-files` 或丢失追溯记录。补充条目仍计入顶层 `expected_count`，并接受统一严格 QA。

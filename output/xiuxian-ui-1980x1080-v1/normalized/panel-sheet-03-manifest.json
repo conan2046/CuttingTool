@@ -6,7 +6,7 @@
     2048,
     2048
   ],
-  "assignment_mode": "global-components-nearest-slot-center",
+  "assignment_mode": "global-components-slot-seeded-nearest-geometry-masked",
   "fragment_policy": {
     "merge_distance": 12.0,
     "merge_distance_ratio": 0.06,
@@ -35,12 +35,12 @@
       "output": "final/Panel/01_Panel_ProgressBarFrame_Default_009.png",
       "width": 935,
       "height": 153,
-      "component_count": 22,
-      "merged_component_count": 22,
+      "component_count": 19,
+      "merged_component_count": 19,
       "detached_component_count": 0,
       "accepted_detached_count": 0,
       "major_detached_count": 0,
-      "foreground_pixels": 43130,
+      "foreground_pixels": 43066,
       "qa": "pass",
       "normalization": {
         "source_trim_bbox": [

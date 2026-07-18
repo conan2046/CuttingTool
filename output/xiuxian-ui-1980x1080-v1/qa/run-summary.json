@@ -18,10 +18,10 @@
   "results": {
     "expected": 88,
     "exported": 88,
-    "pass": 85,
-    "warning": 3,
+    "pass": 87,
+    "warning": 1,
     "fail": 0,
     "manual_action_required": []
   },
-  "completed_at": "2026-07-17T05:49:43.574777+00:00"
+  "completed_at": "2026-07-18T07:32:51.258979+00:00"
 }

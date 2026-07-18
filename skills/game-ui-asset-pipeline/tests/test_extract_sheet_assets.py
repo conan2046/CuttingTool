@@ -5,6 +5,7 @@ import tempfile
 import unittest
 from pathlib import Path
 
+import numpy as np
 from PIL import Image, ImageDraw
 
 
@@ -140,8 +141,49 @@ class ExtractSheetAssetsTest(unittest.TestCase):
                 Path(temporary_directory) / "assets",
             )
         self.assertTrue(report["ok"])
-        self.assertEqual(manifest["assignment_mode"], "global-components-nearest-slot-center")
+        self.assertEqual(
+            manifest["assignment_mode"],
+            "global-components-slot-seeded-nearest-geometry-masked",
+        )
         self.assertGreater(manifest["assets"][0]["source_bbox"][2], first_slot["right"])
+
+    def test_hollow_panel_crest_crossing_row_bisector_stays_with_seeded_panel(self) -> None:
+        source = Image.new("RGBA", (400, 400), (0, 0, 0, 0))
+        draw = ImageDraw.Draw(source)
+        # Upper frame whose bbox encloses the upper slot center.
+        draw.rectangle((35, 45, 165, 155), outline=(220, 230, 240, 255), width=12)
+        # Lower frame plus a detached crest above the row bisector. The crest's
+        # centroid is closer to the upper center, but its geometry overlaps the
+        # lower frame bbox and must remain with the lower asset.
+        draw.rectangle((45, 220, 155, 370), outline=(180, 210, 240, 255), width=12)
+        draw.polygon(((100, 165), (124, 215), (76, 215)), fill=(250, 180, 60, 255))
+        layout = {
+            "slots": [
+                {"slot": {"left": 0, "top": 0, "right": 200, "bottom": 200}},
+                {"slot": {"left": 0, "top": 200, "right": 200, "bottom": 400}},
+            ]
+        }
+        request = {
+            "project_id": "seeded-panels",
+            "category": "Panel",
+            "assets": [{"semantic_name": "Upper"}, {"semantic_name": "Lower"}],
+        }
+        with tempfile.TemporaryDirectory() as temporary_directory:
+            output_dir = Path(temporary_directory)
+            manifest, report = EXTRACT.extract_assets(
+                source,
+                layout,
+                request,
+                output_dir,
+                minimum_component_pixels=1,
+            )
+            upper = Image.open(output_dir / manifest["assets"][0]["output"]).convert("RGBA")
+            lower = Image.open(output_dir / manifest["assets"][1]["output"]).convert("RGBA")
+            self.assertTrue(report["ok"], report)
+            self.assertLess(manifest["assets"][0]["source_bbox"][3], 200)
+            self.assertLess(manifest["assets"][1]["source_bbox"][1], 200)
+            self.assertEqual(upper.getpixel((upper.width // 2, upper.height - 1))[3], 0)
+            self.assertGreater(int(np.asarray(lower.getchannel("A")).sum()), 0)
 
     def test_merges_near_fragments_without_warning(self) -> None:
         source = Image.new("RGBA", (256, 256), (0, 0, 0, 0))

@@ -251,6 +251,8 @@ ${CODEX_HOME:-$HOME/.codex}/skills/.system/imagegen/SKILL.md
 
 Runner 根据 Job 声明分流 `model-matte-derived`、原生 Alpha、已有 Alpha 或色键背景。Matte 模式必须在正式输出前验证双图齐全、灰度纯度、黑色边框、连续 Alpha 层次、背景平整度、像素覆盖关系和双图 SHA-256；通过后用已知黑背景合成方程恢复直通道 RGB＋Alpha。失败时只写 QA 与失败摘要，不生成正式 Manifest。所有 RGBA 生产尺寸与单体归一化均使用预乘 Alpha。默认拒绝覆盖已有正式 Manifest；明确重跑时使用 `--force`。
 
+如果批量准备完成后又通过独立链路新增正式资源，把完整追溯条目写入运行根目录 `supplemental-manifest.json`，并确保输出位于本次 `final/` 下。Runner 会在统一 QA 前合并这些条目；不要只遗留 PNG 或手工改一次总 Manifest，否则强制重跑会丢失资源记录。
+
 P6 编排器每次调用都写出 `qa/delivery-summary.json` 和 `qa/delivery-summary.md`。完成态重复调用必须直接复用正式结果；失败后替换生成输入可继续执行，只有已有正式 Manifest 时才允许显式 `--force-run`。
 
 内置 `imagegen` 当前不能直接用于 `native-alpha-required`，但可以用于 `model-matte-derived`，不需要 API Key。原生模式仍需用户明确确认外部透明生成回退，并保存 `generated/<job-id>.provenance.json`；来源侧车中的模型与生成方式都必须为非空值。
@@ -311,7 +313,7 @@ P6 编排器每次调用都写出 `qa/delivery-summary.json` 和 `qa/delivery-su
   --qa-out qa/<sheet>-extract.json
 ```
 
-切割脚本先在整张 Alpha Sheet 上检测连通域，再按最近槽位中心稳定归属。Layout Guide 的槽位用于排序和归属，不作为硬裁切边界；这样可保留伸入槽间纯背景留白、但没有与相邻资源接触的完整轮廓。距离主体足够近的小碎片按分类默认比例和像素上限合并；大面板/按钮使用更严格上限，技能和简单特效允许更大的合法硬边碎片间距。远离碎片默认记录 `detached-components`，远离且面积显著的第二主体追加 `multiple-major-components`。只有请求明确设置 `fragment_policy.detached_action=allow-small` 且同时满足绝对像素与锚点面积比例限制时，才允许保留该小组件但不产生 warning；仍须记录 `accepted_detached_count`。空槽、主体跨槽合并、画布边缘接触和数量不符属于失败；不要静默删除无法解释的组件。
+切割脚本先在整张 Alpha Sheet 上检测连通域，以各槽中心包围主件建立唯一种子，再按组件轮廓几何间距归属其余装饰；不要仅按碎片质心到槽中心的距离分配空心面板冠饰。Layout Guide 的槽位用于排序和归属，不作为硬裁切边界；这样可保留伸入槽间纯背景留白、但没有与相邻资源接触的完整轮廓。不同资源 bbox 重叠时，导出必须使用组件归属遮罩并保留本组件低 Alpha 抗锯齿 halo，不得把邻槽像素随矩形裁图带入。距离主体足够近的小碎片按分类默认比例和像素上限合并；大面板/按钮使用更严格上限，技能和简单特效允许更大的合法硬边碎片间距。远离碎片默认记录 `detached-components`，远离且面积显著的第二主体追加 `multiple-major-components`。只有请求明确设置 `fragment_policy.detached_action=allow-small` 且同时满足绝对像素与锚点面积比例限制时，才允许保留该小组件但不产生 warning；仍须记录 `accepted_detached_count`。空槽、主体跨槽合并、画布边缘接触和数量不符属于失败；不要静默删除无法解释的组件。
 
 组件检测默认使用 `alpha >= 16`，与最低可见 Alpha QA 一致。单一连通组件同时跨过两个或更多槽位中心时必须报告 `cross-slot-connected-component` 并失败；不得仅依赖后续空槽间接推断。
 
@@ -388,7 +390,7 @@ Contact Sheet 中的棋盘格只用于人工查看透明边缘，不得回写到
 
 脚本把可追溯 PNG 导入 `Assets/_Generated/GameUI/<project-id>`，配置 Sprite Single、Alpha、PPU、Pivot 和 Border，生成独立资源 Prefab、界面 Prefab、可直接运行的 Preview Scene，并由 Unity 渲染像素尺寸一致的预览 PNG。Panel/Button 自动分析九宫格，并按源图到全部布局目标的最小缩放比推导 PPU；只有 Border 置信度、中心拉伸区及换算后的显示尺寸全部有效时才写入，否则预检失败并要求在布局 JSON 的 `nine_slice_overrides` 或 `pixels_per_unit_overrides` 中明确覆写。
 
-界面元素当前正式支持 `Image` 和 `Button`。每个对象附带稳定 `GameUIElementBinding.BindingId`；Button 自动配置 `Image`、`Button.targetGraphic`、Raycast，并在布局提供状态资源时使用真实 Hover/Pressed/Disabled SpriteSwap。无 Sprite 的 Image 可通过 RGBA `color` 作为确定性底色。文字、本地化、业务事件和运行时数据绑定属于项目代码，不得伪造完成。
+界面元素正式支持 `Image`、`Button`，schema v2 另支持 `HorizontalLayoutGroup`、`VerticalLayoutGroup` 父节点。两个或以上同级资源形成单行或单列时，必须先建立独立 LayoutGroup 父节点并把资源挂为直接子节点，不得用逐个绝对坐标冒充布局组。每个对象附带稳定 `GameUIElementBinding.BindingId`；Button 自动配置 `Image`、`Button.targetGraphic`、Raycast，并在布局提供状态资源时使用真实 Hover/Pressed/Disabled SpriteSwap。无 Sprite 的 Image 可通过 RGBA `color` 作为确定性底色。文字、本地化、业务事件和运行时数据绑定属于项目代码，不得伪造完成。
 
 Unity 导出失败时读取 `unity/unity-preflight.json`、`unity/unity-import-report.json` 和 `unity/unity-batch.log`。需要回滚本次生成目录时运行 `rollback_unity_export.py`；默认保留共享嵌入包，只有明确需要完全移除时才加 `--remove-package`。
 

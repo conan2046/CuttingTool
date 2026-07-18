@@ -6,7 +6,7 @@
     2048,
     2048
   ],
-  "assignment_mode": "global-components-nearest-slot-center",
+  "assignment_mode": "global-components-slot-seeded-nearest-geometry-masked",
   "fragment_policy": {
     "merge_distance": 12.0,
     "merge_distance_ratio": 0.12,
@@ -593,12 +593,12 @@
       "output": "final/Icon_Nav/03_Icon_Nav_FunctionScroll_Default_026.png",
       "width": 128,
       "height": 128,
-      "component_count": 10,
-      "merged_component_count": 10,
+      "component_count": 9,
+      "merged_component_count": 9,
       "detached_component_count": 0,
       "accepted_detached_count": 0,
       "major_detached_count": 0,
-      "foreground_pixels": 103138,
+      "foreground_pixels": 103113,
       "qa": "pass",
       "normalization": {
         "source_trim_bbox": [
@@ -655,12 +655,12 @@
       "output": "final/Icon_Nav/03_Icon_Nav_FunctionWealth_Default_027.png",
       "width": 128,
       "height": 128,
-      "component_count": 5,
-      "merged_component_count": 5,
+      "component_count": 4,
+      "merged_component_count": 4,
       "detached_component_count": 0,
       "accepted_detached_count": 0,
       "major_detached_count": 0,
-      "foreground_pixels": 118985,
+      "foreground_pixels": 118969,
       "qa": "pass",
       "normalization": {
         "source_trim_bbox": [
@@ -712,28 +712,28 @@
         1547,
         1066,
         2009,
-        1508
+        1511
       ],
       "output": "final/Icon_Nav/03_Icon_Nav_FunctionCompanion_Default_028.png",
       "width": 128,
       "height": 128,
-      "component_count": 8,
-      "merged_component_count": 8,
+      "component_count": 11,
+      "merged_component_count": 11,
       "detached_component_count": 0,
       "accepted_detached_count": 0,
       "major_detached_count": 0,
-      "foreground_pixels": 142291,
+      "foreground_pixels": 142372,
       "qa": "pass",
       "normalization": {
         "source_trim_bbox": [
           0,
           0,
           462,
-          442
+          445
         ],
         "source_trim_size": [
           462,
-          442
+          445
         ],
         "target_size": [
           128,
@@ -741,7 +741,7 @@
         ],
         "content_size": [
           108,
-          103
+          104
         ],
         "content_position": [
           10,

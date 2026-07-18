@@ -13,6 +13,7 @@
     "Assets/_Generated/GameUI/xiuxian-ui-main-v1/Sprites/01_Panel_BottomNavSlotFrame_Default_007.png",
     "Assets/_Generated/GameUI/xiuxian-ui-main-v1/Sprites/01_Panel_VerticalOrnamentBanner_Default_008.png",
     "Assets/_Generated/GameUI/xiuxian-ui-main-v1/Sprites/01_Panel_ProgressBarFrame_Default_009.png",
+    "Assets/_Generated/GameUI/xiuxian-ui-main-v1/Sprites/01_Panel_SceneBackground_Default_010.png",
     "Assets/_Generated/GameUI/xiuxian-ui-main-v1/Sprites/02_Button_AddCurrency_Normal_001.png",
     "Assets/_Generated/GameUI/xiuxian-ui-main-v1/Sprites/02_Button_AddCurrency_Hover_002.png",
     "Assets/_Generated/GameUI/xiuxian-ui-main-v1/Sprites/02_Button_AddCurrency_Pressed_003.png",
@@ -78,6 +79,7 @@
     "Assets/_Generated/GameUI/xiuxian-ui-main-v1/Sprites/03_Icon_Nav_FunctionWealth_Default_027.png",
     "Assets/_Generated/GameUI/xiuxian-ui-main-v1/Sprites/03_Icon_Nav_FunctionCompanion_Default_028.png",
     "Assets/_Generated/GameUI/xiuxian-ui-main-v1/Sprites/03_Icon_Nav_FunctionCharacter_Default_029.png",
+    "Assets/_Generated/GameUI/xiuxian-ui-main-v1/Sprites/03_Icon_Nav_PlayerAvatar_Default_030.png",
     "Assets/_Generated/GameUI/xiuxian-ui-main-v1/Sprites/04_Icon_Status_CurrencyJade_Default_001.png",
     "Assets/_Generated/GameUI/xiuxian-ui-main-v1/Sprites/04_Icon_Status_CurrencyEssence_Default_002.png",
     "Assets/_Generated/GameUI/xiuxian-ui-main-v1/Sprites/04_Icon_Status_CurrencyVoucher_Default_003.png",
@@ -89,8 +91,6 @@
     "Assets/_Generated/GameUI/xiuxian-ui-main-v1/Sprites/09_Icon_Effect_SoftBlueGlow_Default_001.png",
     "Assets/_Generated/GameUI/xiuxian-ui-main-v1/Sprites/09_Icon_Effect_GoldSelectedGlow_Default_002.png",
     "Assets/_Generated/GameUI/xiuxian-ui-main-v1/Sprites/09_Icon_Effect_StarSparkle_Default_003.png",
-    "Assets/_Generated/GameUI/xiuxian-ui-main-v1/Sprites/09_Icon_Effect_NotificationPulse_Default_004.png",
-    "Assets/_Generated/GameUI/xiuxian-ui-main-v1/Sprites/01_Panel_SceneBackground_Default_010.png",
-    "Assets/_Generated/GameUI/xiuxian-ui-main-v1/Sprites/03_Icon_Nav_PlayerAvatar_Default_030.png"
+    "Assets/_Generated/GameUI/xiuxian-ui-main-v1/Sprites/09_Icon_Effect_NotificationPulse_Default_004.png"
   ]
 }

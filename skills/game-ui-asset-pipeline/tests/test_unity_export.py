@@ -145,7 +145,16 @@ class UnityExportTest(unittest.TestCase):
             self.assertEqual(result["sprite_count"], 1)
             self.assertEqual(result["screen_count"], 1)
             self.assertTrue((unity_project / "Packages" / "com.hongda.game-ui-asset-pipeline" / "package.json").is_file())
+            package = json.loads(
+                (unity_project / "Packages" / "com.hongda.game-ui-asset-pipeline" / "package.json").read_text(
+                    encoding="utf-8"
+                )
+            )
+            self.assertEqual(package["dependencies"]["com.unity.2d.sprite"], "1.0.0")
+            self.assertEqual(package["dependencies"]["com.unity.ugui"], "1.0.0")
             plan = json.loads((run_dir / "unity" / "unity-import-plan.json").read_text(encoding="utf-8"))
+            self.assertEqual(plan["schema_version"], 2)
+            self.assertEqual(plan["layout_schema_version"], 1)
             self.assertEqual(plan["sprites"][0]["border_origin"], "auto-inferred")
             self.assertEqual(plan["sprites"][0]["pixels_per_unit_origin"], "layout-derived")
             self.assertEqual(plan["sprites"][0]["pixels_per_unit"], 100.0)
@@ -280,6 +289,66 @@ class UnityExportTest(unittest.TestCase):
         self.assertEqual(elements[1]["highlighted_asset_id"], "Hover")
         self.assertEqual(elements[1]["pressed_asset_id"], "Pressed")
         self.assertEqual(elements[1]["disabled_asset_id"], "Disabled")
+
+    def test_normalizes_schema_v2_layout_groups(self) -> None:
+        layout = {
+            "schema_version": 2,
+            "screens": [
+                {
+                    "id": "grouped",
+                    "reference_size": [1980, 1080],
+                    "elements": [
+                        {
+                            "id": "NavigationRow",
+                            "kind": "HorizontalLayoutGroup",
+                            "size": [412, 120],
+                            "spacing": 8,
+                            "padding": [4, 4, 2, 2],
+                            "child_alignment": "MiddleCenter",
+                        },
+                        {"id": "Nav1", "parent_id": "NavigationRow", "kind": "Image", "size": [132, 120]},
+                        {"id": "Nav2", "parent_id": "NavigationRow", "kind": "Image", "size": [132, 120]},
+                        {"id": "Nav3", "parent_id": "NavigationRow", "kind": "Image", "size": [132, 120]},
+                    ],
+                }
+            ],
+        }
+        group = UNITY_EXPORT.normalize_layout(layout)[0]["elements"][0]
+        self.assertEqual(group["kind"], "HorizontalLayoutGroup")
+        self.assertEqual(group["spacing"], 8.0)
+        self.assertEqual(group["padding"], [4, 4, 2, 2])
+        self.assertFalse(group["control_child_size"])
+        self.assertFalse(group["child_force_expand"])
+
+    def test_layout_group_requires_schema_v2_and_two_children(self) -> None:
+        layout = {
+            "schema_version": 1,
+            "screens": [
+                {
+                    "id": "legacy",
+                    "reference_size": [100, 100],
+                    "elements": [
+                        {"id": "Row", "kind": "HorizontalLayoutGroup"},
+                        {"id": "A", "parent_id": "Row", "kind": "Image"},
+                        {"id": "B", "parent_id": "Row", "kind": "Image"},
+                    ],
+                }
+            ],
+        }
+        with self.assertRaisesRegex(ValueError, "schema_version 2"):
+            UNITY_EXPORT.normalize_layout(layout)
+        layout["schema_version"] = 2
+        layout["screens"][0]["elements"].pop()
+        with self.assertRaisesRegex(ValueError, "at least two direct children"):
+            UNITY_EXPORT.normalize_layout(layout)
+
+    def test_layout_group_importer_uses_real_ugui_components(self) -> None:
+        importer = (SKILL_DIR / "assets" / "unity-package" / "Editor" / "GameUIBatchImporter.cs").read_text(
+            encoding="utf-8"
+        )
+        self.assertIn("item.AddComponent<HorizontalLayoutGroup>()", importer)
+        self.assertIn("item.AddComponent<VerticalLayoutGroup>()", importer)
+        self.assertIn("LayoutRebuilder.ForceRebuildLayoutImmediate", importer)
 
     def test_rejects_out_of_range_layout_color(self) -> None:
         layout = {
