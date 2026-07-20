@@ -140,8 +140,45 @@ class ExtractSheetAssetsTest(unittest.TestCase):
                 Path(temporary_directory) / "assets",
             )
         self.assertTrue(report["ok"])
-        self.assertEqual(manifest["assignment_mode"], "global-components-nearest-slot-center")
+        self.assertEqual(
+            manifest["assignment_mode"],
+            "global-components-nearest-slot-center-with-anchor-correction",
+        )
         self.assertGreater(manifest["assets"][0]["source_bbox"][2], first_slot["right"])
+
+    def test_reassigns_cross_slot_fragment_to_nearest_asset_anchor(self) -> None:
+        source = Image.new("RGBA", (512, 256), (0, 0, 0, 0))
+        draw = ImageDraw.Draw(source)
+        draw.rectangle((40, 50, 250, 210), fill=(180, 80, 60, 255))
+        # A disconnected right-edge ornament from the first asset has its center
+        # on the second slot's side of the layout midpoint.
+        draw.rectangle((270, 90, 285, 170), fill=(220, 140, 80, 255))
+        draw.rectangle((340, 60, 470, 200), fill=(40, 90, 210, 255))
+        layout = {
+            "slots": [
+                {"slot": {"left": 0, "top": 0, "right": 256, "bottom": 256}},
+                {"slot": {"left": 256, "top": 0, "right": 512, "bottom": 256}},
+            ]
+        }
+        request = {
+            "project_id": "cross-slot-fragment",
+            "category": "Panel",
+            "assets": [
+                {"semantic_name": "WidePanel"},
+                {"semantic_name": "SmallFrame"},
+            ],
+        }
+        with tempfile.TemporaryDirectory() as temporary_directory:
+            manifest, report = EXTRACT.extract_assets(
+                source,
+                layout,
+                request,
+                Path(temporary_directory),
+            )
+        self.assertTrue(report["ok"], report)
+        self.assertEqual(manifest["reassigned_component_count"], 1)
+        self.assertGreaterEqual(manifest["assets"][0]["source_bbox"][2], 285)
+        self.assertGreaterEqual(manifest["assets"][1]["source_bbox"][0], 338)
 
     def test_merges_near_fragments_without_warning(self) -> None:
         source = Image.new("RGBA", (256, 256), (0, 0, 0, 0))

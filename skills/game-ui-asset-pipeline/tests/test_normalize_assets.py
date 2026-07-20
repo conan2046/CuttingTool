@@ -76,6 +76,26 @@ class NormalizeAssetsTest(unittest.TestCase):
         distance = np.linalg.norm(array[:, :, :3].astype(np.float32) - key, axis=2)
         self.assertEqual(int(np.count_nonzero(visible & (distance <= 12.0))), 0)
 
+    def test_suppresses_detached_low_alpha_aura_but_keeps_antialiasing(self) -> None:
+        source = Image.new("RGBA", (96, 96), (0, 0, 0, 0))
+        draw = ImageDraw.Draw(source)
+        draw.rounded_rectangle((8, 8, 87, 87), radius=12, fill=(180, 220, 255, 20))
+        draw.rounded_rectangle((24, 24, 71, 71), radius=8, fill=(180, 220, 255, 255))
+        draw.rounded_rectangle((22, 22, 73, 73), radius=9, outline=(180, 220, 255, 20), width=2)
+
+        output, metadata = MODULE.normalize_image(
+            source,
+            target_size=None,
+            padding=0,
+            alignment="center",
+            suppress_low_alpha_aura=True,
+        )
+
+        self.assertGreater(metadata["removed_detached_low_alpha_aura_pixels"], 0)
+        self.assertEqual(output.size, (52, 52))
+        self.assertEqual(output.getpixel((0, 0))[3], 0)
+        self.assertGreater(output.getpixel((1, 26))[3], 0)
+
 
 if __name__ == "__main__":
     unittest.main()

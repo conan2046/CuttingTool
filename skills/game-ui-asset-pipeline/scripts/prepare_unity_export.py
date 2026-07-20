@@ -164,7 +164,10 @@ def normalize_layout(layout: dict[str, Any] | None) -> list[dict[str, Any]]:
                 raise ValueError(f"invalid duplicate element id at screens[{screen_index}].elements[{element_index}]")
             ids.add(element_id)
             kind = str(element.get("kind", "Image"))
-            if kind not in {"Image", "Button"}:
+            if kind not in {
+                "Image", "Button", "GridLayoutGroup", "HorizontalLayoutGroup", "VerticalLayoutGroup",
+                "ScrollView", "ScrollViewport",
+            }:
                 raise ValueError(f"unsupported Unity element kind: {kind}")
             parent_id = str(element.get("parent_id", ""))
             if parent_id and parent_id not in ids:
@@ -185,11 +188,66 @@ def normalize_layout(layout: dict[str, Any] | None) -> list[dict[str, Any]]:
                     )
             if vectors["size"][0] <= 0 or vectors["size"][1] <= 0:
                 raise ValueError(f"screens[{screen_index}].elements[{element_index}].size must be positive")
-            color = element.get("color", [1.0, 1.0, 1.0, 1.0])
+            default_color = [0.0, 0.0, 0.0, 0.0] if kind == "ScrollView" else [1.0, 1.0, 1.0, 1.0]
+            color = element.get("color", default_color)
             if not isinstance(color, list) or len(color) != 4 or not all(isinstance(value, (int, float)) for value in color):
                 raise ValueError(f"screens[{screen_index}].elements[{element_index}].color must contain four numbers")
             if not all(0.0 <= float(value) <= 1.0 for value in color):
                 raise ValueError(f"screens[{screen_index}].elements[{element_index}].color values must be between 0 and 1")
+            spacing = element.get("spacing", [0.0, 0.0])
+            cell_size = element.get("cell_size", [100.0, 100.0])
+            padding = element.get("padding", [0, 0, 0, 0])
+            for field_name, value in {"spacing": spacing, "cell_size": cell_size}.items():
+                if not isinstance(value, list) or len(value) != 2 or not all(isinstance(item, (int, float)) for item in value):
+                    raise ValueError(f"screens[{screen_index}].elements[{element_index}].{field_name} must contain two numbers")
+            if not isinstance(padding, list) or len(padding) != 4 or not all(isinstance(item, (int, float)) and item >= 0 for item in padding):
+                raise ValueError(f"screens[{screen_index}].elements[{element_index}].padding must contain four non-negative numbers")
+            if kind == "GridLayoutGroup" and (cell_size[0] <= 0 or cell_size[1] <= 0):
+                raise ValueError(f"screens[{screen_index}].elements[{element_index}].cell_size must be positive")
+            constraint = str(element.get("constraint", "Flexible"))
+            if constraint not in {"Flexible", "FixedColumnCount", "FixedRowCount"}:
+                raise ValueError(f"unsupported GridLayoutGroup constraint: {constraint}")
+            constraint_count = int(element.get("constraint_count", 1))
+            if constraint_count <= 0:
+                raise ValueError(f"screens[{screen_index}].elements[{element_index}].constraint_count must be positive")
+            start_axis = str(element.get("start_axis", "Horizontal"))
+            if start_axis not in {"Horizontal", "Vertical"}:
+                raise ValueError(f"unsupported GridLayoutGroup start_axis: {start_axis}")
+            start_corner = str(element.get("start_corner", "UpperLeft"))
+            if start_corner not in {"UpperLeft", "UpperRight", "LowerLeft", "LowerRight"}:
+                raise ValueError(f"unsupported GridLayoutGroup start_corner: {start_corner}")
+            child_alignment = str(element.get("child_alignment", "MiddleCenter"))
+            if child_alignment not in {
+                "UpperLeft", "UpperCenter", "UpperRight",
+                "MiddleLeft", "MiddleCenter", "MiddleRight",
+                "LowerLeft", "LowerCenter", "LowerRight",
+            }:
+                raise ValueError(f"unsupported LayoutGroup child_alignment: {child_alignment}")
+            child_control_size = element.get("child_control_size", [False, False])
+            child_force_expand = element.get("child_force_expand", [False, False])
+            for field_name, value in {
+                "child_control_size": child_control_size,
+                "child_force_expand": child_force_expand,
+            }.items():
+                if not isinstance(value, list) or len(value) != 2 or not all(isinstance(item, bool) for item in value):
+                    raise ValueError(f"screens[{screen_index}].elements[{element_index}].{field_name} must contain two booleans")
+            viewport_id = str(element.get("viewport_id", ""))
+            content_id = str(element.get("content_id", ""))
+            movement_type = str(element.get("movement_type", "Clamped"))
+            if movement_type not in {"Unrestricted", "Elastic", "Clamped"}:
+                raise ValueError(f"unsupported ScrollRect movement_type: {movement_type}")
+            horizontal_fit = str(element.get("horizontal_fit", "Unconstrained"))
+            vertical_fit = str(element.get("vertical_fit", "Unconstrained"))
+            for field_name, value in {"horizontal_fit": horizontal_fit, "vertical_fit": vertical_fit}.items():
+                if value not in {"Unconstrained", "MinSize", "PreferredSize"}:
+                    raise ValueError(f"unsupported ContentSizeFitter {field_name}: {value}")
+            for field_name, value in {
+                "elasticity": element.get("elasticity", 0.1),
+                "deceleration_rate": element.get("deceleration_rate", 0.135),
+                "scroll_sensitivity": element.get("scroll_sensitivity", 20.0),
+            }.items():
+                if not isinstance(value, (int, float)) or float(value) < 0:
+                    raise ValueError(f"screens[{screen_index}].elements[{element_index}].{field_name} must be non-negative")
             normalized_elements.append(
                 {
                     "id": element_id,
@@ -207,8 +265,42 @@ def normalize_layout(layout: dict[str, Any] | None) -> list[dict[str, Any]]:
                     "highlighted_asset_id": str(element.get("highlighted_asset_id", "")),
                     "pressed_asset_id": str(element.get("pressed_asset_id", "")),
                     "disabled_asset_id": str(element.get("disabled_asset_id", "")),
+                    "spacing": [float(value) for value in spacing],
+                    "cell_size": [float(value) for value in cell_size],
+                    "padding": [int(value) for value in padding],
+                    "constraint": constraint,
+                    "constraint_count": constraint_count,
+                    "start_axis": start_axis,
+                    "start_corner": start_corner,
+                    "child_alignment": child_alignment,
+                    "child_control_size": child_control_size,
+                    "child_force_expand": child_force_expand,
+                    "viewport_id": viewport_id,
+                    "content_id": content_id,
+                    "horizontal_scroll": bool(element.get("horizontal_scroll", False)),
+                    "vertical_scroll": bool(element.get("vertical_scroll", True)),
+                    "movement_type": movement_type,
+                    "elasticity": float(element.get("elasticity", 0.1)),
+                    "inertia": bool(element.get("inertia", True)),
+                    "deceleration_rate": float(element.get("deceleration_rate", 0.135)),
+                    "scroll_sensitivity": float(element.get("scroll_sensitivity", 20.0)),
+                    "content_size_fitter": bool(element.get("content_size_fitter", False)),
+                    "horizontal_fit": horizontal_fit,
+                    "vertical_fit": vertical_fit,
                 }
             )
+        elements_by_id = {element["id"]: element for element in normalized_elements}
+        for element in normalized_elements:
+            if element["kind"] != "ScrollView":
+                continue
+            viewport = elements_by_id.get(element["viewport_id"])
+            content = elements_by_id.get(element["content_id"])
+            if viewport is None or viewport["kind"] != "ScrollViewport" or viewport["parent_id"] != element["id"]:
+                raise ValueError(f"ScrollView {element['id']} requires a child ScrollViewport referenced by viewport_id")
+            if content is None or content["parent_id"] != viewport["id"]:
+                raise ValueError(f"ScrollView {element['id']} requires content_id to reference a child of its viewport")
+            if not element["horizontal_scroll"] and not element["vertical_scroll"]:
+                raise ValueError(f"ScrollView {element['id']} must enable horizontal_scroll or vertical_scroll")
         normalized.append(
             {
                 "id": str(screen.get("id", f"screen-{screen_index + 1:02d}")),

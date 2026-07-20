@@ -250,6 +250,43 @@ def classify_components(
     }
 
 
+def reassign_cross_slot_fragments(
+    assigned_components: list[list[dict[str, int]]],
+    active_slot_count: int,
+    maximum_gap: float,
+) -> int:
+    """Move a fragment to the neighbouring asset whose main body it actually touches."""
+    anchors: list[dict[str, int] | None] = []
+    for slot_index in range(active_slot_count):
+        components = assigned_components[slot_index]
+        anchors.append(max(components, key=lambda component: component["pixels"]) if components else None)
+
+    moves: list[tuple[int, int, dict[str, int]]] = []
+    for source_index in range(active_slot_count):
+        source_anchor = anchors[source_index]
+        if source_anchor is None:
+            continue
+        for component in assigned_components[source_index]:
+            if component is source_anchor:
+                continue
+            source_gap = component_gap(component, source_anchor)
+            candidates = [
+                (component_gap(component, anchor), target_index)
+                for target_index, anchor in enumerate(anchors)
+                if anchor is not None and target_index != source_index
+            ]
+            if not candidates:
+                continue
+            nearest_gap, target_index = min(candidates, key=lambda item: (item[0], item[1]))
+            if nearest_gap <= maximum_gap and nearest_gap + 1e-6 < source_gap:
+                moves.append((source_index, target_index, component))
+
+    for source_index, target_index, component in moves:
+        assigned_components[source_index].remove(component)
+        assigned_components[target_index].append(component)
+    return len(moves)
+
+
 def extract_assets(
     source: Image.Image,
     layout: dict[str, Any],
@@ -333,6 +370,12 @@ def extract_assets(
             ),
         )
         assigned_components[nearest_slot].append(component)
+
+    reassigned_component_count = reassign_cross_slot_fragments(
+        assigned_components,
+        active_slot_count=len(assets),
+        maximum_gap=float(fragment_policy["merge_distance_max"]),
+    )
 
     for visual_index, asset in enumerate(assets, start=1):
         components = assigned_components[visual_index - 1]
@@ -448,7 +491,8 @@ def extract_assets(
         "project_id": request.get("project_id", "game-ui"),
         "category": category,
         "source_image_size": [source.width, source.height],
-        "assignment_mode": "global-components-nearest-slot-center",
+        "assignment_mode": "global-components-nearest-slot-center-with-anchor-correction",
+        "reassigned_component_count": reassigned_component_count,
         "fragment_policy": fragment_policy,
         "expected_count": len(assets),
         "exported_count": len(entries),

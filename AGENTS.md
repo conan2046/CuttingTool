@@ -53,6 +53,8 @@ V1 必须支持：
 - 在不引入桌面 GUI 的前提下，用批准后的 bbox 修正文件完成透明切割和正式 QA。
 - 正式 QA 通过后可导入 Unity 2022.3：配置 Sprite Single/Alpha/PPU/Pivot/Border，生成资源 Prefab 和基于显式布局的 Image/Button 界面 Prefab。
 - Panel/Button 自动推断九宫格 Border；只有高置信且中心区有效时写入，低置信必须失败并使用人工覆写。
+- 九宫格 Panel 的龙、莲花、菱形、徽记等独特装饰只能位于四角固定区；上/下/左/右边中段和中央内容区必须干净、连续、可重复拉伸。禁止通过扩大 Border 把边中段装饰纳入固定区来掩盖问题；应编辑或重生成源图。
+- Panel 内按钮、列表、页签等控件必须位于外框安全区，不能覆盖或越过固定边框；优先作为 Panel 子节点声明。验收必须检查四边安全距离和实际 Unity Sliced 渲染，自动 Border/PPU 通过不等于视觉通过。
 - Unity 导出必须限定在 `Assets/_Generated/GameUI/<project-id>`，生成预检、导入报告、日志和回滚清单。
 
 V1 不包含：
@@ -93,7 +95,10 @@ V1 不包含：
 - 默认导入 `Assets/_Generated/GameUI/<project-id>`，安装嵌入包 `Packages/com.hongda.game-ui-asset-pipeline`；不得改写用户手工 Prefab。
 - TextureImporter 固定为 Sprite Single、Alpha Is Transparency、无 Mipmap、Clamp、Bilinear、Uncompressed；默认 PPU 100，Panel/Button 按源图与全部布局目标的最小缩放比自动提高 PPU，也可显式覆写。Pivot、Border、PPU 来源均须可追溯。
 - Panel/Button 自动九宫格推断必须记录置信度和来源。低置信、中心区无效、覆写越界，或 Border 经 PPU 换算后不适配任一布局目标尺寸，必须在启动 Unity 前失败。
-- 最终界面 Prefab 只从 schema v1 显式布局生成；父元素必须先声明，元素正式支持 Image/Button，并写入稳定 BindingId。
+- 最终界面 Prefab 只从 schema v1 显式布局生成；父元素必须先声明，元素正式支持 Image、Button、GridLayoutGroup、HorizontalLayoutGroup、VerticalLayoutGroup，并写入稳定 BindingId。
+- 装备位、页签、背包格、按钮排等规则排列必须使用 Layout Group 父容器统一控制单元尺寸、间距、行列、内边距和对齐；不得把同组子元素逐个写死坐标。验收必须同时检查 Prefab 组件、子节点数量与 Unity 渲染。
+- 背包、任务列表、商店列表、邮件列表等内容数量可能增长且展示范围有限的区域，优先使用 `ScrollView → Viewport(RectMask2D) → Content(LayoutGroup + ContentSizeFitter)`。Viewport 规定可见范围，超出内容必须隐藏并通过指定轴滚动；禁止只添加 Layout Group 后让子项越界。只有数量固定且确认不会溢出的纯装饰排列才允许不使用 Scroll View。
+- Scroll View 验收必须检查 ScrollRect 的 Content/Viewport 引用、滚动轴、MovementType、Viewport 的 RectMask2D、Content 的尺寸增长方式，以及 Content 大于 Viewport 时的实际裁剪渲染；组件名存在不等于验收通过。
 - 布局允许 RGBA 纯色 Image；Button 状态资源必须显式引用正式 Manifest，并配置 SpriteSwap，不得用 ColorTint 冒充已有四态资源。
 - 每个正式 Screen 必须生成 Preview Scene 与同目标尺寸 Unity 渲染 PNG；Prefab 结构正确但未完成视觉渲染检查，不得视为完整验收。
 - Unity 导出前必须确认项目、版本、Editor、导入根和回滚范围；失败不得报告完成。
@@ -412,6 +417,7 @@ GPT Image 2 不提供原生透明背景时，默认使用：
 - 禁止把两个槽位的资源合成一个元素。
 - 禁止因内部镂空而把一个边框拆成四条边。
 - 已知布局的槽位中心用于稳定归属和排序，不得把 Layout Guide 的槽位矩形直接当作硬裁切边界；允许完整主体伸入纯背景槽间留白，但主体合并、空槽和画布边缘接触仍判定为失败。
+- 按槽位中心完成初次归属后，必须用各槽位主组件边界距离纠正跨槽碎片；分离边饰若更接近相邻资源主体，不得仅因组件中心越过中线而串入当前资源。
 
 检测顺序必须稳定：从上到下、从左到右。
 
@@ -446,8 +452,10 @@ GPT Image 2 不提供原生透明背景时，默认使用：
 归一化必须：
 
 - 保持宽高比。
+- 生成图与请求画布仅允许在宽高比一致时等比缩放；宽高比不一致必须在正式输出前失败，禁止非等比拉伸。
 - 避免重复缩放。
 - RGBA 缩放必须使用预乘 Alpha 插值，再转回直通道 RGBA；禁止直接缩放直通道 RGBA，避免低 Alpha 色键 RGB 在缩小时重新显色。
+- `allow_attached_glow=false` 时必须清理与稳定主体边缘分离的低 Alpha 外溢，保留紧贴轮廓的抗锯齿，并记录移除像素数供视觉复核。
 - 根据分类选择居中或底部对齐。
 - 保留配置的透明留白。
 - 不放大低分辨率资源超过质量阈值。

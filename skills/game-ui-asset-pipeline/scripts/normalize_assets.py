@@ -8,7 +8,7 @@ import json
 from pathlib import Path
 from typing import Any
 
-from PIL import Image
+from PIL import Image, ImageFilter
 
 
 def read_json(path: Path) -> dict[str, Any]:
@@ -26,14 +26,48 @@ def resize_rgba_premultiplied(image: Image.Image, size: tuple[int, int]) -> Imag
     return image.convert("RGBA").convert("RGBa").resize(size, Image.Resampling.LANCZOS).convert("RGBA")
 
 
+def suppress_detached_low_alpha_aura(
+    image: Image.Image,
+    core_alpha_threshold: int = 32,
+    keep_radius: int = 2,
+) -> tuple[Image.Image, int]:
+    """Remove detached low-alpha model glow while preserving edge antialiasing."""
+    if not 1 <= core_alpha_threshold <= 255:
+        raise ValueError("core_alpha_threshold must be between 1 and 255")
+    if keep_radius < 0:
+        raise ValueError("keep_radius must be non-negative")
+
+    rgba = image.convert("RGBA")
+    alpha = rgba.getchannel("A")
+    core = alpha.point(lambda value: 255 if value >= core_alpha_threshold else 0)
+    if core.getbbox() is None:
+        return rgba, 0
+    near_core = core if keep_radius == 0 else core.filter(ImageFilter.MaxFilter(keep_radius * 2 + 1))
+    cleaned_alpha = Image.composite(alpha, Image.new("L", alpha.size, 0), near_core)
+    removed_pixels = sum(alpha.histogram()[1:]) - sum(cleaned_alpha.histogram()[1:])
+    rgba.putalpha(cleaned_alpha)
+    cleaned = Image.alpha_composite(Image.new("RGBA", rgba.size, (0, 0, 0, 0)), rgba)
+    return cleaned, removed_pixels
+
+
 def normalize_image(
     image: Image.Image,
     target_size: tuple[int, int] | None,
     padding: int,
     alignment: str,
     allow_upscale: bool = False,
+    suppress_low_alpha_aura: bool = False,
+    aura_core_alpha_threshold: int = 32,
+    aura_keep_radius: int = 2,
 ) -> tuple[Image.Image, dict[str, Any]]:
     image = image.convert("RGBA")
+    removed_aura_pixels = 0
+    if suppress_low_alpha_aura:
+        image, removed_aura_pixels = suppress_detached_low_alpha_aura(
+            image,
+            core_alpha_threshold=aura_core_alpha_threshold,
+            keep_radius=aura_keep_radius,
+        )
     alpha_bbox = image.getchannel("A").getbbox()
     if alpha_bbox is None:
         raise ValueError("cannot normalize an empty transparent image")
@@ -81,6 +115,10 @@ def normalize_image(
         "padding": padding,
         "alignment": alignment,
         "upscaled": scale > 1.0,
+        "detached_low_alpha_aura_suppressed": suppress_low_alpha_aura,
+        "removed_detached_low_alpha_aura_pixels": removed_aura_pixels,
+        "aura_core_alpha_threshold": aura_core_alpha_threshold if suppress_low_alpha_aura else None,
+        "aura_keep_radius": aura_keep_radius if suppress_low_alpha_aura else None,
     }
 
 
@@ -98,6 +136,9 @@ def normalize_manifest_assets(
     target_size = tuple(int(value) for value in requested_target) if requested_target else None
     padding = int(request.get("padding", 8))
     alignment = str(request.get("alignment", "center"))
+    suppress_low_alpha_aura = not bool(request.get("allow_attached_glow", False))
+    aura_core_alpha_threshold = int(request.get("detached_alpha_aura_threshold", 32))
+    aura_keep_radius = int(request.get("detached_alpha_aura_keep_radius", 2))
 
     normalized_entries: list[dict[str, Any]] = []
     for entry in manifest.get("assets", []):
@@ -111,6 +152,9 @@ def normalize_manifest_assets(
                 padding=padding,
                 alignment=alignment,
                 allow_upscale=allow_upscale,
+                suppress_low_alpha_aura=suppress_low_alpha_aura,
+                aura_core_alpha_threshold=aura_core_alpha_threshold,
+                aura_keep_radius=aura_keep_radius,
             )
         output_path = output_dir / source_path.name
         normalized.save(output_path, format="PNG")

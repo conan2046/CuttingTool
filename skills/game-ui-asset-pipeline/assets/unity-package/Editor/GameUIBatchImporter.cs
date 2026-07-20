@@ -66,6 +66,28 @@ namespace CuttingTool.GameUI.Editor
             public string highlighted_asset_id = string.Empty;
             public string pressed_asset_id = string.Empty;
             public string disabled_asset_id = string.Empty;
+            public float[] spacing = Array.Empty<float>();
+            public float[] cell_size = Array.Empty<float>();
+            public int[] padding = Array.Empty<int>();
+            public string constraint = "Flexible";
+            public int constraint_count = 1;
+            public string start_axis = "Horizontal";
+            public string start_corner = "UpperLeft";
+            public string child_alignment = "MiddleCenter";
+            public bool[] child_control_size = Array.Empty<bool>();
+            public bool[] child_force_expand = Array.Empty<bool>();
+            public string viewport_id = string.Empty;
+            public string content_id = string.Empty;
+            public bool horizontal_scroll;
+            public bool vertical_scroll = true;
+            public string movement_type = "Clamped";
+            public float elasticity = 0.1f;
+            public bool inertia = true;
+            public float deceleration_rate = 0.135f;
+            public float scroll_sensitivity = 20f;
+            public bool content_size_fitter;
+            public string horizontal_fit = "Unconstrained";
+            public string vertical_fit = "Unconstrained";
         }
 
         [Serializable]
@@ -230,7 +252,7 @@ namespace CuttingTool.GameUI.Editor
                         AddIssue(issues, "layout-sprite-missing", element.id, $"Unknown sprite ID: {element.asset_id}");
                         continue;
                     }
-                    var item = CreateVisualObject(element.id, element.id, element.kind, sprite, element.preserve_aspect, element.raycast_target);
+                    var item = CreateElementObject(element, sprite);
                     var parent = root.transform;
                     if (!string.IsNullOrWhiteSpace(element.parent_id) && objects.TryGetValue(element.parent_id, out var parentObject))
                     {
@@ -243,10 +265,17 @@ namespace CuttingTool.GameUI.Editor
                     rect.pivot = ReadVector2(element.pivot, new Vector2(0.5f, 0.5f));
                     rect.anchoredPosition = ReadVector2(element.anchored_position, Vector2.zero);
                     rect.sizeDelta = ReadVector2(element.size, new Vector2(100f, 100f));
-                    item.GetComponent<Image>().color = ReadColor(element.color, Color.white);
+                    var image = item.GetComponent<Image>();
+                    if (image != null)
+                    {
+                        image.color = ReadColor(element.color, Color.white);
+                    }
+                    ConfigureLayoutGroup(item, element, issues);
+                    ConfigureContentSizeFitter(item, element, issues);
                     ConfigureButtonSprites(item, element, sprites, issues);
                     objects[element.id] = item;
                 }
+                ConfigureScrollViews(screen.elements, objects, issues);
 
                 var path = $"{directory}/{SanitizeFileName(screen.id)}.prefab";
                 PrefabUtility.SaveAsPrefabAsset(root, path, out var success);
@@ -435,6 +464,153 @@ namespace CuttingTool.GameUI.Editor
                 button.transition = Selectable.Transition.ColorTint;
             }
             return item;
+        }
+
+        private static GameObject CreateElementObject(ElementPlan element, Sprite sprite)
+        {
+            if (string.Equals(element.kind, "ScrollView", StringComparison.Ordinal))
+            {
+                var scrollView = new GameObject(
+                    string.IsNullOrWhiteSpace(element.id) ? "ScrollView" : element.id,
+                    typeof(RectTransform),
+                    typeof(CanvasRenderer),
+                    typeof(Image),
+                    typeof(ScrollRect),
+                    typeof(GameUIElementBinding));
+                var image = scrollView.GetComponent<Image>();
+                image.color = Color.clear;
+                image.raycastTarget = true;
+                scrollView.GetComponent<GameUIElementBinding>().Configure(element.id);
+                return scrollView;
+            }
+            if (string.Equals(element.kind, "ScrollViewport", StringComparison.Ordinal))
+            {
+                var viewport = new GameObject(
+                    string.IsNullOrWhiteSpace(element.id) ? "Viewport" : element.id,
+                    typeof(RectTransform),
+                    typeof(RectMask2D),
+                    typeof(GameUIElementBinding));
+                viewport.GetComponent<GameUIElementBinding>().Configure(element.id);
+                return viewport;
+            }
+            if (element.kind.EndsWith("LayoutGroup", StringComparison.Ordinal))
+            {
+                var container = new GameObject(
+                    string.IsNullOrWhiteSpace(element.id) ? "LayoutGroup" : element.id,
+                    typeof(RectTransform),
+                    typeof(GameUIElementBinding));
+                container.GetComponent<GameUIElementBinding>().Configure(element.id);
+                if (string.Equals(element.kind, "GridLayoutGroup", StringComparison.Ordinal))
+                {
+                    container.AddComponent<GridLayoutGroup>();
+                }
+                else if (string.Equals(element.kind, "HorizontalLayoutGroup", StringComparison.Ordinal))
+                {
+                    container.AddComponent<HorizontalLayoutGroup>();
+                }
+                else
+                {
+                    container.AddComponent<VerticalLayoutGroup>();
+                }
+                return container;
+            }
+            return CreateVisualObject(element.id, element.id, element.kind, sprite, element.preserve_aspect, element.raycast_target);
+        }
+
+        private static void ConfigureLayoutGroup(GameObject item, ElementPlan element, ICollection<ImportIssue> issues)
+        {
+            var layoutGroup = item.GetComponent<LayoutGroup>();
+            if (layoutGroup == null)
+            {
+                return;
+            }
+            layoutGroup.padding = ReadPadding(element.padding);
+            layoutGroup.childAlignment = ReadEnum(element.child_alignment, TextAnchor.MiddleCenter, issues, element.id, "child-alignment-invalid");
+            if (layoutGroup is GridLayoutGroup grid)
+            {
+                grid.cellSize = ReadVector2(element.cell_size, new Vector2(100f, 100f));
+                grid.spacing = ReadVector2(element.spacing, Vector2.zero);
+                grid.constraint = ReadEnum(element.constraint, GridLayoutGroup.Constraint.Flexible, issues, element.id, "grid-constraint-invalid");
+                grid.constraintCount = Mathf.Max(1, element.constraint_count);
+                grid.startAxis = ReadEnum(element.start_axis, GridLayoutGroup.Axis.Horizontal, issues, element.id, "grid-start-axis-invalid");
+                grid.startCorner = ReadEnum(element.start_corner, GridLayoutGroup.Corner.UpperLeft, issues, element.id, "grid-start-corner-invalid");
+                return;
+            }
+            if (layoutGroup is HorizontalOrVerticalLayoutGroup linear)
+            {
+                linear.spacing = element.spacing != null && element.spacing.Length > 0 ? element.spacing[0] : 0f;
+                linear.childControlWidth = ReadBool(element.child_control_size, 0, false);
+                linear.childControlHeight = ReadBool(element.child_control_size, 1, false);
+                linear.childForceExpandWidth = ReadBool(element.child_force_expand, 0, false);
+                linear.childForceExpandHeight = ReadBool(element.child_force_expand, 1, false);
+            }
+        }
+
+        private static void ConfigureContentSizeFitter(GameObject item, ElementPlan element, ICollection<ImportIssue> issues)
+        {
+            if (!element.content_size_fitter)
+            {
+                return;
+            }
+            var fitter = item.GetComponent<ContentSizeFitter>() ?? item.AddComponent<ContentSizeFitter>();
+            fitter.horizontalFit = ReadEnum(element.horizontal_fit, ContentSizeFitter.FitMode.Unconstrained, issues, element.id, "content-horizontal-fit-invalid");
+            fitter.verticalFit = ReadEnum(element.vertical_fit, ContentSizeFitter.FitMode.Unconstrained, issues, element.id, "content-vertical-fit-invalid");
+        }
+
+        private static void ConfigureScrollViews(
+            IEnumerable<ElementPlan> elements,
+            IReadOnlyDictionary<string, GameObject> objects,
+            ICollection<ImportIssue> issues)
+        {
+            foreach (var element in elements ?? Array.Empty<ElementPlan>())
+            {
+                if (!string.Equals(element.kind, "ScrollView", StringComparison.Ordinal) ||
+                    !objects.TryGetValue(element.id, out var item))
+                {
+                    continue;
+                }
+                var scrollRect = item.GetComponent<ScrollRect>();
+                if (scrollRect == null ||
+                    !objects.TryGetValue(element.viewport_id, out var viewportObject) ||
+                    !objects.TryGetValue(element.content_id, out var contentObject))
+                {
+                    AddIssue(issues, "scroll-view-reference-missing", element.id, "ScrollView viewport or content is missing.");
+                    continue;
+                }
+                scrollRect.viewport = viewportObject.GetComponent<RectTransform>();
+                scrollRect.content = contentObject.GetComponent<RectTransform>();
+                scrollRect.horizontal = element.horizontal_scroll;
+                scrollRect.vertical = element.vertical_scroll;
+                scrollRect.movementType = ReadEnum(element.movement_type, ScrollRect.MovementType.Clamped, issues, element.id, "scroll-movement-type-invalid");
+                scrollRect.elasticity = Mathf.Max(0f, element.elasticity);
+                scrollRect.inertia = element.inertia;
+                scrollRect.decelerationRate = Mathf.Max(0f, element.deceleration_rate);
+                scrollRect.scrollSensitivity = Mathf.Max(0f, element.scroll_sensitivity);
+                scrollRect.horizontalNormalizedPosition = 0f;
+                scrollRect.verticalNormalizedPosition = 1f;
+            }
+        }
+
+        private static RectOffset ReadPadding(IReadOnlyList<int> values)
+        {
+            return values != null && values.Count == 4
+                ? new RectOffset(values[0], values[1], values[2], values[3])
+                : new RectOffset();
+        }
+
+        private static bool ReadBool(IReadOnlyList<bool> values, int index, bool fallback)
+        {
+            return values != null && values.Count > index ? values[index] : fallback;
+        }
+
+        private static T ReadEnum<T>(string value, T fallback, ICollection<ImportIssue> issues, string target, string code) where T : struct
+        {
+            if (!string.IsNullOrWhiteSpace(value) && Enum.TryParse(value, true, out T parsed))
+            {
+                return parsed;
+            }
+            AddIssue(issues, code, target, $"Unsupported {typeof(T).Name} value: {value}");
+            return fallback;
         }
 
         private static string ReadArgument(IReadOnlyList<string> args, string name)

@@ -2,6 +2,115 @@
 
 记录每次正式功能提交的目标、主要改动、验证结果和兼容性影响。按时间倒序维护；纯格式整理或无功能影响的微小修正可以合并记录。
 
+## 2026-07-20｜v0.12.6｜九宫格 Panel 拉伸带与控件安全区
+
+提交：待本轮确认后提交。
+
+### 目标
+
+修复底部按钮压住最大外框，以及 Panel 的边中段装饰进入九宫格拉伸带后产生变形的问题。
+
+### 主要改动
+
+- 使用内置 GPT Image 2 精确编辑 `panel-sheet-01.png`：清除两块 Panel 上下左右边中段的星点、莲花和菱形装饰，重建连续边线；保留四角与 UniversalPanel 左上龙角。
+- 保持生产 Sheet 为原始 `1254×1254 RGB`、两资源位置/数量和纯绿色键背景不变，重新执行完整切割、透明化、Manifest 和 QA。
+- `InventoryActionsLayout` 上移 50px，并改为 `InventoryPanel` 子节点；按钮底边与 Panel 底边安全距离由 9px 增加到 59px。
+- Panel 生成与 Unity 契约新增强制规则：独特装饰只位于四角固定区，四边中段和中心区必须干净可拉伸，禁止用异常大 Border 掩盖边中段装饰。
+
+### 验证
+
+- 整包资源：30 pass、0 warning、0 fail；两张 Panel 透明 PNG 与 Contact Sheet 已视觉检查。
+- Unity：30 Sprite、30 资源 Prefab、1 Screen Prefab、1 Preview Scene、1 Preview PNG、0 issue。
+- `UniversalPanelBase` 与 `InventorySlotFrame` 的自动 Border 置信度分别为 0.7854、0.8618；实际 Sliced 渲染四角稳定、边中段连续、无独特装饰拉长。
+- 源码与安装态全量测试、Skill 哈希一致性：待最终回归后填写。
+
+### 兼容性
+
+- 继续使用 schema v1；现有非九宫格资源不受影响。
+- 被替换前的 Panel Sheet 保留为 `generated/panel-sheet-01-pre-nine-slice-cleanup.png`，便于追溯。
+
+## 2026-07-20｜v0.12.5｜Unity Scroll View 有限区域与溢出裁剪
+
+提交：待本轮确认后提交。
+
+### 目标
+
+修复背包只有 GridLayoutGroup、内容增长后会越过规定区域的问题；将可增长列表统一为可裁剪、可滚动的 Scroll View 结构。
+
+### 主要改动
+
+- `unity-layout.json` schema v1 新增 `ScrollView` 与 `ScrollViewport`，支持 Content/Viewport 引用、滚动轴、MovementType、惯性、减速率和滚轮灵敏度。
+- ScrollViewport 自动生成 `RectMask2D`；Content 支持 `ContentSizeFitter`，与 Grid/Horizontal/Vertical Layout Group 组合后按内容增长。
+- Scroll View 默认使用透明 Raycast Image，不生成破坏现有美术的可见滚动条。
+- Python 预检验证 ScrollView → Viewport → Content 引用链、滚动轴、枚举和非负参数，错误配置在启动 Unity 前失败。
+- 角色界面背包改为垂直 Scroll View：Viewport 固定 772×632，Content Grid 为 5 列、当前 5 行；静态预览显示 4 行，第 5 行被裁剪并可向下滚动。
+
+### 验证
+
+- 定向 `test_unity_export`：16/16 通过；源码与安装态全量 `unittest`：各 106/106 通过。
+- Skill 源码与安装副本：63 个正式文件 SHA-256 一致，0 差异。
+- 真实 Unity 导入：30 Sprite、30 资源 Prefab、1 Screen Prefab、1 Preview Scene、1 Preview PNG、0 issue。
+- Prefab 已写入 ScrollRect、RectMask2D、GridLayoutGroup、ContentSizeFitter；Content/Viewport 引用有效，垂直滚动开启、横向关闭。
+- 1980×1080 Unity 渲染已视觉检查：Viewport 外内容隐藏，无白底、越界或底部按钮遮挡。
+
+### 兼容性
+
+- 继续使用 schema v1；既有 Image/Button/LayoutGroup 布局不受影响。
+- 数量固定且保证不溢出的装饰排列仍可只用 Layout Group；动态或可增长有限列表默认必须使用 Scroll View。
+
+## 2026-07-20｜v0.12.4｜Unity Layout Group 规则布局
+
+提交：待本轮确认后提交。
+
+### 目标
+
+将装备位、页签、背包格和操作按钮等规则排列从逐项坐标改为 Unity UGUI Layout Group 容器统一控制。
+
+### 主要改动
+
+- `unity-layout.json` schema v1 新增 `GridLayoutGroup`、`HorizontalLayoutGroup`、`VerticalLayoutGroup` 元素类型。
+- Grid 支持单元尺寸、二维间距、固定行列、起排轴和起始角；横纵 Layout 支持间距、子项尺寸控制和扩展策略；三者支持内边距与子项对齐。
+- Layout Group 容器与子项均保留稳定 BindingId，子项通过 `parent_id` 进入容器，声明顺序决定布局顺序。
+- Python 预检严格验证 Layout Group 枚举、布尔向量、尺寸和约束，避免无效配置进入 Unity。
+- 角色界面改为 4 个规则容器：6 格装备 Grid、4 个页签 Horizontal、25 格背包 Grid、2 个操作按钮 Horizontal。
+
+### 验证
+
+- 定向 `test_unity_export`：14/14 通过；源码与安装态全量 `unittest`：各 104/104 通过。
+- Skill 源码与安装副本：63 个正式文件 SHA-256 一致，0 差异。
+- 真实 Unity 导入：30 Sprite、30 资源 Prefab、1 Screen Prefab、1 Preview Scene、1 Preview PNG、0 issue。
+- Prefab 已写入 2 个 GridLayoutGroup、2 个 HorizontalLayoutGroup；子节点数量为 6、4、25、2。
+- 1980×1080 Unity 渲染已视觉检查：四组排列整齐，无越界、重叠或散排。
+
+### 兼容性
+
+- 继续使用 schema v1；原 Image/Button 布局无需修改。
+- Layout Group 只负责静态层级和规则排布，不生成业务事件、文本、本地化或数据绑定。
+
+## 2026-07-20｜v0.12.3｜低 Alpha 外溢与画布拉伸修复
+
+提交：待本轮确认后提交。
+
+### 目标
+
+修复按钮主体外侧被模型生成的低 Alpha 光圈污染，以及非预期宽高比的生成图被强制缩放后造成角色拉伸的问题。
+
+### 主要改动
+
+- `allow_attached_glow=false` 时，归一化阶段清理与稳定主体边缘分离的低 Alpha 外溢，同时保留紧贴轮廓的抗锯齿像素，并记录移除数量。
+- Runner 在生产尺寸调整前校验生成图与请求画布的宽高比；比例不一致直接失败，禁止非等比拉伸。
+- 全局组件先按槽位中心初分，再按各资源主组件边界距离纠正跨槽碎片归属；避免宽面板的分离边饰串入相邻资源。
+- 修正 `xiuxian-ui-character-1980x1080-v3` 角色彩色图与 Matte：等偏移补齐为 2048×2048，不缩放主体；Unity 布局启用等比显示。
+- 新增低 Alpha 外溢清理与生成画布比例不一致阻断测试。
+
+### 验证
+
+- 源码与安装态全量 `unittest`：各 102/102 通过；63 个正式 Skill 文件 SHA-256 一致，0 差异。
+- 真实项目重跑：30 个资源，30 pass、0 warning、0 fail；20/20 个 Button 完成外溢清理，共移除 511825 个低 Alpha 像素。
+- `InventorySlotFrame` 的左侧跨槽碎片已重新归属到 `UniversalPanelBase`，最终 PNG 与 Unity 25 格渲染均无污染。
+- 角色输出裁切与内容尺寸均为 527×886、缩放比 1.0，不再拉伸。
+- Unity 重新导入：30 Sprite、30 资源 Prefab、1 Screen Prefab、1 Preview Scene、1 Preview PNG、0 issue；渲染检查通过。
+
 ## 2026-07-17｜v0.12.2｜九宫格 PPU 联动修复
 
 提交：待本轮确认后提交。

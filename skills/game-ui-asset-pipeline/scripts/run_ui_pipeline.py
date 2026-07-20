@@ -5,6 +5,7 @@ from __future__ import annotations
 
 import argparse
 import json
+import math
 from datetime import datetime, timezone
 from pathlib import Path
 from typing import Any
@@ -189,6 +190,14 @@ def run_pipeline(
         expected_size = tuple(int(value) for value in job_request.get("canvas", source_size))
         resized = source.size != expected_size
         if resized:
+            source_ratio = source.width / source.height
+            expected_ratio = expected_size[0] / expected_size[1]
+            if not math.isclose(source_ratio, expected_ratio, rel_tol=0.01, abs_tol=0.01):
+                raise ValueError(
+                    "generated-canvas-aspect-ratio-mismatch: "
+                    f"job={job_id} source={source.width}x{source.height} "
+                    f"expected={expected_size[0]}x{expected_size[1]}"
+                )
             source = resize_rgba_premultiplied(source, expected_size)
 
         transparency_mode = str(job.get("transparency_mode", job_request.get("transparency_mode", "auto")))

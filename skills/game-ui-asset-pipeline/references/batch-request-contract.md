@@ -55,7 +55,7 @@
 | `padding` | 否 | 最终透明安全留白，默认 8 |
 | `chroma_key` | 否 | `auto` 或 `#RRGGBB` |
 | `subject_uses_green` | 否 | `true` 时自动使用品红色键 |
-| `allow_attached_glow` | 否 | 是否允许紧贴主体的硬边光效 |
+| `allow_attached_glow` | 否 | 是否允许附着光效；`false` 时清理与稳定主体分离的低 Alpha 外溢并记录移除数量 |
 | `fragment_policy` | 否 | 碎片策略覆盖；默认使用分类级校准参数 |
 | `transparency_mode` | 否 | `chroma-key`、`model-matte-derived` 或 `native-alpha-required` |
 

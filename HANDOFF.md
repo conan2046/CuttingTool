@@ -1,10 +1,10 @@
 # CuttingTool 会话交接
 
-> 更新时间：2026-07-17
+> 更新时间：2026-07-20
 > 工作目录：`D:\CuttingTool`  
 > 仓库：`https://github.com/conan2046/CuttingTool.git`  
 > 当前工作分支：`main`
-> 已完成功能基线：v0.12.2 九宫格 PPU 联动修复、真实 HUD、Button 四态与 Unity Preview Scene
+> 已完成功能基线：v0.12.6 九宫格 Panel 拉伸带与控件安全区、Scroll View 溢出裁剪、Layout Group 规则布局、低 Alpha 外溢与画布拉伸修复、九宫格 PPU 联动、真实 HUD、Button 四态与 Unity Preview Scene
 
 ## 1. 新会话先做什么
 
@@ -46,7 +46,40 @@ game-ui-asset-pipeline
 
 ## 3. 已经完成什么
 
-### 3.0 v0.12.2：九宫格 PPU 联动修复
+### 3.0 v0.12.6：九宫格 Panel 拉伸带与控件安全区
+
+- `UniversalPanelBase`、`InventorySlotFrame` 已清除四边中段独特装饰，保留四角和左上龙角；生产 Sheet 尺寸、资源位置、数量和绿色键背景不变。
+- 两张 Panel 已重新完成切割、透明化、Manifest、QA 和 Unity Border 推导；30 pass、0 warning、0 fail。
+- 背包底部按钮组上移 50px 并成为 InventoryPanel 子节点，底部安全距离从 9px 增加到 59px。
+- Unity 重导 0 issue；实际 Sliced 渲染四角稳定、边中段连续，按钮不再压住外框。
+- 固化规则：九宫格独特装饰只放四角，四边中段与中心区保持干净，控件必须位于 Panel 安全区。
+
+### 3.0 v0.12.5：Unity Scroll View 有限区域与溢出裁剪
+
+- 背包从单独 GridLayoutGroup 改为 `ScrollView → ScrollViewport(RectMask2D) → InventorySlotsGrid(GridLayoutGroup + ContentSizeFitter)`。
+- Viewport 固定 772×632，Content 当前 772×772；静态预览显示 4 行，第 5 行被正确裁剪，内容可垂直滚动。
+- Prefab 的 ScrollRect Content/Viewport 引用有效，垂直开启、横向关闭、MovementType=Clamped；Scroll View 默认透明且无可见滚动条。
+- 真实 Unity 重导：30 Sprite、30 资源 Prefab、1 Screen Prefab、1 Preview Scene、1 Preview PNG、0 issue；最终回归数量以 CHANGELOG 最新记录为准。
+- 源码与安装态全量 `unittest` 各 106/106 通过；63 个正式 Skill 文件 SHA-256 一致，0 差异。
+
+### 3.0 v0.12.4：Unity Layout Group 规则布局
+
+- Unity 布局支持 `GridLayoutGroup`、`HorizontalLayoutGroup`、`VerticalLayoutGroup`，容器与子项均保留稳定 BindingId。
+- 角色界面装备位、页签、25 格背包和底部按钮已从逐项坐标改为 4 个 Layout Group 容器。
+- 真实 Unity 重导：30 Sprite、30 资源 Prefab、1 Screen Prefab、1 Preview Scene、1 Preview PNG、0 issue。
+- Screen Prefab 实际包含 2 个 GridLayoutGroup、2 个 HorizontalLayoutGroup；子节点数量 6、4、25、2，1980×1080 渲染视觉检查通过。
+- 源码与安装态全量 `unittest` 各 104/104 通过；63 个正式 Skill 文件 SHA-256 一致，0 差异。
+
+### 3.0 v0.12.3：低 Alpha 外溢与画布拉伸修复
+
+- `allow_attached_glow=false` 时清理与稳定主体分离的低 Alpha 外溢，保留紧贴轮廓的抗锯齿，并记录移除数量。
+- Runner 拒绝生成图与请求画布宽高比不一致的输入，禁止非等比拉伸。
+- `xiuxian-ui-character-1980x1080-v3` 已重跑：30 个资源，30 pass、0 warning、0 fail；20 个 Button 均完成外溢清理。
+- 跨槽碎片会按资源主组件边界距离二次纠正；`InventorySlotFrame` 左侧误入的大面板边饰已清除。
+- 角色源图与 Matte 已等偏移补齐为 2048×2048，主体不缩放；Unity 等比显示后人物比例正常。
+- Unity 重新导入：30 Sprite、30 资源 Prefab、1 Screen Prefab、1 Preview Scene、1 Preview PNG、0 issue。
+
+### 3.1 v0.12.2：九宫格 PPU 联动修复
 
 - Panel/Button 根据源图与全部布局目标的最小缩放比自动推导 PPU，避免固定 Border 在矮控件中被比例压缩。
 - 预检验证 Border 换算后的 Unity 显示尺寸；左右或上下固定区超过任一目标控件时阻断。

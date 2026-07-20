@@ -133,6 +133,19 @@ class BatchPipelineTest(unittest.TestCase):
             with self.assertRaises(FileNotFoundError):
                 RUNNER.run_pipeline(run_dir)
 
+    def test_runner_rejects_generated_canvas_aspect_ratio_mismatch(self) -> None:
+        with tempfile.TemporaryDirectory() as temporary_directory:
+            run_dir = Path(temporary_directory) / "run"
+            PREPARE.prepare_batch(self.request_spec(), run_dir)
+            self.create_generated_sheets(run_dir)
+            jobs = json.loads((run_dir / "jobs.json").read_text(encoding="utf-8"))["jobs"]
+            first_generated = run_dir / jobs[0]["generated_output"]
+            with Image.open(first_generated) as image:
+                image.resize((256, 128)).save(first_generated)
+
+            with self.assertRaisesRegex(ValueError, "generated-canvas-aspect-ratio-mismatch"):
+                RUNNER.run_pipeline(run_dir)
+
     def test_state_group_is_not_split_across_sheets(self) -> None:
         assets = [
             {"semantic_name": "Confirm", "state": "Normal"},

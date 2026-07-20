@@ -281,6 +281,102 @@ class UnityExportTest(unittest.TestCase):
         self.assertEqual(elements[1]["pressed_asset_id"], "Pressed")
         self.assertEqual(elements[1]["disabled_asset_id"], "Disabled")
 
+    def test_normalizes_layout_group_configuration(self) -> None:
+        layout = {
+            "schema_version": 1,
+            "screens": [
+                {
+                    "id": "Inventory",
+                    "reference_size": [1920, 1080],
+                    "elements": [
+                        {
+                            "id": "SlotGrid",
+                            "kind": "GridLayoutGroup",
+                            "size": [772, 772],
+                            "cell_size": [132, 132],
+                            "spacing": [28, 28],
+                            "constraint": "FixedColumnCount",
+                            "constraint_count": 5,
+                            "start_axis": "Horizontal",
+                            "child_alignment": "MiddleCenter",
+                        },
+                        {
+                            "id": "Slot01",
+                            "parent_id": "SlotGrid",
+                            "kind": "Image",
+                            "asset_id": "Slot",
+                        },
+                    ],
+                }
+            ],
+        }
+        elements = UNITY_EXPORT.normalize_layout(layout)[0]["elements"]
+        self.assertEqual(elements[0]["kind"], "GridLayoutGroup")
+        self.assertEqual(elements[0]["cell_size"], [132.0, 132.0])
+        self.assertEqual(elements[0]["spacing"], [28.0, 28.0])
+        self.assertEqual(elements[0]["constraint"], "FixedColumnCount")
+        self.assertEqual(elements[0]["constraint_count"], 5)
+        self.assertEqual(elements[1]["parent_id"], "SlotGrid")
+
+    def test_rejects_invalid_layout_group_configuration(self) -> None:
+        base = {
+            "schema_version": 1,
+            "screens": [{
+                "id": "Inventory",
+                "reference_size": [1920, 1080],
+                "elements": [{
+                    "id": "SlotGrid",
+                    "kind": "GridLayoutGroup",
+                    "size": [772, 772],
+                }],
+            }],
+        }
+        invalid_cases = {
+            "start_axis": "Diagonal",
+            "start_corner": "Center",
+            "child_alignment": "Center",
+            "child_control_size": [1, 0],
+            "child_force_expand": [False],
+        }
+        for field_name, invalid_value in invalid_cases.items():
+            with self.subTest(field_name=field_name):
+                layout = json.loads(json.dumps(base))
+                layout["screens"][0]["elements"][0][field_name] = invalid_value
+                with self.assertRaises(ValueError):
+                    UNITY_EXPORT.normalize_layout(layout)
+
+    def test_normalizes_scroll_view_with_masked_grid_content(self) -> None:
+        layout = {
+            "schema_version": 1,
+            "screens": [{
+                "id": "Inventory",
+                "reference_size": [1920, 1080],
+                "elements": [
+                    {"id": "InventoryScrollView", "kind": "ScrollView", "size": [772, 632], "viewport_id": "InventoryViewport", "content_id": "InventoryGrid", "vertical_scroll": True, "horizontal_scroll": False, "movement_type": "Clamped"},
+                    {"id": "InventoryViewport", "parent_id": "InventoryScrollView", "kind": "ScrollViewport", "size": [772, 632]},
+                    {"id": "InventoryGrid", "parent_id": "InventoryViewport", "kind": "GridLayoutGroup", "size": [772, 772], "cell_size": [132, 132], "spacing": [28, 28], "constraint": "FixedColumnCount", "constraint_count": 5, "content_size_fitter": True, "vertical_fit": "PreferredSize"},
+                ],
+            }],
+        }
+        elements = UNITY_EXPORT.normalize_layout(layout)[0]["elements"]
+        self.assertEqual(elements[0]["viewport_id"], "InventoryViewport")
+        self.assertEqual(elements[0]["content_id"], "InventoryGrid")
+        self.assertTrue(elements[0]["vertical_scroll"])
+        self.assertEqual(elements[0]["color"], [0.0, 0.0, 0.0, 0.0])
+        self.assertEqual(elements[2]["vertical_fit"], "PreferredSize")
+
+    def test_rejects_scroll_view_without_valid_viewport_content_chain(self) -> None:
+        layout = {
+            "schema_version": 1,
+            "screens": [{
+                "id": "Inventory",
+                "reference_size": [1920, 1080],
+                "elements": [{"id": "InventoryScrollView", "kind": "ScrollView", "viewport_id": "MissingViewport", "content_id": "MissingContent"}],
+            }],
+        }
+        with self.assertRaises(ValueError):
+            UNITY_EXPORT.normalize_layout(layout)
+
     def test_rejects_out_of_range_layout_color(self) -> None:
         layout = {
             "schema_version": 1,

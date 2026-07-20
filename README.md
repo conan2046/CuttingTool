@@ -33,11 +33,14 @@
 - 根据边框色差分布自适应诊断并安全采用色键阈值。
 - 软 Alpha 边缘和色键污染清理；除软遮罩过渡带外，背景邻域中符合色键—前景混合模型或存在色键通道优势的像素也会进行局部前景重建，无法安全重建的残边会透明化并计数。
 - 在已知布局槽位内独立检测和切割资源。
+- 全局组件按槽位中心初分后，以各资源主组件边界距离二次纠正跨槽碎片归属，避免宽资源的分离边饰串入相邻资源。
 - 智能合并近邻碎片；Panel、Button、128 图标、Skill 和 Effect 使用真实生产校准后的分类级比例与像素上限，避免大面板阈值失控。
 - 远离碎片默认 warning；可通过显式 `fragment_policy` 接受受双重尺寸限制的小组件，组件仍保留并记录，不静默删除。
 - 保留面板、边框和图标内部透明孔洞。
 - 自动识别空槽、槽位边缘接触和额外组件。
 - 按目标尺寸、留白和对齐方式归一化；RGBA 缩放使用预乘 Alpha，避免低 Alpha 色键像素在缩小时重新显色。
+- `allow_attached_glow=false` 时清理与稳定主体分离的低 Alpha 外溢，并记录移除像素数；紧贴轮廓的抗锯齿仍保留。
+- 生成图可在宽高比一致时等比适配请求画布；宽高比不一致时在正式处理前失败，禁止强制拉伸。
 - 导出稳定命名的透明 PNG。
 - 生成 Manifest、Contact Sheet 和 QA 报告。
 - QA 同时检查近纯色键残留和连续色键通道偏色，避免只靠欧氏距离漏掉肉眼可见的绿边、品红边或青边。
@@ -61,7 +64,9 @@
 - 完成态自动把正式 Manifest 合并到 `input/<project-id>/ui-asset-catalog.json`，供后续界面确定性复用。
 - 支持 Unity 2022.3 自动导入：Sprite Single、Alpha、布局自适应 PPU、Pivot、无 Mipmap、Clamp、Bilinear 和 Uncompressed。
 - 对 Panel/Button 自动推断九宫格 Border，并结合全部布局目标尺寸推导 PPU；低置信、无有效中心区或 Border 显示尺寸超限时阻断，支持显式人工覆写。
-- 从已确认的 `unity-layout.json` 生成独立资源 Prefab 和 Image/Button 界面 Prefab，并附稳定 BindingId。
+- 九宫格 Panel 只在四角固定区保留独特装饰，四边中段和中心区保持干净可拉伸；实际 Unity 渲染必须检查角饰、连续边线和内部控件安全边距。
+- 从已确认的 `unity-layout.json` 生成独立资源 Prefab 和 Image/Button 界面 Prefab，并附稳定 BindingId；规则网格或横纵队列使用 Grid/Horizontal/Vertical Layout Group 容器统一管理。
+- 背包、任务、商店等可增长有限区域使用 ScrollView、RectMask2D Viewport、Layout Group Content 和 ContentSizeFitter；内容超出规定范围时裁剪并滚动，不允许越界显示。
 - 每次 Unity 导出生成预检、导入报告、批处理日志和安全回滚清单。
 - Unity 布局支持 RGBA 底色和 Button 四态 SpriteSwap，并自动生成可运行 Preview Scene 与同尺寸 Unity 渲染图。
 

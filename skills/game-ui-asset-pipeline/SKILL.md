@@ -249,7 +249,7 @@ ${CODEX_HOME:-$HOME/.codex}/skills/.system/imagegen/SKILL.md
   --run-dir output/<project-id>
 ```
 
-Runner 根据 Job 声明分流 `model-matte-derived`、原生 Alpha、已有 Alpha 或色键背景。Matte 模式必须在正式输出前验证双图齐全、灰度纯度、黑色边框、连续 Alpha 层次、背景平整度、像素覆盖关系和双图 SHA-256；通过后用已知黑背景合成方程恢复直通道 RGB＋Alpha。失败时只写 QA 与失败摘要，不生成正式 Manifest。所有 RGBA 生产尺寸与单体归一化均使用预乘 Alpha。默认拒绝覆盖已有正式 Manifest；明确重跑时使用 `--force`。
+Runner 根据 Job 声明分流 `model-matte-derived`、原生 Alpha、已有 Alpha 或色键背景。Matte 模式必须在正式输出前验证双图齐全、灰度纯度、黑色边框、连续 Alpha 层次、背景平整度、像素覆盖关系和双图 SHA-256；通过后用已知黑背景合成方程恢复直通道 RGB＋Alpha。失败时只写 QA 与失败摘要，不生成正式 Manifest。所有 RGBA 生产尺寸与单体归一化均使用预乘 Alpha；生成图与请求画布宽高比不一致时必须失败，禁止非等比拉伸。默认拒绝覆盖已有正式 Manifest；明确重跑时使用 `--force`。
 
 P6 编排器每次调用都写出 `qa/delivery-summary.json` 和 `qa/delivery-summary.md`。完成态重复调用必须直接复用正式结果；失败后替换生成输入可继续执行，只有已有正式 Manifest 时才允许显式 `--force-run`。
 
@@ -311,7 +311,7 @@ P6 编排器每次调用都写出 `qa/delivery-summary.json` 和 `qa/delivery-su
   --qa-out qa/<sheet>-extract.json
 ```
 
-切割脚本先在整张 Alpha Sheet 上检测连通域，再按最近槽位中心稳定归属。Layout Guide 的槽位用于排序和归属，不作为硬裁切边界；这样可保留伸入槽间纯背景留白、但没有与相邻资源接触的完整轮廓。距离主体足够近的小碎片按分类默认比例和像素上限合并；大面板/按钮使用更严格上限，技能和简单特效允许更大的合法硬边碎片间距。远离碎片默认记录 `detached-components`，远离且面积显著的第二主体追加 `multiple-major-components`。只有请求明确设置 `fragment_policy.detached_action=allow-small` 且同时满足绝对像素与锚点面积比例限制时，才允许保留该小组件但不产生 warning；仍须记录 `accepted_detached_count`。空槽、主体跨槽合并、画布边缘接触和数量不符属于失败；不要静默删除无法解释的组件。
+切割脚本先在整张 Alpha Sheet 上检测连通域，再按最近槽位中心稳定初分，并以各资源主组件边界距离纠正跨槽碎片归属。Layout Guide 的槽位用于排序和归属，不作为硬裁切边界；这样可保留伸入槽间纯背景留白、但没有与相邻资源接触的完整轮廓，同时避免宽资源的分离边饰因中心越线而串入相邻资源。距离主体足够近的小碎片按分类默认比例和像素上限合并；大面板/按钮使用更严格上限，技能和简单特效允许更大的合法硬边碎片间距。远离碎片默认记录 `detached-components`，远离且面积显著的第二主体追加 `multiple-major-components`。只有请求明确设置 `fragment_policy.detached_action=allow-small` 且同时满足绝对像素与锚点面积比例限制时，才允许保留该小组件但不产生 warning；仍须记录 `accepted_detached_count`。空槽、主体跨槽合并、画布边缘接触和数量不符属于失败；不要静默删除无法解释的组件。
 
 组件检测默认使用 `alpha >= 16`，与最低可见 Alpha QA 一致。单一连通组件同时跨过两个或更多槽位中心时必须报告 `cross-slot-connected-component` 并失败；不得仅依赖后续空槽间接推断。
 
@@ -329,6 +329,8 @@ P6 编排器每次调用都写出 `qa/delivery-summary.json` 和 `qa/delivery-su
 ```
 
 RGBA 资源缩放必须使用预乘 Alpha 插值，再转换回直通道 RGBA。禁止直接缩放直通道 RGBA，否则低 Alpha 色键 RGB 可能被插值成可见绿边或品红边。
+
+请求设置 `allow_attached_glow=false` 时，清理与稳定主体边缘分离的低 Alpha 外溢，同时保留紧贴轮廓的抗锯齿；把移除像素数写入 Manifest 并检查 Contact Sheet。
 
 默认不放大小尺寸原图，避免无意义插值；超出目标安全区时只缩放一次。图标使用中心对齐，需要底边稳定的资源使用 `bottom-center`。
 
@@ -388,7 +390,9 @@ Contact Sheet 中的棋盘格只用于人工查看透明边缘，不得回写到
 
 脚本把可追溯 PNG 导入 `Assets/_Generated/GameUI/<project-id>`，配置 Sprite Single、Alpha、PPU、Pivot 和 Border，生成独立资源 Prefab、界面 Prefab、可直接运行的 Preview Scene，并由 Unity 渲染像素尺寸一致的预览 PNG。Panel/Button 自动分析九宫格，并按源图到全部布局目标的最小缩放比推导 PPU；只有 Border 置信度、中心拉伸区及换算后的显示尺寸全部有效时才写入，否则预检失败并要求在布局 JSON 的 `nine_slice_overrides` 或 `pixels_per_unit_overrides` 中明确覆写。
 
-界面元素当前正式支持 `Image` 和 `Button`。每个对象附带稳定 `GameUIElementBinding.BindingId`；Button 自动配置 `Image`、`Button.targetGraphic`、Raycast，并在布局提供状态资源时使用真实 Hover/Pressed/Disabled SpriteSwap。无 Sprite 的 Image 可通过 RGBA `color` 作为确定性底色。文字、本地化、业务事件和运行时数据绑定属于项目代码，不得伪造完成。
+预计九宫格拉伸的 Panel 只允许在四角固定区保留独特装饰；四边中段拉伸带和中央内容区必须连续、均匀、无星点、莲花、菱形、徽记或方向性图案。不要用扩大 Border 的方式包住边中段装饰；应编辑或重生成源资源。Panel 内按钮、列表和页签必须留在外框安全区内，不能覆盖或越过固定边框。Unity 验收必须看实际 Sliced 渲染，不只看自动 Border 置信度。
+
+界面元素当前正式支持 `Image`、`Button`、`GridLayoutGroup`、`HorizontalLayoutGroup`、`VerticalLayoutGroup`、`ScrollView` 和 `ScrollViewport`。规则排列必须建立 Layout Group 父容器，由容器统一控制单元尺寸、间距、行列、内边距和对齐，不得逐项写死位置。背包、任务列表、商店列表等内容数量可能增长且展示区域有限的容器，优先使用 `ScrollView → ScrollViewport(RectMask2D) → Content(LayoutGroup + ContentSizeFitter)`；Viewport 只显示规定范围，超出内容必须隐藏并通过指定轴滚动，不得仅用 Layout Group 让内容越界。只有数量固定且确认永不溢出的纯装饰排列才允许只用 Layout Group。每个容器及子对象都附带稳定 `GameUIElementBinding.BindingId`；Button 自动配置 `Image`、`Button.targetGraphic`、Raycast，并在布局提供状态资源时使用真实 Hover/Pressed/Disabled SpriteSwap。无 Sprite 的 Image 可通过 RGBA `color` 作为确定性底色。文字、本地化、业务事件和运行时数据绑定属于项目代码，不得伪造完成。
 
 Unity 导出失败时读取 `unity/unity-preflight.json`、`unity/unity-import-report.json` 和 `unity/unity-batch.log`。需要回滚本次生成目录时运行 `rollback_unity_export.py`；默认保留共享嵌入包，只有明确需要完全移除时才加 `--remove-package`。
 
