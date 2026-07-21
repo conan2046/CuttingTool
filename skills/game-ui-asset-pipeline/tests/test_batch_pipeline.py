@@ -116,6 +116,8 @@ class BatchPipelineTest(unittest.TestCase):
             qa = json.loads((run_dir / "qa" / "qa-report.json").read_text(encoding="utf-8"))
             summary = json.loads((run_dir / "qa" / "run-summary.json").read_text(encoding="utf-8"))
             self.assertTrue(qa["ok"], qa)
+            self.assertEqual(len(qa["nine_slice_stretch_bands"]), 3)
+            self.assertTrue(all(item["category"] == "Button" for item in qa["nine_slice_stretch_bands"]))
             self.assertEqual(summary["status"], "complete")
             self.assertTrue((run_dir / "qa" / "contact-sheet.png").is_file())
             button_background = json.loads(

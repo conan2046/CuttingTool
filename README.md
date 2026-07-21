@@ -1,5 +1,7 @@
 # CuttingTool
 
+> 当前版本：`v0.13.0`｜Python `>=3.11`｜Unity `2022.3.x` + UGUI｜源码/安装态测试各 `120/120` 通过
+
 游戏 UI 位图资源生产与拆分工具。当前实现 `game-ui-asset-pipeline` Skill 的批量可执行核心链路：
 
 ```text
@@ -15,6 +17,32 @@
 项目制作标准见 [AGENTS.md](AGENTS.md)，每次正式功能提交见 [CHANGELOG.md](CHANGELOG.md)。
 
 第一次使用请直接阅读 [新手操作指南](BEGINNER_GUIDE.md)。Skill 会先取得项目名并创建参考图目录；放图后由 Codex 自动完善 `reference-notes.md`，用户只需一次性确认界面布局、元素一致性和像素尺寸。
+
+## 版本演进
+
+| 版本 | 已完成能力 |
+|---|---|
+| `v0.1–v0.4` | 九类 UI 资源生成、色键透明化、切割归一化、Manifest/Contact Sheet/QA、未知整图诊断、自适应色键与三风格真实回归 |
+| `v0.5–v0.9` | 分类碎片策略、bbox 人工校正、复杂边缘失败矩阵、原生 Alpha 来源证明、GPT Image 2 RGB＋Alpha Matte 双图链路 |
+| `v0.10.x` | 自然语言一键编排、缺图续跑、交付摘要、跨风格 Matte 回归、项目初始化与参考图强制验收 |
+| `v0.11.0` | 自动需求接收、首界面完整产出、后续界面按语义复用、从中间阶段安全起跑 |
+| `v0.12.x` | Unity Sprite/Border/PPU、Image/Button Prefab、Preview Scene、真实 HUD、Layout Group、Scroll View、低 Alpha 外溢与九宫格安全区 |
+| `v0.13.0` | Run/Job/Asset 质量评分、候选哈希去重、单原因定向重生成、跨 Sheet 风格一致性、Panel/Button 内外双重九宫格门禁 |
+
+完整逐版本记录见 [CHANGELOG.md](CHANGELOG.md)。
+
+## v0.13.0 最新验收
+
+| 项目 | 结果 |
+|---|---:|
+| 源码测试 | `120/120` |
+| Codex 安装态测试 | `120/120` |
+| Skill 源码/安装副本 | 68 个正式文件，SHA-256 `0` 差异 |
+| 真实装备强化批次 | 10 pass / 2 warning / 0 fail |
+| Panel/Button 九宫格 | 2 个 Panel + 4 个 Button 状态，6 条边带报告全部通过 |
+| 多尺寸 Sliced 预览 | 原尺寸、`0.5×`、`1.5×`、`2×` 人工视觉验收通过 |
+
+两条非阻断 warning 分别为 Panel 色键边框存在轻微波动、装备 Sheet 与 Canonical 存在轻微风格漂移；正式资源无 fail，质量分 82，跨 Sheet 风格分 67.10。
 
 ## 当前能力
 
@@ -61,10 +89,15 @@
 - Manifest 明确记录 `alpha_origin=gpt-image-2-matte-derived`，不会把 Matte 推导结果冒充模型原生 Alpha。
 - P6 一键编排器支持首次准备、精确缺图清单、补图续跑、自动 Runner、完成态复用和统一交付摘要。
 - 每次编排写出 `qa/delivery-summary.json` 与 `qa/delivery-summary.md`，集中列出生成方式、Job/输入进度、结果数量、交付路径和人工处理项。
+- V0.13 为 Run、Job、Asset 输出 `0–100` 质量分和硬阻断数；分数只排序候选，任何 `fail` 仍禁止交付。
+- Runner 失败后自动选择一个最高优先级原因，生成 `qa/regeneration-plan.json/md` 与单原因纠错 Prompt；Codex 只重生成计划指定的失败 Job 输入。
+- 候选按 SHA-256 去重，未替换原图不会重复计次；替代候选就绪后自动重跑，默认最多 3 个候选，耗尽后保持硬失败。
+- 至少两个生产 Job 且存在 Canonical 时，输出 `qa/style-consistency.json`：综合 Canonical 与 Sheet 间的调色板、平均色、亮度、饱和度和边缘密度；漂移绑定具体 Job 并进入定向重生成。
 - 完成态自动把正式 Manifest 合并到 `input/<project-id>/ui-asset-catalog.json`，供后续界面确定性复用。
 - 支持 Unity 2022.3 自动导入：Sprite Single、Alpha、布局自适应 PPU、Pivot、无 Mipmap、Clamp、Bilinear 和 Uncompressed。
 - 对 Panel/Button 自动推断九宫格 Border，并结合全部布局目标尺寸推导 PPU；低置信、无有效中心区或 Border 显示尺寸超限时阻断，支持显式人工覆写。
-- 九宫格 Panel 只在四角固定区保留独特装饰，四边中段和中心区保持干净可拉伸；实际 Unity 渲染必须检查角饰、连续边线和内部控件安全边距。
+- 九宫格 Panel/Button 只在四角固定区保留独特装饰，四边中段和中心区保持干净可拉伸；实际多尺寸 Sliced 预览必须检查角饰、连续边线、内部纹理和控件安全边距。
+- Panel/Button Prompt 强制禁止四边中点装饰；正式 QA 同时检查四边中间 60% 的外轮廓与内部纹理变化，并在报告中写出 `nine_slice_stretch_bands`。凸起、凹口或独特边带花纹直接硬失败。
 - 从已确认的 `unity-layout.json` 生成独立资源 Prefab 和 Image/Button 界面 Prefab，并附稳定 BindingId；规则网格或横纵队列使用 Grid/Horizontal/Vertical Layout Group 容器统一管理。
 - 背包、任务、商店等可增长有限区域使用 ScrollView、RectMask2D Viewport、Layout Group Content 和 ContentSizeFitter；内容超出规定范围时裁剪并滚动，不允许越界显示。
 - 每次 Unity 导出生成预检、导入报告、批处理日志和安全回滚清单。
@@ -89,11 +122,11 @@
 
 ## 路线优先级
 
-1. P6：Codex 自然语言一键编排和稳定交付（已实现）。
-2. P6.1：GPT Image 2 RGB＋Matte 跨风格回归（已完成：暗黑幻想、明亮卡通、科幻全息三套真实样本）。
-3. P7：Unity 自动导入与 Sprite Editor 配置（已实现）。
-4. P8：自动九宫格边界推断、低置信阻断与人工覆写（已实现）。
-5. P7.1：已完成 RGBA 布局层、Button 四态、Preview Scene 和 Unity 渲染预览；后续扩展更多显式组件并与业务绑定层解耦。
+1. V0.13：QA 驱动纠错、候选评分、失败 Job 定向重生成、真实 GPT Image 多候选闭环和跨 Sheet 风格评分（已完成）。
+2. P6：Codex 自然语言一键编排和稳定交付（已实现）。
+3. P6.1：GPT Image 2 RGB＋Matte 跨风格回归（已完成：暗黑幻想、明亮卡通、科幻全息三套真实样本）。
+4. P7/P8：Unity 自动导入、Sprite Editor、九宫格和交互 Prefab（已实现）。
+5. 下一阶段：积累更多跨品类真实样本，校准风格阈值并扩展人工语义问题的结构化回写。
 6. 根据真实生产任务继续优化色键、碎片、JSON 修正、bbox 预览和 Contact Sheet。
 7. 桌面 GUI：长期最低优先级。只有前述流程稳定完成，且高频人工操作无法通过现有轻量方式解决时才重新评估。
 
@@ -150,7 +183,12 @@ qa/qa-report.json
 qa/run-summary.json
 qa/delivery-summary.json
 qa/delivery-summary.md
+qa/style-consistency.json
+qa/nine-slice-multi-size-preview.json
+qa/nine-slice-multi-size-preview.png
 ```
+
+失败进入定向纠错时还会输出 `qa/regeneration-plan.json/md` 与 `prompts/<job-id>-retry-<NN>.md`；只有全部硬阻断清零后才生成正式交付。
 
 复杂半透明任务默认设置 `transparency_mode: "model-matte-derived"`。每个 Job 使用内置 GPT Image 2 生成彩色黑底 Sheet 和同名 `-alpha-matte.png`；不需要 API Key。真实烟雾、玻璃、液体、柔光验收位于 `output/p5-model-matte-real`。
 

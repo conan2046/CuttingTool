@@ -89,6 +89,18 @@ V1 不包含：
 - 完成态自动把正式 Manifest 合并到 `input/<project-id>/ui-asset-catalog.json`，后续界面复用键固定为 `category + semantic_name + state`，尺寸不参与命中。
 - 编排器不调用图片 API；Codex 仍使用内置 `imagegen` 按缺图清单完成视觉生成。
 
+### V0.13 QA 驱动纠错闭环
+
+- Runner 必须输出 Run、Job、Asset 三级 `0–100` 质量分、维度扣分和硬阻断数；质量分只用于候选排序，任何 `fail` 均禁止正式交付。
+- 编排器失败后只选择一个最高优先级原因，生成 `qa/regeneration-plan.json/md` 与 `prompts/<job-id>-retry-<NN>.md`；禁止在同轮同时改变风格、布局和资源清单。
+- Codex 按计划只重生成指定生产 Sheet、Alpha Matte 或原生来源侧车；确定性脚本不得直接调用图片 API。
+- 候选使用全部必需生成输入的 SHA-256 组合指纹去重；输入未变化时保持 `awaiting-regeneration`，不得重复计次或重复运行 Runner。
+- 顶层 `retry_policy.max_attempts` 默认 3，允许 1–5；候选耗尽后必须返回 `failed`，不得把最佳失败候选写成正式交付。
+- 计划内替代候选就绪后允许编排器自动覆盖失败运行；计划外覆盖已有正式 Manifest 仍要求显式 `--force-run`。
+- 顶层 `style_consistency` 默认启用；使用 Canonical 相似度与 Sheet 间相似度合成 `0–100` 分，写入 `qa/style-consistency.json`。默认 `<40 fail`、`<60 warning`，允许请求覆写但必须满足 `0 <= fail_below <= warning_below <= 100`。
+- 风格评分只做跨 Sheet 自动门禁，不能替代 Contact Sheet 人工语义检查；风格漂移失败必须定位到具体 Job，并进入同一单原因重生成闭环。
+- Panel/Button 生成 Prompt 必须逐项禁止上、下、左、右边中段装饰；正式 QA 必须同时检查四边中间 60% 的外轮廓连续性与内部纹理变化，输出 `nine_slice_stretch_bands`，并兼容保留 Panel 专用 `panel_stretch_bands`。Panel 或 Button 任一边超出容差分别报 `panel-stretch-band-decoration` 或 `button-stretch-band-decoration` 硬失败。
+
 ### P7/P8 Unity 交付链路
 
 - 当前支持 Unity `2022.3.x` 与 UGUI；其他 Unity 主版本必须先兼容性验证。

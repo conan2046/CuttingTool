@@ -9,6 +9,7 @@ from PIL import Image, ImageDraw
 
 SKILL_DIR = Path(__file__).resolve().parents[1]
 SCRIPTS_DIR = SKILL_DIR / "scripts"
+sys.path.insert(0, str(SCRIPTS_DIR))
 
 
 def load_module(name: str):
@@ -61,6 +62,9 @@ class DeliveryQaTest(unittest.TestCase):
             request = {"chroma_key": "#00FF00"}
             report = VALIDATE.validate_pack(manifest, root, request)
             self.assertTrue(report["ok"], report)
+            self.assertEqual(report["quality"]["score"], 100)
+            self.assertEqual(report["quality"]["hard_blocker_count"], 0)
+            self.assertEqual(len(report["quality"]["assets"]), 2)
             contact_path = root / "contact-sheet.png"
             contact = CONTACT.make_contact_sheet(manifest, root, contact_path, columns=2)
             self.assertTrue(contact["ok"])
@@ -106,6 +110,7 @@ class DeliveryQaTest(unittest.TestCase):
             report = VALIDATE.validate_pack(manifest, root, {"chroma_key": "#00FF00"})
             self.assertFalse(report["ok"])
             self.assertIn("visible-chroma-residue", {issue["code"] for issue in report["issues"]})
+            self.assertEqual(report["quality"]["status"], "blocked")
 
     def test_visible_chroma_spill_band_fails(self) -> None:
         with tempfile.TemporaryDirectory() as temporary_directory:
@@ -155,6 +160,85 @@ class DeliveryQaTest(unittest.TestCase):
             report = VALIDATE.validate_pack(manifest, root, {"chroma_key": "#00FF00"})
             self.assertFalse(report["ok"])
             self.assertIn("non-continuous-category-indices", {issue["code"] for issue in report["issues"]})
+
+    def panel_manifest(self, filename: str, width: int, height: int) -> dict:
+        return {
+            "expected_count": 1,
+            "assets": [
+                {
+                    "id": Path(filename).stem,
+                    "category": "Panel",
+                    "category_index": 1,
+                    "output": filename,
+                    "width": width,
+                    "height": height,
+                }
+            ],
+        }
+
+    def button_manifest(self, filename: str, width: int, height: int) -> dict:
+        manifest = self.panel_manifest(filename, width, height)
+        manifest["assets"][0]["category"] = "Button"
+        return manifest
+
+    def test_panel_with_plain_middle_stretch_bands_passes(self) -> None:
+        with tempfile.TemporaryDirectory() as temporary_directory:
+            root = Path(temporary_directory)
+            filename = "01_Panel_Plain_Default_001.png"
+            image = Image.new("RGBA", (320, 180), (0, 0, 0, 0))
+            ImageDraw.Draw(image).rectangle((20, 20, 299, 159), fill=(170, 210, 235, 255), outline=(240, 245, 250, 255), width=4)
+            image.save(root / filename)
+            report = VALIDATE.validate_pack(self.panel_manifest(filename, 320, 180), root)
+            self.assertTrue(report["ok"], report)
+            self.assertTrue(report["panel_stretch_bands"][0]["ok"])
+
+    def test_panel_mid_edge_decorations_are_hard_failure(self) -> None:
+        with tempfile.TemporaryDirectory() as temporary_directory:
+            root = Path(temporary_directory)
+            filename = "01_Panel_Decorated_Default_001.png"
+            image = Image.new("RGBA", (320, 180), (0, 0, 0, 0))
+            draw = ImageDraw.Draw(image)
+            draw.rectangle((20, 20, 299, 159), fill=(170, 210, 235, 255), outline=(240, 245, 250, 255), width=4)
+            draw.polygon(((160, 6), (174, 20), (160, 34), (146, 20)), fill=(250, 220, 90, 255))
+            draw.polygon(((160, 145), (174, 159), (160, 173), (146, 159)), fill=(250, 220, 90, 255))
+            draw.polygon(((6, 90), (20, 76), (34, 90), (20, 104)), fill=(250, 220, 90, 255))
+            draw.polygon(((285, 90), (299, 76), (313, 90), (299, 104)), fill=(250, 220, 90, 255))
+            image.save(root / filename)
+            report = VALIDATE.validate_pack(self.panel_manifest(filename, 320, 180), root)
+            self.assertFalse(report["ok"])
+            issue = next(issue for issue in report["issues"] if issue["code"] == "panel-stretch-band-decoration")
+            self.assertEqual(set(issue["failed_edges"]), {"top", "bottom", "left", "right"})
+            self.assertEqual(issue["severity"], "fail")
+
+    def test_internal_edge_texture_is_detected_without_silhouette_change(self) -> None:
+        with tempfile.TemporaryDirectory() as temporary_directory:
+            root = Path(temporary_directory)
+            filename = "01_Panel_InternalPattern_Default_001.png"
+            image = Image.new("RGBA", (320, 180), (0, 0, 0, 0))
+            draw = ImageDraw.Draw(image)
+            draw.rectangle((20, 20, 299, 159), fill=(170, 210, 235, 255), outline=(240, 245, 250, 255), width=4)
+            draw.polygon(((24, 90), (34, 80), (44, 90), (34, 100)), fill=(250, 210, 80, 255))
+            image.save(root / filename)
+            report = VALIDATE.validate_pack(self.panel_manifest(filename, 320, 180), root)
+            self.assertFalse(report["ok"])
+            issue = next(issue for issue in report["issues"] if issue["code"] == "panel-stretch-band-decoration")
+            left = next(edge for edge in issue["edge_reports"] if edge["edge"] == "left")
+            self.assertTrue(left["silhouette_ok"])
+            self.assertFalse(left["texture_ok"])
+
+    def test_button_internal_edge_pattern_is_hard_failure(self) -> None:
+        with tempfile.TemporaryDirectory() as temporary_directory:
+            root = Path(temporary_directory)
+            filename = "02_Button_Pattern_Normal_001.png"
+            image = Image.new("RGBA", (320, 120), (0, 0, 0, 0))
+            draw = ImageDraw.Draw(image)
+            draw.rectangle((20, 20, 299, 99), fill=(170, 210, 235, 255), outline=(240, 245, 250, 255), width=4)
+            draw.polygon(((24, 60), (44, 35), (64, 60), (44, 85)), fill=(250, 210, 80, 255))
+            image.save(root / filename)
+            report = VALIDATE.validate_pack(self.button_manifest(filename, 320, 120), root)
+            self.assertFalse(report["ok"])
+            issue = next(issue for issue in report["issues"] if issue["code"] == "button-stretch-band-decoration")
+            self.assertIn("left", issue["failed_edges"])
 
 
 if __name__ == "__main__":

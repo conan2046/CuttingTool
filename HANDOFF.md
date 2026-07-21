@@ -1,10 +1,10 @@
 # CuttingTool 会话交接
 
-> 更新时间：2026-07-20
+> 更新时间：2026-07-21
 > 工作目录：`D:\CuttingTool`  
 > 仓库：`https://github.com/conan2046/CuttingTool.git`  
-> 当前工作分支：`main`
-> 已完成功能基线：v0.12.6 九宫格 Panel 拉伸带与控件安全区、Scroll View 溢出裁剪、Layout Group 规则布局、低 Alpha 外溢与画布拉伸修复、九宫格 PPU 联动、真实 HUD、Button 四态与 Unity Preview Scene
+> 当前工作分支：`codex/v0.13-quality-nine-slice`
+> 已完成功能基线：v0.13.0 QA 驱动纠错、候选评分与失败 Job 定向重生成；并包含 v0.12.6 九宫格 Panel 拉伸带与控件安全区、Scroll View、Layout Group、低 Alpha 外溢、九宫格 PPU、真实 HUD、Button 四态与 Unity Preview Scene
 
 ## 1. 新会话先做什么
 
@@ -45,6 +45,20 @@ game-ui-asset-pipeline
 核心原则：AI 负责视觉，Python 脚本负责确定性处理和验收。桌面 GUI 已明确降为长期最低优先级，不是当前开发目标。
 
 ## 3. 已经完成什么
+
+### 3.0 v0.13.0：QA 驱动纠错与候选评分
+
+- 新增 Run、Job、Asset 三级质量分；分数只排序候选，`fail` 永远硬阻断。
+- Runner 失败后生成 `qa/regeneration-plan.json/md` 和单原因纠错 Prompt，Codex 只替换计划指定输入。
+- 候选按必需输入 SHA-256 组合指纹去重；未替换不计新候选，替换后自动重跑。
+- 默认最多 3 个候选，可配置 1–5；耗尽后保持 `failed`，不交付最佳失败候选。
+- 源码与安装态全量测试各 120/120 通过；68 个正式 Skill 文件哈希一致，0 差异。
+- 已用装备强化参考图完成真实 GPT Image 多候选闭环：Button 暖红漂移被自动阻断并修正；装备 Sheet 修复触边和人工语义偏差。
+- 新增 `qa/style-consistency.json`：Canonical + 跨 Sheet 综合评分，漂移绑定具体 Job 并进入定向重生成。
+- 真实批次：`output/xiuxian-ui-v013-enhancement`，10 pass、2 warning、0 fail，质量 82，风格 67.10；两条 warning 为 Panel 色键边框波动与装备 Sheet 轻微风格漂移，Contact Sheet 人工复核通过。
+- 后续用户指出 Panel 与 Button 四边中段存在九宫格违规花纹；最终候选已把装饰限制在四角固定区，Panel 两件和 Button 四态均通过原尺寸、0.5×、1.5×、2× Sliced 视觉复核。
+- QA 现对 Panel/Button 同时检查四边中间 60% 的外轮廓与内部纹理，正式总报告包含 6 条 `nine_slice_stretch_bands`；分别以 `panel-stretch-band-decoration`、`button-stretch-band-decoration` 硬阻断。
+- 根因之一是实际 `build_prompt()` 未注入文档已有的 Panel 九宫格约束；另一处断点遗漏是 Runner 未转发 Button 拉伸报告。两处均已修复并有回归测试。
 
 ### 3.0 v0.12.6：九宫格 Panel 拉伸带与控件安全区
 

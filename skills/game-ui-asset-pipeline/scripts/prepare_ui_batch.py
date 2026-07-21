@@ -93,6 +93,19 @@ def prepare_batch(spec: dict[str, Any], run_dir: Path, force: bool = False) -> P
     categories = spec.get("categories")
     if not isinstance(categories, list) or not categories:
         raise ValueError("request requires a non-empty categories list")
+    retry_policy = dict(spec.get("retry_policy", {}))
+    max_attempts = int(retry_policy.get("max_attempts", 3))
+    if max_attempts < 1 or max_attempts > 5:
+        raise ValueError("retry_policy.max_attempts must be between 1 and 5")
+    retry_policy = {"max_attempts": max_attempts, "single_cause_per_attempt": True}
+    style_consistency = dict(spec.get("style_consistency", {}))
+    style_consistency = {
+        "enabled": bool(style_consistency.get("enabled", True)),
+        "warning_below": float(style_consistency.get("warning_below", 60)),
+        "fail_below": float(style_consistency.get("fail_below", 40)),
+    }
+    if not 0 <= style_consistency["fail_below"] <= style_consistency["warning_below"] <= 100:
+        raise ValueError("style_consistency thresholds must satisfy 0 <= fail_below <= warning_below <= 100")
     run_dir = run_dir.expanduser().resolve()
     if run_dir.exists() and any(run_dir.iterdir()) and not force:
         raise FileExistsError(f"output directory is not empty: {run_dir}; use --force to reuse it")
@@ -259,6 +272,8 @@ def prepare_batch(spec: dict[str, Any], run_dir: Path, force: bool = False) -> P
             "created_at": created_at,
             "style_notes": str(spec.get("style_notes", "")),
             "generation_method": generation_method,
+            "retry_policy": retry_policy,
+            "style_consistency": style_consistency,
             "references": references,
             "categories": normalized_categories,
             "expected_count": sum(len(item["assets"]) for item in normalized_categories),

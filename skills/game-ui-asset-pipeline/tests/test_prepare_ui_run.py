@@ -80,6 +80,32 @@ class PrepareUiRunTest(unittest.TestCase):
             self.assertNotEqual(result.returncode, 0)
             self.assertIn("exceeds grid capacity", result.stderr)
 
+    def test_panel_prompt_forbids_all_four_mid_edge_decorations(self) -> None:
+        with tempfile.TemporaryDirectory() as temporary_directory:
+            run_dir = Path(temporary_directory) / "run"
+            result = subprocess.run(
+                [
+                    sys.executable,
+                    str(SCRIPT),
+                    "--project-id",
+                    "nine-slice-panel",
+                    "--category",
+                    "Panel",
+                    "--asset",
+                    "Main|Default|clean stretchable panel",
+                    "--output-dir",
+                    str(run_dir),
+                ],
+                check=False,
+                capture_output=True,
+                text=True,
+            )
+            self.assertEqual(result.returncode, 0, result.stderr)
+            prompt = (run_dir / "prompts" / "panel-sheet-01.md").read_text(encoding="utf-8")
+            self.assertIn("middle 60% of the top and bottom borders", prompt)
+            self.assertIn("middle 60% of the left and right borders", prompt)
+            self.assertIn("Never place a star, diamond, jewel", prompt)
+
 
 if __name__ == "__main__":
     unittest.main()

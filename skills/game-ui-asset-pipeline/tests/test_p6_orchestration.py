@@ -153,15 +153,48 @@ class P6OrchestrationTest(unittest.TestCase):
             self.write_matte_sheet(run_dir, color_bias=120)
 
             failed = ORCHESTRATOR.orchestrate(run_dir)
-            self.assertFalse(failed["ok"])
-            self.assertEqual(failed["status"], "failed")
+            self.assertTrue(failed["ok"])
+            self.assertEqual(failed["status"], "awaiting-regeneration")
             self.assertFalse((run_dir / "final" / "manifest.json").exists())
             self.assertIn("Icon_Effect".lower().replace("_", "-"), " ".join(failed["results"]["manual_action_required"]))
+            self.assertEqual(len(failed["retry"]["items"]), 1)
+            retry_item = failed["retry"]["items"][0]
+            self.assertEqual(retry_item["job_id"], "icon-effect-sheet-01")
+            self.assertEqual(retry_item["primary_issue"]["retry_target"], "alpha-matte")
+            self.assertTrue((run_dir / retry_item["prompt_file"]).is_file())
+            self.assertTrue((run_dir / "qa" / "regeneration-plan.json").is_file())
+
+            unchanged = ORCHESTRATOR.orchestrate(run_dir)
+            self.assertTrue(unchanged["ok"])
+            self.assertEqual(unchanged["status"], "awaiting-regeneration")
+            jobs = self.jobs(run_dir)
+            self.assertEqual(len(jobs["Icon_Effect"]["candidate_history"]), 1)
 
             self.write_matte_sheet(run_dir)
             recovered = ORCHESTRATOR.orchestrate(run_dir)
             self.assertTrue(recovered["ok"], recovered)
             self.assertEqual(recovered["status"], "complete")
+            self.assertGreaterEqual(recovered["results"]["quality_score"], 90)
+            self.assertEqual(recovered["results"]["hard_blocker_count"], 0)
+            self.assertFalse((run_dir / "qa" / "regeneration-plan.json").exists())
+
+    def test_retry_budget_exhaustion_remains_a_hard_failure(self) -> None:
+        with tempfile.TemporaryDirectory() as temporary_directory:
+            root = Path(temporary_directory)
+            run_dir = root / "run"
+            request = self.request()
+            request["retry_policy"] = {"max_attempts": 1}
+            request_path = root / "batch-request.json"
+            request_path.write_text(json.dumps(request), encoding="utf-8")
+            ORCHESTRATOR.orchestrate(run_dir, request_path=request_path)
+            self.write_chroma_sheet(run_dir)
+            self.write_matte_sheet(run_dir, color_bias=120)
+
+            failed = ORCHESTRATOR.orchestrate(run_dir)
+            self.assertFalse(failed["ok"])
+            self.assertEqual(failed["status"], "failed")
+            self.assertEqual(failed["retry"]["items"], [])
+            self.assertEqual(failed["retry"]["exhausted_jobs"], ["icon-effect-sheet-01"])
 
     def test_unprepared_run_requires_request(self) -> None:
         with tempfile.TemporaryDirectory() as temporary_directory:
@@ -189,6 +222,88 @@ class P6OrchestrationTest(unittest.TestCase):
             ])
             self.assertTrue(inputs[0]["exists"])
             self.assertFalse(inputs[1]["exists"])
+
+    def test_multi_input_retry_waits_until_every_planned_target_changes(self) -> None:
+        with tempfile.TemporaryDirectory() as temporary_directory:
+            run_dir = Path(temporary_directory)
+            generated = run_dir / "generated" / "effect.png"
+            matte = run_dir / "generated" / "effect-alpha-matte.png"
+            generated.parent.mkdir(parents=True)
+            generated.write_bytes(b"color-v1")
+            matte.write_bytes(b"matte-v1")
+            job = {
+                "id": "effect",
+                "category": "Icon_Effect",
+                "expected_count": 1,
+                "transparency_mode": "model-matte-derived",
+                "generated_output": "generated/effect.png",
+                "alpha_matte_output": "generated/effect-alpha-matte.png",
+                "prompt_file": "prompts/effect.md",
+                "alpha_matte_prompt_file": "prompts/effect-alpha-matte.md",
+            }
+            targets = [job["generated_output"], job["alpha_matte_output"]]
+            job["retry"] = {
+                "target_paths": targets,
+                "awaiting_fingerprint": ORCHESTRATOR.candidate_fingerprint(job, run_dir),
+                "awaiting_hashes": {
+                    path: ORCHESTRATOR.file_sha256(run_dir / path) for path in targets
+                },
+            }
+
+            generated.write_bytes(b"color-v2")
+            partial = ORCHESTRATOR.generation_state([job], run_dir)
+            self.assertFalse(partial["jobs"][0]["ready"])
+            self.assertEqual(partial["jobs"][0]["pending_replacements"], [job["alpha_matte_output"]])
+
+            matte.write_bytes(b"matte-v2")
+            ready = ORCHESTRATOR.generation_state([job], run_dir)
+            self.assertTrue(ready["jobs"][0]["ready"])
+            self.assertTrue(ready["jobs"][0]["retry_candidate_ready"])
+
+    def test_asset_validation_blocker_retries_even_when_extraction_job_was_ok(self) -> None:
+        with tempfile.TemporaryDirectory() as temporary_directory:
+            run_dir = Path(temporary_directory)
+            (run_dir / "generated").mkdir(parents=True)
+            (run_dir / "prompts").mkdir(parents=True)
+            (run_dir / "qa").mkdir(parents=True)
+            (run_dir / "generated" / "item.png").write_bytes(b"candidate")
+            (run_dir / "prompts" / "item.md").write_text("original prompt", encoding="utf-8")
+            job = {
+                "id": "item",
+                "category": "Icon_Item",
+                "expected_count": 1,
+                "transparency_mode": "chroma-key",
+                "generated_output": "generated/item.png",
+                "prompt_file": "prompts/item.md",
+                "input_images": [],
+            }
+            qa_report = {
+                "jobs": [{"id": "item", "ok": True}],
+                "issues": [
+                    {
+                        "severity": "fail",
+                        "code": "visible-chroma-spill",
+                        "job_id": "item",
+                        "asset_id": "06_Icon_Item_Test_Default_001",
+                    }
+                ],
+                "quality": {
+                    "jobs": [
+                        {"id": "item", "score": 68, "status": "blocked", "hard_blocker_count": 1}
+                    ]
+                },
+            }
+            jobs_payload = {"schema_version": 2, "jobs": [job]}
+            plan = ORCHESTRATOR.write_regeneration_plan(
+                run_dir,
+                {"retry_policy": {"max_attempts": 3}},
+                jobs_payload,
+                qa_report,
+            )
+            self.assertEqual(plan["status"], "awaiting-regeneration")
+            self.assertEqual(plan["items"][0]["primary_issue"]["code"], "visible-chroma-spill")
+            updated = json.loads((run_dir / "jobs.json").read_text(encoding="utf-8"))["jobs"][0]
+            self.assertFalse(updated["candidate_history"][0]["ok"])
 
 
 if __name__ == "__main__":

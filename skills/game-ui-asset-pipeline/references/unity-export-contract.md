@@ -116,7 +116,7 @@
 - 所有规则排列容器必须在 Screen Prefab 中具有对应 Layout Group 组件；检查约束、行列、间距、子节点数量和 Unity 渲染结果，不能只确认组件存在。
 - 所有可增长有限列表必须检查 `ScrollRect.content`、`ScrollRect.viewport`、滚动轴、`RectMask2D`、ContentSizeFitter、Content/Viewport 尺寸关系和裁剪渲染；只添加 GridLayoutGroup 不算通过。
 - Border 来源记录为 `auto-inferred`、`manual-override` 或 `not-applicable`；PPU 来源记录为 `layout-derived`、`manual-override` 或 `default`。不得把低置信或几何不适配结果写入 Unity。
-- 对所有 Sliced Panel 做实际拉伸视觉检查：四角不变形、四边中段连续、中心无独特装饰拉长或重复、子控件不压住外框。自动 Border 通过不代表美术拉伸带一定可交付。
+- 对所有 Sliced Panel/Button 做实际多尺寸拉伸视觉检查：四角不变形、四边中段连续、内部无独特纹理拉长或重复、Panel 子控件不压住外框。自动 Border 通过不代表美术拉伸带一定可交付。
 
 回滚：
 

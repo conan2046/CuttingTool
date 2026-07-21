@@ -2,9 +2,43 @@
 
 记录每次正式功能提交的目标、主要改动、验证结果和兼容性影响。按时间倒序维护；纯格式整理或无功能影响的微小修正可以合并记录。
 
+## 2026-07-21｜v0.13.0｜QA 驱动纠错、候选评分与失败 Job 定向重生成
+
+发布分支：`codex/v0.13-quality-nine-slice`。
+
+### 目标
+
+把“Runner 发现失败后等待人工判断”升级为可追溯的 Codex 自动纠错闭环，同时保留正式交付的严格 `fail` 阻断。
+
+### 完成
+
+- 新增 `quality_feedback.py`：按数量、分离、构图、Alpha、Matte、尺寸和来源等维度计算 Run、Job、Asset 三级 `0–100` 质量分。
+- 质量分只用于多候选排序；任一 `fail` 都保留硬阻断，不能被总分抵消。
+- 编排器失败后自动选择一个最高优先级原因，生成 `qa/regeneration-plan.json/md` 和单原因纠错 Prompt。
+- 计划精确声明需要替换的生产 Sheet、Alpha Matte 或原生 Alpha 来源侧车；Codex 负责按计划调用内置图片生成，Python 不调用图片 API。
+- 候选使用全部必需输入的 SHA-256 组合指纹去重；原文件未变化时保持 `awaiting-regeneration`，不重复计次。
+- 替代候选就绪后自动覆盖失败运行；默认最多 3 个候选，可配置为 1–5，耗尽后保持硬失败。
+- `jobs.json` 持久化候选历史、分数、缺陷代码、重试次数和当前纠错目标。
+- `delivery-summary.json/md` 增加质量分、硬阻断数和定向重生成入口。
+- 新增 `test_quality_feedback.py`，扩充 P6 编排与 Delivery QA 测试，覆盖单原因选择、Matte 定向重试、未变化候选去重、恢复完成和预算耗尽。
+- 新增 `style_consistency.py` 与 `test_style_consistency.py`：结合 Canonical 和 Sheet 间的调色板、平均色、亮度、饱和度、边缘密度输出逐 Job 与总风格分，并把漂移送入定向重生成。
+- 使用装备强化参考图完成真实 GPT Image 多候选闭环：首轮 Button 受控暖红漂移分 28.27 被阻断；第二候选恢复冰蓝白玉风格；装备 Sheet 依次修复剑尖触边和人工发现的“斗笠误作头盔”。
+- 最终真实批次 `output/xiuxian-ui-v013-enhancement`：10/10 导出，10 pass、2 warning、0 fail，质量 82，跨 Sheet 风格 67.10；两条 warning 为 Panel 色键边框波动与装备 Sheet 轻微风格漂移，Contact Sheet 人工复核通过。
+- 用户复核发现两个 Panel 的上、下、左、右边中段仍有菱形/徽记，违反九宫格规则；已精修源 Sheet，清除 8 处中点装饰并重建连续边线，四角和中心材质保持不变。
+- 修复根因：`build_prompt()` 之前没有把文档中的 Panel 九宫格规则写进实际生成 Prompt。现已强制禁止四边中间 60% 的星点、菱形、徽记、凸起和厚度变化。
+- 新增 Panel/Button 共用的 `nine_slice_stretch_bands` 四边报告，检查外轮廓和内部纹理；分别用 `panel-stretch-band-decoration`、`button-stretch-band-decoration` 硬阻断，兼容保留 `panel_stretch_bands`。
+- 新增 `make_nine_slice_preview.py`，按自动 Border 生成原尺寸、0.5×、1.5×、2× Sliced 对比图；真实 Panel 与 Button 四态预览均通过人工复核。
+- 源码与安装态全量 `unittest` 各 120/120 通过；68 个正式 Skill 文件 SHA-256 一致，0 差异。
+- 测试日志：`logs/unittest-v0.13.0-nine-slice.txt`、`logs/unittest-installed-v0.13.0-nine-slice.txt`。
+
+### 范围
+
+- 不新增图片 API、API Key、桌面 GUI、多 Provider 或跨引擎导出。
+- 跨 Sheet 风格评分只处理视觉家族一致性，不替代 Contact Sheet 的人工资源语义与用途验收。
+
 ## 2026-07-20｜v0.12.6｜九宫格 Panel 拉伸带与控件安全区
 
-提交：待本轮确认后提交。
+状态：已完成并纳入当前版本基线。
 
 ### 目标
 
@@ -31,7 +65,7 @@
 
 ## 2026-07-20｜v0.12.5｜Unity Scroll View 有限区域与溢出裁剪
 
-提交：待本轮确认后提交。
+状态：已完成并纳入当前版本基线。
 
 ### 目标
 
@@ -60,7 +94,7 @@
 
 ## 2026-07-20｜v0.12.4｜Unity Layout Group 规则布局
 
-提交：待本轮确认后提交。
+状态：已完成并纳入当前版本基线。
 
 ### 目标
 
@@ -89,7 +123,7 @@
 
 ## 2026-07-20｜v0.12.3｜低 Alpha 外溢与画布拉伸修复
 
-提交：待本轮确认后提交。
+状态：已完成并纳入当前版本基线。
 
 ### 目标
 
@@ -113,7 +147,7 @@
 
 ## 2026-07-17｜v0.12.2｜九宫格 PPU 联动修复
 
-提交：待本轮确认后提交。
+状态：已完成并纳入当前版本基线。
 
 ### 目标
 
@@ -134,7 +168,7 @@
 
 ## 2026-07-17｜v0.12.1｜真实 HUD 拼装与 Unity 视觉验收
 
-提交：待本轮确认后提交。
+状态：已完成并纳入当前版本基线。
 
 ### 目标
 

@@ -110,6 +110,18 @@ def build_prompt(
         else "Do not add glow, aura, detached particles, floating effects, or shadows."
     )
     style_line = style_notes.strip() or "Follow the attached canonical UI style reference exactly."
+    nine_slice_contract = ""
+    if category in {"Panel", "Button"}:
+        nine_slice_contract = f"""
+Nine-slice stretch-band contract:
+- This contract applies to every `{category}` asset in this sheet
+- Unique decoration is allowed only inside the four fixed corner regions
+- Keep the middle 60% of the top and bottom borders plain, continuous, uniform, and horizontally repeatable
+- Keep the middle 60% of the left and right borders plain, continuous, uniform, and vertically repeatable
+- Keep the central content region clean and stretchable
+- Never place a star, diamond, jewel, crest, lotus, badge, spike, notch, protrusion, directional motif, or thickness change at any edge midpoint
+- Do not enlarge corner decoration into a horizontal or vertical stretch band
+"""
     if transparency_mode == "native-alpha-required":
         background_contract = """Native transparency contract:
 - Output PNG with a genuine RGBA alpha channel created by the image model
@@ -152,6 +164,7 @@ Style:
 {style_line}
 - Preserve one coherent UI family across every asset
 - Keep details readable at mobile-game UI size
+{nine_slice_contract}
 
 {background_contract}
 

@@ -18,7 +18,9 @@ from extract_sheet_assets import extract_assets
 from make_contact_sheet import make_contact_sheet
 from native_alpha import validate_native_alpha_source
 from normalize_assets import normalize_manifest_assets, resize_rgba_premultiplied
+from quality_feedback import evaluate_quality
 from remove_chroma_key import parse_hex_color, recommend_chroma_thresholds, remove_chroma
+from style_consistency import evaluate_style_consistency
 from validate_asset_pack import validate_pack
 
 
@@ -133,6 +135,7 @@ def run_pipeline(
         jobs_payload["jobs"] = jobs
         jobs_payload["updated_at"] = datetime.now(timezone.utc).isoformat()
         write_json(jobs_path, jobs_payload)
+        failed_job_ids = {str(issue["job_id"]) for issue in preflight_failures}
         qa_report = {
             "schema_version": 3,
             "ok": False,
@@ -143,9 +146,16 @@ def run_pipeline(
             "warning_count": 0,
             "fail_count": len(preflight_failures),
             "issues": preflight_failures,
-            "jobs": [{"id": str(job["id"]), "ok": False} for job in jobs],
+            "jobs": [
+                {"id": str(job["id"]), "ok": str(job["id"]) not in failed_job_ids}
+                for job in jobs
+            ],
             "manual_action_required": sorted({str(issue["job_id"]) for issue in preflight_failures}),
         }
+        qa_report["quality"] = evaluate_quality(qa_report, jobs)
+        quality_by_job = {item["id"]: item for item in qa_report["quality"]["jobs"]}
+        for job_result in qa_report["jobs"]:
+            job_result["quality"] = quality_by_job.get(job_result["id"])
         qa_report_path = run_dir / "qa" / "qa-report.json"
         write_json(qa_report_path, qa_report)
         run_summary = {
@@ -168,6 +178,9 @@ def run_pipeline(
                 "warning": 0,
                 "fail": len(preflight_failures),
                 "manual_action_required": qa_report["manual_action_required"],
+                "quality_score": qa_report["quality"]["score"],
+                "hard_blocker_count": qa_report["quality"]["hard_blocker_count"],
+                "job_quality": qa_report["quality"]["jobs"],
             },
             "completed_at": datetime.now(timezone.utc).isoformat(),
         }
@@ -298,6 +311,7 @@ def run_pipeline(
             final_dir,
         )
         for entry in normalized_manifest.get("assets", []):
+            entry["job_id"] = job_id
             entry["source_sheet"] = relative(generated_path, run_dir)
             entry["output"] = relative(final_dir / Path(entry["output"]).name, run_dir)
             entry["padding"] = int(job_request.get("padding", 8))
@@ -374,7 +388,47 @@ def run_pipeline(
     contact_path = run_dir / "qa" / "contact-sheet.png"
     contact_report = make_contact_sheet(final_manifest, run_dir, contact_path)
     validation = validate_pack(final_manifest, run_dir, request, strict_files=True)
-    all_issues.extend(validation.get("issues", []))
+    job_by_output = {str(entry.get("output", "")): str(entry.get("job_id", "")) for entry in all_entries}
+    asset_by_output = {str(entry.get("output", "")): str(entry.get("id", "")) for entry in all_entries}
+    validation_issues = []
+    for issue in validation.get("issues", []):
+        enriched = dict(issue)
+        filename = str(enriched.get("file", ""))
+        if filename in job_by_output:
+            enriched.setdefault("job_id", job_by_output[filename])
+            enriched.setdefault("asset_id", asset_by_output[filename])
+        validation_issues.append(enriched)
+    all_issues.extend(validation_issues)
+    style_report: dict[str, Any] = {
+        "schema_version": 1,
+        "ok": True,
+        "evaluated": False,
+        "reason": "style consistency scoring disabled or canonical reference unavailable",
+        "issues": [],
+    }
+    style_policy = dict(request.get("style_consistency", {}))
+    if bool(style_policy.get("enabled", True)):
+        canonical_reference = next(
+            (
+                run_dir / str(reference["path"])
+                for reference in request.get("references", [])
+                if reference.get("role") == "canonical-ui-style"
+            ),
+            None,
+        )
+        if canonical_reference and canonical_reference.is_file():
+            style_report = evaluate_style_consistency(
+                final_manifest,
+                run_dir,
+                canonical_reference,
+                warning_below=float(style_policy.get("warning_below", 60)),
+                fail_below=float(style_policy.get("fail_below", 40)),
+            )
+            if style_report.get("evaluated"):
+                style_report["canonical"] = relative(canonical_reference, run_dir)
+            all_issues.extend(style_report.get("issues", []))
+    style_report_path = run_dir / "qa" / "style-consistency.json"
+    write_json(style_report_path, style_report)
     failures = [issue for issue in all_issues if issue.get("severity") == "fail"]
     warnings = [issue for issue in all_issues if issue.get("severity") == "warning"]
     warned_assets = {issue.get("asset_id") for issue in warnings if issue.get("asset_id")}
@@ -389,10 +443,17 @@ def run_pipeline(
         "fail_count": len(failures),
         "issues": all_issues,
         "jobs": job_results,
+        "style_consistency": style_report,
+        "panel_stretch_bands": validation.get("panel_stretch_bands", []),
+        "nine_slice_stretch_bands": validation.get("nine_slice_stretch_bands", []),
         "manual_action_required": sorted(
             {str(issue.get("asset_id") or issue.get("job_id") or issue.get("file") or issue.get("code")) for issue in failures}
         ),
     }
+    qa_report["quality"] = evaluate_quality(qa_report, jobs, all_entries)
+    quality_by_job = {item["id"]: item for item in qa_report["quality"]["jobs"]}
+    for job_result in qa_report["jobs"]:
+        job_result["quality"] = quality_by_job.get(job_result["id"])
     qa_report_path = run_dir / "qa" / "qa-report.json"
     write_json(qa_report_path, qa_report)
     jobs_payload["jobs"] = jobs
@@ -414,6 +475,7 @@ def run_pipeline(
             "manifest": relative(final_manifest_path, run_dir),
             "contact_sheet": relative(contact_path, run_dir),
             "qa_report": relative(qa_report_path, run_dir),
+            "style_consistency": relative(style_report_path, run_dir),
         },
         "results": {
             "expected": final_manifest["expected_count"],
@@ -422,6 +484,10 @@ def run_pipeline(
             "warning": qa_report["warning_count"],
             "fail": qa_report["fail_count"],
             "manual_action_required": qa_report["manual_action_required"],
+            "quality_score": qa_report["quality"]["score"],
+            "hard_blocker_count": qa_report["quality"]["hard_blocker_count"],
+            "job_quality": qa_report["quality"]["jobs"],
+            "style_score": style_report.get("overall_score"),
         },
         "completed_at": datetime.now(timezone.utc).isoformat(),
     }

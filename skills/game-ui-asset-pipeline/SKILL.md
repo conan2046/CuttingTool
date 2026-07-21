@@ -30,6 +30,7 @@ description: 生成、拆分、透明化、校验并打包游戏 UI 位图资源
 - 使用 GPT Image 2 彩色 Sheet＋灰度 Alpha Matte 推导的烟雾、玻璃、液体和柔光特效
 - 具有可验证生成来源的原生 RGBA 烟雾、玻璃、液体和柔光特效
 - Unity 2022.3 Sprite Single 自动导入、可验证九宫格 Border 和 Image/Button Prefab
+- V0.13 QA 质量评分、跨 Sheet 风格一致性、单原因纠错 Prompt、候选哈希去重和失败 Job 定向重生成
 
 以上九项是运行配置和验收 JSON 使用的内部类别名，必须原样返回。`01_Panel` 到 `09_Icon_Effect` 只用于文件名前缀；不要把 `09_Icon_Effect` 当成内部 `category`。
 
@@ -251,7 +252,11 @@ ${CODEX_HOME:-$HOME/.codex}/skills/.system/imagegen/SKILL.md
 
 Runner 根据 Job 声明分流 `model-matte-derived`、原生 Alpha、已有 Alpha 或色键背景。Matte 模式必须在正式输出前验证双图齐全、灰度纯度、黑色边框、连续 Alpha 层次、背景平整度、像素覆盖关系和双图 SHA-256；通过后用已知黑背景合成方程恢复直通道 RGB＋Alpha。失败时只写 QA 与失败摘要，不生成正式 Manifest。所有 RGBA 生产尺寸与单体归一化均使用预乘 Alpha；生成图与请求画布宽高比不一致时必须失败，禁止非等比拉伸。默认拒绝覆盖已有正式 Manifest；明确重跑时使用 `--force`。
 
-P6 编排器每次调用都写出 `qa/delivery-summary.json` 和 `qa/delivery-summary.md`。完成态重复调用必须直接复用正式结果；失败后替换生成输入可继续执行，只有已有正式 Manifest 时才允许显式 `--force-run`。
+P6 编排器每次调用都写出 `qa/delivery-summary.json` 和 `qa/delivery-summary.md`。完成态重复调用必须直接复用正式结果；V0.13 计划内替代候选会自动覆盖失败运行，计划外人工覆盖已有正式 Manifest 时才要求显式 `--force-run`。
+
+V0.13 中，Runner 失败后编排器还会写出 `qa/regeneration-plan.json/md` 和 `prompts/<job-id>-retry-<NN>.md`。立即按计划使用 `$imagegen` 只替换指定生产 Sheet 或 Alpha Matte，再续跑编排器。原文件未变化时保持 `awaiting-regeneration` 且不重复计次；替代候选就绪后自动覆盖失败运行。默认最多 3 个候选，每轮只纠正一个最高优先级原因。质量分只用于候选排序，任何 `fail` 仍禁止正式交付。
+
+当存在 Canonical 且至少有两个生产 Job 时，读取顶层 `style_consistency` 并输出 `qa/style-consistency.json`。评分组合 Canonical 相似度与 Sheet 间可见 RGBA 的调色板、平均色、亮度、饱和度和边缘密度；低于门槛时把 `cross-sheet-style-drift` 绑定到具体 Job，进入同一单原因纠错闭环。它是自动门禁，不替代 Contact Sheet 的人工语义、造型和用途检查。
 
 内置 `imagegen` 当前不能直接用于 `native-alpha-required`，但可以用于 `model-matte-derived`，不需要 API Key。原生模式仍需用户明确确认外部透明生成回退，并保存 `generated/<job-id>.provenance.json`；来源侧车中的模型与生成方式都必须为非空值。
 
@@ -371,6 +376,8 @@ Contact Sheet 中的棋盘格只用于人工查看透明边缘，不得回写到
 - 命名唯一且编号连续
 - Manifest 与实际文件一致
 - Contact Sheet 可读且风格一致
+- Run、Job、Asset 三级质量分和硬阻断数可追溯
+- 每个 Panel/Button 的 `nine_slice_stretch_bands` 四边报告通过；边中段凸起、凹口或持续内部花纹分别触发 `panel-stretch-band-decoration`、`button-stretch-band-decoration` 硬失败；Panel 同时保留兼容字段 `panel_stretch_bands`
 
 任何 `fail` 未处理时，不得报告资源包完成。
 
@@ -390,7 +397,7 @@ Contact Sheet 中的棋盘格只用于人工查看透明边缘，不得回写到
 
 脚本把可追溯 PNG 导入 `Assets/_Generated/GameUI/<project-id>`，配置 Sprite Single、Alpha、PPU、Pivot 和 Border，生成独立资源 Prefab、界面 Prefab、可直接运行的 Preview Scene，并由 Unity 渲染像素尺寸一致的预览 PNG。Panel/Button 自动分析九宫格，并按源图到全部布局目标的最小缩放比推导 PPU；只有 Border 置信度、中心拉伸区及换算后的显示尺寸全部有效时才写入，否则预检失败并要求在布局 JSON 的 `nine_slice_overrides` 或 `pixels_per_unit_overrides` 中明确覆写。
 
-预计九宫格拉伸的 Panel 只允许在四角固定区保留独特装饰；四边中段拉伸带和中央内容区必须连续、均匀、无星点、莲花、菱形、徽记或方向性图案。不要用扩大 Border 的方式包住边中段装饰；应编辑或重生成源资源。Panel 内按钮、列表和页签必须留在外框安全区内，不能覆盖或越过固定边框。Unity 验收必须看实际 Sliced 渲染，不只看自动 Border 置信度。
+预计九宫格拉伸的 Panel/Button 只允许在四角固定区保留独特装饰；四边中段拉伸带和中央内容区必须连续、均匀、无星点、莲花、菱形、徽记、卷纹或方向性图案。不要用扩大 Border 的方式包住边中段装饰；应编辑或重生成源资源。Panel 内按钮、列表和页签必须留在外框安全区内，不能覆盖或越过固定边框。Unity 验收必须看实际多尺寸 Sliced 渲染，不只看自动 Border 置信度。
 
 界面元素当前正式支持 `Image`、`Button`、`GridLayoutGroup`、`HorizontalLayoutGroup`、`VerticalLayoutGroup`、`ScrollView` 和 `ScrollViewport`。规则排列必须建立 Layout Group 父容器，由容器统一控制单元尺寸、间距、行列、内边距和对齐，不得逐项写死位置。背包、任务列表、商店列表等内容数量可能增长且展示区域有限的容器，优先使用 `ScrollView → ScrollViewport(RectMask2D) → Content(LayoutGroup + ContentSizeFitter)`；Viewport 只显示规定范围，超出内容必须隐藏并通过指定轴滚动，不得仅用 Layout Group 让内容越界。只有数量固定且确认永不溢出的纯装饰排列才允许只用 Layout Group。每个容器及子对象都附带稳定 `GameUIElementBinding.BindingId`；Button 自动配置 `Image`、`Button.targetGraphic`、Raycast，并在布局提供状态资源时使用真实 Hover/Pressed/Disabled SpriteSwap。无 Sprite 的 Image 可通过 RGBA `color` 作为确定性底色。文字、本地化、业务事件和运行时数据绑定属于项目代码，不得伪造完成。
 
@@ -433,8 +440,10 @@ output/<project-id>-<timestamp>/
 └─ qa/
    ├─ contact-sheet.png
    ├─ qa-report.json
+   ├─ style-consistency.json
    ├─ run-summary.json
    ├─ delivery-summary.json
+   ├─ regeneration-plan.json
    └─ delivery-summary.md
 ```
 

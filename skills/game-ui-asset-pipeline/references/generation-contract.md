@@ -87,6 +87,8 @@ Panel 预计进入 Unity 九宫格时，提示词必须额外明确：
 
 输出后必须按九宫格预览检查四条拉伸带。若中段仍出现独特装饰，只针对该问题编辑或重生成；不得通过扩大 Border 把边中段装饰全部纳入固定区，以免固定区在小尺寸控件中挤压变形。
 
+确定性 QA 对每个 Panel/Button 输出 `nine_slice_stretch_bands`，同时检查四边中间 60% 的外轮廓偏差和预乘 RGBA 内部纹理梯度；Panel 兼容保留 `panel_stretch_bands`。任一边出现超过容差的凸起、凹口或持续花纹时，分别写入 `panel-stretch-band-decoration` 或 `button-stretch-band-decoration` 并硬失败；Prompt 约束、自动检测和多尺寸 Sliced 预览必须同时存在。
+
 ## 色键约束
 
 使用纯色色键，不使用棋盘格。背景必须是单一颜色，不能带：
@@ -116,6 +118,10 @@ Panel 预计进入 Unity 九宫格时，提示词必须额外明确：
 - 网格被复制：明确 Layout Guide 只作为不可见施工参考。
 - 风格漂移：加强 Canonical Reference 的身份约束。
 - 状态外形不一致：强调同一母版轮廓，只改变状态表现。
-- Panel 拉伸带有装饰：只保留四角装饰，清除四边中段和中央独特图案，重建连续边线。
+- Panel/Button 拉伸带有装饰：只保留四角装饰，清除四边中段和中央独特图案，重建连续边线，并生成多尺寸 Sliced 预览复核。
 
 不要在一次重试中同时改变风格、布局和资源清单。
+
+V0.13 由 `orchestrate_ui_delivery.py` 把 QA 的最高优先级单一缺陷写入 `prompts/<job-id>-retry-<NN>.md` 和 `qa/regeneration-plan.json`。Codex 必须使用该 Prompt，只覆盖计划列出的输入文件，再续跑编排器。默认最多 3 个候选；候选分数只用于排序，任何 `fail` 都禁止正式交付。
+
+跨 Sheet 风格评分使用正式透明资源的可见 RGBA 画像，组合调色板、平均色、亮度、饱和度和边缘密度，同时比较 Canonical 与其他 Sheet。`cross-sheet-style-drift` 必须绑定 Job；纠错 Prompt 只要求恢复 Canonical 的配色、材质、描边、对比度和光照，不得借机改变布局或资源语义。

@@ -2,6 +2,8 @@
   "project_id": "xianxia-item-icons",
   "style_notes": "国风修仙手游，青玉与鎏金材质，正面视角，移动端清晰可读；reference-01 只参考材质，reference-02 只参考配色",
   "generation_method": "built-in-imagegen",
+  "retry_policy": {"max_attempts": 3},
+  "style_consistency": {"enabled": true, "warning_below": 60, "fail_below": 40},
   "canonical_style": "D:/CuttingTool/input/xianxia-item-icons/references/canonical-style.png",
   "references": [
     "D:/CuttingTool/input/xianxia-item-icons/references/reference-01-material.png",

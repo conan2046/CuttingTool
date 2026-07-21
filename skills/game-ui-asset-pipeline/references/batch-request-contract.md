@@ -40,6 +40,8 @@
 | `generation_method` | 否 | 默认 `built-in-imagegen` |
 | `canonical_style` | 否 | 已批准风格基准图路径 |
 | `references` | 否 | 其他风格参考图路径列表 |
+| `retry_policy` | 否 | V0.13 定向重生成策略；`max_attempts` 默认 3，可设为 1–5 |
+| `style_consistency` | 否 | 跨 Sheet 风格评分；默认启用，`warning_below=60`、`fail_below=40` |
 | `categories` | 是 | 一个或多个分类任务 |
 
 ## 分类字段
@@ -78,3 +80,7 @@
 `model-matte-derived` 使用内置 `built-in-imagegen`，每个 Job 必须同时生成 `generated/<job-id>.png` 与 `generated/<job-id>-alpha-matte.png`。Matte 生成时把彩色 Sheet 作为编辑目标，禁止独立重画；Runner 在正式输出前验证双图对齐和连续灰度层次。
 
 自然语言完整交付由 Codex 先建立本契约的请求 JSON，再交给 `orchestrate_ui_delivery.py`。编排器不解析自然语言、不调用图片 API；它负责生成 Job、报告精确缺图、补图续跑和汇总正式交付。状态机和摘要格式见 `orchestration-contract.md`。
+
+V0.13 会把规范化后的 `retry_policy` 写入运行目录 `request.json`。失败候选按内容哈希去重，每轮只纠正一个最高优先级原因；达到候选上限后保持硬失败。
+
+`style_consistency` 必须满足 `0 <= fail_below <= warning_below <= 100`。存在 Canonical 且至少两个 Job 时，Runner 输出 `qa/style-consistency.json`；风格漂移绑定到具体 Job，可触发定向重生成。

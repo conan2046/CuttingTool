@@ -18,6 +18,10 @@
 
 Codex 会负责建立请求、拆分 Sheet、生成图片、切割透明 PNG、运行 QA，并返回最终目录和 Contact Sheet。
 
+V0.13 起，QA 失败时不再只返回错误：系统会生成单原因纠错 Prompt 和失败 Job 替换清单，Codex 自动按计划重生成并续跑。默认最多评估 3 个候选；质量分只用于选择更好的候选，任何 `fail` 都不会被高分放行。
+
+同一批次至少有两张生产 Sheet 且提供 Canonical 时，还会生成 `qa/style-consistency.json`。它能发现某张 Sheet 的配色、材质、描边和光照漂移，但仍必须人工查看 Contact Sheet，确认装备语义、按钮状态和造型是否正确。
+
 如果同时提供 Unity 项目路径，QA 通过后还会自动配置 Sprite、九宫格并从确认过的布局生成 Image/Button Prefab。当前已验证目标为 Unity 2022.3 LTS；业务点击事件、文本本地化和运行时数据仍由项目代码接线。
 
 Unity 布局示例：`D:\CuttingTool\samples\unity-layout-example.json`。正式执行会生成 `unity-preflight.json`、`unity-import-report.json`、Unity 日志和回滚清单；九宫格低置信度时会要求明确 Border 覆写，不会猜测写入。
@@ -164,6 +168,7 @@ D:\CuttingTool\samples\ui-request-example.json
   "project_id": "xianxia-item-icons",
   "style_notes": "国风修仙手游，青玉与鎏金材质，正面视角，移动端清晰可读",
   "generation_method": "built-in-imagegen",
+  "retry_policy": {"max_attempts": 3},
   "canonical_style": "D:/CuttingTool/input/xianxia-item-icons/references/canonical-style.png",
   "references": [
     "D:/CuttingTool/input/xianxia-item-icons/references/reference-01-material.png",
@@ -220,6 +225,7 @@ D:\CuttingTool\output\<项目名>\
 1. `qa/contact-sheet.png`：人工查看数量、风格、轮廓、透明边缘和错误拆分。
 2. `qa/delivery-summary.md`：查看当前状态、结果数量和下一步动作。
 3. `qa/qa-report.json`：检查 `fail_count` 是否为 0。
+4. `qa/style-consistency.json`：检查总分、逐 Job 分数和 `cross-sheet-style-drift`。
 4. `final/manifest.json`：资源清单、来源、尺寸和输出路径。
 5. `final/<Category>/`：最终透明 PNG。
 
