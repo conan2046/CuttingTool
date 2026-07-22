@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.IO;
 using System.Linq;
 using CuttingTool.GameUI;
+using TMPro;
 using UnityEditor;
 using UnityEditor.SceneManagement;
 using UnityEngine;
@@ -14,16 +15,19 @@ namespace CuttingTool.GameUI.Editor
 {
     public static class GameUIBatchImporter
     {
+        private const string FallbackTextFontSourcePath = "Assets/_Project/UI/Fonts/SourceHanSansOLD-Heavy-2.otf";
+        private const string FallbackTextFontAssetPath = "Assets/_Project/UI/Fonts/TMP_SourceHanSansOLD Heavy SDF.asset";
         [Serializable]
         private sealed class ImportPlan
         {
             public int schema_version;
             public string project_id = string.Empty;
-            public string generated_root = string.Empty;
-            public string prefab_root = string.Empty;
+            public string sprite_root = string.Empty;
+            public string screen_prefab_root = string.Empty;
+            public string scene_root = string.Empty;
+            public string legacy_asset_prefab_root = string.Empty;
             public string report_path = string.Empty;
             public string preview_output_dir = string.Empty;
-            public bool create_asset_prefabs;
             public SpritePlan[] sprites = Array.Empty<SpritePlan>();
             public ScreenPlan[] screens = Array.Empty<ScreenPlan>();
         }
@@ -61,6 +65,16 @@ namespace CuttingTool.GameUI.Editor
             public float[] anchored_position = Array.Empty<float>();
             public float[] size = Array.Empty<float>();
             public float[] color = Array.Empty<float>();
+            public string text = string.Empty;
+            public float font_size = 32f;
+            public string text_alignment = "Center";
+            public string font_style = "Normal";
+            public string text_overflow = "Ellipsis";
+            public bool enable_auto_sizing;
+            public float font_size_min = 18f;
+            public float font_size_max = 32f;
+            public string font_source_path = string.Empty;
+            public string font_asset_path = string.Empty;
             public bool preserve_aspect;
             public bool raycast_target;
             public string highlighted_asset_id = string.Empty;
@@ -137,10 +151,8 @@ namespace CuttingTool.GameUI.Editor
             }
 
             var issues = new List<ImportIssue>();
+            RemoveLegacyAssetPrefabs(plan, issues);
             var importedSprites = ConfigureSprites(plan, issues);
-            var assetPrefabCount = plan.create_asset_prefabs
-                ? CreateAssetPrefabs(plan, importedSprites, issues)
-                : 0;
             var screenPrefabCount = CreateScreenPrefabs(plan, importedSprites, issues);
             var previewSceneCount = CreatePreviewScenes(plan, issues, out var previewImageCount);
             AssetDatabase.SaveAssets();
@@ -151,7 +163,7 @@ namespace CuttingTool.GameUI.Editor
                 ok = issues.All(issue => issue.severity != "fail"),
                 project_id = plan.project_id,
                 imported_sprite_count = importedSprites.Count,
-                asset_prefab_count = assetPrefabCount,
+                asset_prefab_count = 0,
                 screen_prefab_count = screenPrefabCount,
                 preview_scene_count = previewSceneCount,
                 preview_image_count = previewImageCount,
@@ -205,35 +217,21 @@ namespace CuttingTool.GameUI.Editor
             return result;
         }
 
-        private static int CreateAssetPrefabs(ImportPlan plan, IReadOnlyDictionary<string, Sprite> sprites, ICollection<ImportIssue> issues)
+        private static void RemoveLegacyAssetPrefabs(ImportPlan plan, ICollection<ImportIssue> issues)
         {
-            var directory = $"{plan.prefab_root}/Assets";
-            EnsureAssetDirectory(directory);
-            var count = 0;
-            foreach (var spritePlan in plan.sprites ?? Array.Empty<SpritePlan>())
+            if (string.IsNullOrWhiteSpace(plan.legacy_asset_prefab_root) || !AssetDatabase.IsValidFolder(plan.legacy_asset_prefab_root))
             {
-                if (!sprites.TryGetValue(spritePlan.id, out var sprite))
-                {
-                    continue;
-                }
-                var kind = string.Equals(spritePlan.category, "Button", StringComparison.Ordinal) ? "Button" : "Image";
-                var root = CreateVisualObject(spritePlan.id, spritePlan.id, kind, sprite, false, kind == "Button");
-                var path = $"{directory}/{SanitizeFileName(spritePlan.id)}.prefab";
-                PrefabUtility.SaveAsPrefabAsset(root, path, out var success);
-                UnityEngine.Object.DestroyImmediate(root);
-                if (!success)
-                {
-                    AddIssue(issues, "asset-prefab-save-failed", path, "Unity could not save the asset prefab.");
-                    continue;
-                }
-                count++;
+                return;
             }
-            return count;
+            if (!AssetDatabase.DeleteAsset(plan.legacy_asset_prefab_root))
+            {
+                AddIssue(issues, "legacy-asset-prefab-delete-failed", plan.legacy_asset_prefab_root, "Unity could not remove the obsolete per-asset prefab directory.");
+            }
         }
 
         private static int CreateScreenPrefabs(ImportPlan plan, IReadOnlyDictionary<string, Sprite> sprites, ICollection<ImportIssue> issues)
         {
-            var directory = $"{plan.prefab_root}/Screens";
+            var directory = plan.screen_prefab_root;
             EnsureAssetDirectory(directory);
             var count = 0;
             foreach (var screen in plan.screens ?? Array.Empty<ScreenPlan>())
@@ -252,7 +250,7 @@ namespace CuttingTool.GameUI.Editor
                         AddIssue(issues, "layout-sprite-missing", element.id, $"Unknown sprite ID: {element.asset_id}");
                         continue;
                     }
-                    var item = CreateElementObject(element, sprite);
+                    var item = CreateElementObject(element, sprite, issues);
                     var parent = root.transform;
                     if (!string.IsNullOrWhiteSpace(element.parent_id) && objects.TryGetValue(element.parent_id, out var parentObject))
                     {
@@ -269,6 +267,11 @@ namespace CuttingTool.GameUI.Editor
                     if (image != null)
                     {
                         image.color = ReadColor(element.color, Color.white);
+                    }
+                    var text = item.GetComponent<TextMeshProUGUI>();
+                    if (text != null)
+                    {
+                        text.color = ReadColor(element.color, Color.white);
                     }
                     ConfigureLayoutGroup(item, element, issues);
                     ConfigureContentSizeFitter(item, element, issues);
@@ -292,14 +295,14 @@ namespace CuttingTool.GameUI.Editor
 
         private static int CreatePreviewScenes(ImportPlan plan, ICollection<ImportIssue> issues, out int previewImageCount)
         {
-            var directory = $"{plan.generated_root}/Scenes";
+            var directory = plan.scene_root;
             EnsureAssetDirectory(directory);
             Directory.CreateDirectory(plan.preview_output_dir);
             var count = 0;
             previewImageCount = 0;
             foreach (var screen in plan.screens ?? Array.Empty<ScreenPlan>())
             {
-                var prefabPath = $"{plan.prefab_root}/Screens/{SanitizeFileName(screen.id)}.prefab";
+                var prefabPath = $"{plan.screen_prefab_root}/{SanitizeFileName(screen.id)}.prefab";
                 var screenPrefab = AssetDatabase.LoadAssetAtPath<GameObject>(prefabPath);
                 if (screenPrefab == null)
                 {
@@ -466,8 +469,12 @@ namespace CuttingTool.GameUI.Editor
             return item;
         }
 
-        private static GameObject CreateElementObject(ElementPlan element, Sprite sprite)
+        private static GameObject CreateElementObject(ElementPlan element, Sprite sprite, ICollection<ImportIssue> issues)
         {
+            if (string.Equals(element.kind, "Text", StringComparison.Ordinal))
+            {
+                return CreateTextObject(element, issues);
+            }
             if (string.Equals(element.kind, "ScrollView", StringComparison.Ordinal))
             {
                 var scrollView = new GameObject(
@@ -515,6 +522,143 @@ namespace CuttingTool.GameUI.Editor
                 return container;
             }
             return CreateVisualObject(element.id, element.id, element.kind, sprite, element.preserve_aspect, element.raycast_target);
+        }
+
+        private static GameObject CreateTextObject(ElementPlan element, ICollection<ImportIssue> issues)
+        {
+            var item = new GameObject(
+                string.IsNullOrWhiteSpace(element.id) ? "Text" : element.id,
+                typeof(RectTransform),
+                typeof(CanvasRenderer),
+                typeof(TextMeshProUGUI),
+                typeof(GameUIElementBinding));
+            var label = item.GetComponent<TextMeshProUGUI>();
+            label.font = ResolveTextFont(element, issues);
+            label.text = element.text ?? string.Empty;
+            label.fontSize = Mathf.Max(1f, element.font_size);
+            label.enableAutoSizing = element.enable_auto_sizing;
+            label.fontSizeMin = Mathf.Max(1f, element.font_size_min);
+            label.fontSizeMax = Mathf.Max(label.fontSizeMin, element.font_size_max);
+            label.alignment = ReadEnum(element.text_alignment, TextAlignmentOptions.Center, issues, element.id, "text-alignment-invalid");
+            label.fontStyle = ReadEnum(element.font_style, FontStyles.Normal, issues, element.id, "text-font-style-invalid");
+            label.overflowMode = ReadEnum(element.text_overflow, TextOverflowModes.Ellipsis, issues, element.id, "text-overflow-invalid");
+            label.raycastTarget = element.raycast_target;
+            item.GetComponent<GameUIElementBinding>().Configure(element.id);
+            return item;
+        }
+
+        private static TMP_FontAsset ResolveTextFont(ElementPlan element, ICollection<ImportIssue> issues)
+        {
+            if (string.IsNullOrWhiteSpace(element.font_source_path) && string.IsNullOrWhiteSpace(element.font_asset_path))
+            {
+                if (!EnsureTmpEssentialResources(issues, element.id))
+                {
+                    return null;
+                }
+                var projectDefaultFont = TMP_Settings.defaultFontAsset;
+                if (projectDefaultFont != null && HasUsableAtlas(projectDefaultFont))
+                {
+                    var defaultFontIssues = new List<ImportIssue>();
+                    if (EnsureTextCharacters(projectDefaultFont, element, defaultFontIssues))
+                    {
+                        return projectDefaultFont;
+                    }
+                }
+                element.font_source_path = FallbackTextFontSourcePath;
+                element.font_asset_path = FallbackTextFontAssetPath;
+                Debug.Log($"TMP project default font is unavailable; using fallback: {FallbackTextFontAssetPath}");
+            }
+            if (string.IsNullOrWhiteSpace(element.font_source_path) || string.IsNullOrWhiteSpace(element.font_asset_path))
+            {
+                AddIssue(issues, "text-font-path-incomplete", element.id, "TMP source font and font asset paths must be provided together.");
+                return null;
+            }
+            var sourceFont = AssetDatabase.LoadAssetAtPath<Font>(element.font_source_path);
+            if (sourceFont == null)
+            {
+                AddIssue(issues, "text-font-source-missing", element.id, $"TMP source font is unavailable: {element.font_source_path}");
+                return null;
+            }
+            var fontAsset = AssetDatabase.LoadAssetAtPath<TMP_FontAsset>(element.font_asset_path);
+            if (fontAsset != null && (!HasUsableAtlas(fontAsset) || fontAsset.sourceFontFile != sourceFont))
+            {
+                Debug.Log($"Recreating stale or incomplete TMP font asset: {element.font_asset_path}");
+                AssetDatabase.DeleteAsset(element.font_asset_path);
+                fontAsset = null;
+            }
+            if (fontAsset != null)
+            {
+                return EnsureTextCharacters(fontAsset, element, issues) ? fontAsset : null;
+            }
+            if (!EnsureTmpEssentialResources(issues, element.id))
+            {
+                return null;
+            }
+            EnsureAssetDirectory(Path.GetDirectoryName(element.font_asset_path) ?? "Assets");
+            fontAsset = TMP_FontAsset.CreateFontAsset(sourceFont);
+            if (fontAsset == null)
+            {
+                AddIssue(issues, "text-font-asset-create-failed", element.id, $"TMP font asset could not be created from: {element.font_source_path}");
+                return null;
+            }
+            fontAsset.atlasPopulationMode = AtlasPopulationMode.Dynamic;
+            AssetDatabase.CreateAsset(fontAsset, element.font_asset_path);
+            AssetDatabase.AddObjectToAsset(fontAsset.atlasTextures[0], fontAsset);
+            AssetDatabase.AddObjectToAsset(fontAsset.material, fontAsset);
+            AssetDatabase.SaveAssets();
+            return EnsureTextCharacters(fontAsset, element, issues) ? fontAsset : null;
+        }
+
+        private static bool HasUsableAtlas(TMP_FontAsset fontAsset)
+        {
+            return fontAsset.atlasTextures != null
+                && fontAsset.atlasTextures.Length > 0
+                && fontAsset.atlasTextures[0] != null
+                && fontAsset.material != null;
+        }
+
+        private static bool EnsureTextCharacters(TMP_FontAsset fontAsset, ElementPlan element, ICollection<ImportIssue> issues)
+        {
+            if (fontAsset == null || string.IsNullOrWhiteSpace(element.text))
+            {
+                return fontAsset != null;
+            }
+            if (fontAsset.HasCharacters(element.text))
+            {
+                return true;
+            }
+            if (!fontAsset.TryAddCharacters(element.text, out var missingCharacters))
+            {
+                AddIssue(issues, "text-font-glyphs-missing", element.id, $"TMP font is missing glyphs: {missingCharacters}");
+                return false;
+            }
+            EditorUtility.SetDirty(fontAsset);
+            return true;
+        }
+
+        private static bool EnsureTmpEssentialResources(ICollection<ImportIssue> issues, string target)
+        {
+            if (Resources.Load<TMP_Settings>("TMP Settings") != null && Shader.Find("TextMeshPro/Mobile/Distance Field") != null)
+            {
+                return true;
+            }
+            var package = UnityEditor.PackageManager.PackageInfo.FindForPackageName("com.unity.textmeshpro");
+            var resourcePackage = package == null
+                ? string.Empty
+                : Path.Combine(package.resolvedPath, "Package Resources", "TMP Essential Resources.unitypackage");
+            if (string.IsNullOrWhiteSpace(resourcePackage) || !File.Exists(resourcePackage))
+            {
+                AddIssue(issues, "tmp-essential-resources-missing", target, "TextMeshPro Essential Resources package is unavailable.");
+                return false;
+            }
+            AssetDatabase.ImportPackage(resourcePackage, false);
+            AssetDatabase.Refresh(ImportAssetOptions.ForceSynchronousImport);
+            if (Resources.Load<TMP_Settings>("TMP Settings") == null || Shader.Find("TextMeshPro/Mobile/Distance Field") == null)
+            {
+                AddIssue(issues, "tmp-essential-resources-import-failed", target, "TextMeshPro Essential Resources could not be imported.");
+                return false;
+            }
+            return true;
         }
 
         private static void ConfigureLayoutGroup(GameObject item, ElementPlan element, ICollection<ImportIssue> issues)

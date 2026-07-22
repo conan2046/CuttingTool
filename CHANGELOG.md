@@ -2,6 +2,33 @@
 
 记录每次正式功能提交的目标、主要改动、验证结果和兼容性影响。按时间倒序维护；纯格式整理或无功能影响的微小修正可以合并记录。
 
+## 2026-07-22｜v0.13.3｜Source Han 默认 TMP 字体
+
+- Text 先使用项目 TMP 默认字体；不存在时才回退 `SourceHanSansOLD-Heavy-2.otf` 与 `TMP_SourceHanSansOLD Heavy SDF.asset`。
+- 导入器检测 SDF 的 source font 引用是否与当前 OTF 一致；旧 GUID、失效 Atlas 或材质时自动重建同路径动态 SDF，避免中文显示方框。
+- 使用角色界面实际渲染验证标题、属性、页签和按钮中文均可见。
+
+## 2026-07-22｜v0.13.2｜Unity TMP 文本节点与 Button Label
+
+- `unity-layout.json` 新增 `kind: "Text"`，支持静态文案、字体大小、字体样式、对齐、自动缩放、溢出方式和颜色。
+- Text 强制声明 `font_source_path` 与 `font_asset_path`；Unity 导入器创建或复用 Dynamic TMP Font Asset，保证标题、数值占位和按钮文案可编辑且可渲染 CJK 字符。
+- Screen 导出约束要求所有静态可见文案使用 Text 节点，禁止透明 Image Mount 代替文本。
+
+## 2026-07-22｜v0.13.1｜Unity `_Project` 目录与 Sprite-only 美术资源
+
+### 完成
+
+- Unity 生成内容根目录由 `_Generated/GameUI` 迁移到 `_Project`。
+- Sprite 按导出文件夹隔离到 `Assets/_Project/UI/Sprites/<project-id>`。
+- Screen Prefab 统一写入 `Assets/_Project/Prefabs/UI/Demo`；Preview Scene 写入 `Assets/_Project/Scenes/Demo`。
+- 取消单独美术资源 Prefab，导入报告固定 `asset_prefab_count=0`。
+- 导入时定向删除同项目旧的 `Assets/_Generated/GameUI/<project-id>/Prefabs/Assets`。
+- 回滚改为删除项目级 Sprite 子目录及清单内的 Screen Prefab/Preview Scene，不递归删除共享 `_Project` 目录。
+
+### 兼容性
+
+- Unity 导入计划与回滚清单升级为 schema v2；旧 `_Generated` 路径不再作为新导出的正式目标。
+
 ## 2026-07-21｜v0.13.0｜QA 驱动纠错、候选评分与失败 Job 定向重生成
 
 发布分支：`codex/v0.13-quality-nine-slice`。

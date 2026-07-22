@@ -1,6 +1,6 @@
 # CuttingTool
 
-> 当前版本：`v0.13.0`｜Python `>=3.11`｜Unity `2022.3.x` + UGUI｜源码/安装态测试各 `120/120` 通过
+> 当前版本：`v0.13.1`｜Python `>=3.11`｜Unity `2022.3.x` + UGUI
 
 游戏 UI 位图资源生产与拆分工具。当前实现 `game-ui-asset-pipeline` Skill 的批量可执行核心链路：
 
@@ -27,7 +27,7 @@
 | `v0.10.x` | 自然语言一键编排、缺图续跑、交付摘要、跨风格 Matte 回归、项目初始化与参考图强制验收 |
 | `v0.11.0` | 自动需求接收、首界面完整产出、后续界面按语义复用、从中间阶段安全起跑 |
 | `v0.12.x` | Unity Sprite/Border/PPU、Image/Button Prefab、Preview Scene、真实 HUD、Layout Group、Scroll View、低 Alpha 外溢与九宫格安全区 |
-| `v0.13.0` | Run/Job/Asset 质量评分、候选哈希去重、单原因定向重生成、跨 Sheet 风格一致性、Panel/Button 内外双重九宫格门禁 |
+| `v0.13.x` | Run/Job/Asset 质量评分、候选哈希去重、单原因定向重生成、跨 Sheet 风格一致性、Panel/Button 内外双重九宫格门禁、Unity `_Project` 目录规范 |
 
 完整逐版本记录见 [CHANGELOG.md](CHANGELOG.md)。
 
@@ -98,7 +98,7 @@
 - 对 Panel/Button 自动推断九宫格 Border，并结合全部布局目标尺寸推导 PPU；低置信、无有效中心区或 Border 显示尺寸超限时阻断，支持显式人工覆写。
 - 九宫格 Panel/Button 只在四角固定区保留独特装饰，四边中段和中心区保持干净可拉伸；实际多尺寸 Sliced 预览必须检查角饰、连续边线、内部纹理和控件安全边距。
 - Panel/Button Prompt 强制禁止四边中点装饰；正式 QA 同时检查四边中间 60% 的外轮廓与内部纹理变化，并在报告中写出 `nine_slice_stretch_bands`。凸起、凹口或独特边带花纹直接硬失败。
-- 从已确认的 `unity-layout.json` 生成独立资源 Prefab 和 Image/Button 界面 Prefab，并附稳定 BindingId；规则网格或横纵队列使用 Grid/Horizontal/Vertical Layout Group 容器统一管理。
+- 从已确认的 `unity-layout.json` 生成 Image/Button/TMP Text 界面 Prefab 并附稳定 BindingId；标题、数值占位和按钮名为明确 Text 节点，支持 CJK 字体来源与动态 TMP Font Asset。单独美术资源不生成 Prefab。Sprite 写入 `Assets/_Project/UI/Sprites/<project-id>`，界面 Prefab 写入 `Assets/_Project/Prefabs/UI/Demo`。
 - 背包、任务、商店等可增长有限区域使用 ScrollView、RectMask2D Viewport、Layout Group Content 和 ContentSizeFitter；内容超出规定范围时裁剪并滚动，不允许越界显示。
 - 每次 Unity 导出生成预检、导入报告、批处理日志和安全回滚清单。
 - Unity 布局支持 RGBA 底色和 Button 四态 SpriteSwap，并自动生成可运行 Preview Scene 与同尺寸 Unity 渲染图。

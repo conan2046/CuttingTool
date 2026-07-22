@@ -17,6 +17,9 @@ from infer_nine_slice import infer_nine_slice
 
 SUPPORTED_UNITY_MAJOR = "2022.3"
 UNITY_CANVAS_REFERENCE_PPU = 100.0
+UNITY_SPRITE_ROOT = "Assets/_Project/UI/Sprites"
+UNITY_SCREEN_PREFAB_ROOT = "Assets/_Project/Prefabs/UI/Demo"
+UNITY_SCENE_ROOT = "Assets/_Project/Scenes/Demo"
 
 
 def read_json(path: Path) -> dict[str, Any]:
@@ -55,6 +58,18 @@ def validate_asset_path(value: str) -> str:
     if not normalized.startswith("Assets/") or ".." in normalized.split("/"):
         raise ValueError(f"Unity asset path must stay under Assets/: {value}")
     return normalized
+
+
+def validate_project_id(value: str) -> str:
+    normalized = value.strip()
+    if not normalized or normalized in {".", ".."} or any(character in normalized for character in "/\\"):
+        raise ValueError(f"project_id must be one safe folder name: {value}")
+    return normalized
+
+
+def sanitize_unity_filename(value: str) -> str:
+    invalid = set('<>:"/\\|?*')
+    return "".join("_" if character in invalid or ord(character) < 32 else character for character in value or "UI")
 
 
 def install_embedded_package(unity_project: Path, package_source: Path) -> str:
@@ -165,7 +180,7 @@ def normalize_layout(layout: dict[str, Any] | None) -> list[dict[str, Any]]:
             ids.add(element_id)
             kind = str(element.get("kind", "Image"))
             if kind not in {
-                "Image", "Button", "GridLayoutGroup", "HorizontalLayoutGroup", "VerticalLayoutGroup",
+                "Image", "Button", "Text", "GridLayoutGroup", "HorizontalLayoutGroup", "VerticalLayoutGroup",
                 "ScrollView", "ScrollViewport",
             }:
                 raise ValueError(f"unsupported Unity element kind: {kind}")
@@ -194,6 +209,42 @@ def normalize_layout(layout: dict[str, Any] | None) -> list[dict[str, Any]]:
                 raise ValueError(f"screens[{screen_index}].elements[{element_index}].color must contain four numbers")
             if not all(0.0 <= float(value) <= 1.0 for value in color):
                 raise ValueError(f"screens[{screen_index}].elements[{element_index}].color values must be between 0 and 1")
+            text = str(element.get("text", ""))
+            if kind == "Text" and not text:
+                raise ValueError(f"screens[{screen_index}].elements[{element_index}].text must be non-empty")
+            font_size = element.get("font_size", 32.0)
+            if not isinstance(font_size, (int, float)) or float(font_size) <= 0:
+                raise ValueError(f"screens[{screen_index}].elements[{element_index}].font_size must be positive")
+            font_size_min = element.get("font_size_min", 18.0)
+            font_size_max = element.get("font_size_max", font_size)
+            if (
+                not isinstance(font_size_min, (int, float))
+                or not isinstance(font_size_max, (int, float))
+                or float(font_size_min) <= 0
+                or float(font_size_max) < float(font_size_min)
+            ):
+                raise ValueError(f"screens[{screen_index}].elements[{element_index}] has invalid text auto-size range")
+            text_alignment = str(element.get("text_alignment", "Center"))
+            if text_alignment not in {
+                "TopLeft", "Top", "TopRight", "TopJustified", "TopFlush", "TopGeoAligned",
+                "Left", "Center", "Right", "Justified", "Flush", "CenterGeoAligned",
+                "BottomLeft", "Bottom", "BottomRight", "BottomJustified", "BottomFlush", "BottomGeoAligned",
+            }:
+                raise ValueError(f"unsupported Text alignment: {text_alignment}")
+            font_style = str(element.get("font_style", "Normal"))
+            if font_style not in {"Normal", "Bold", "Italic", "BoldItalic"}:
+                raise ValueError(f"unsupported Text font_style: {font_style}")
+            text_overflow = str(element.get("text_overflow", "Ellipsis"))
+            if text_overflow not in {"Overflow", "Ellipsis", "Masking", "Truncate", "ScrollRect", "Page", "Linked"}:
+                raise ValueError(f"unsupported Text overflow: {text_overflow}")
+            font_source_path = str(element.get("font_source_path", ""))
+            font_asset_path = str(element.get("font_asset_path", ""))
+            if kind == "Text":
+                if bool(font_source_path) != bool(font_asset_path):
+                    raise ValueError(f"screens[{screen_index}].elements[{element_index}] Text font_source_path and font_asset_path must be provided together")
+                if font_source_path:
+                    validate_asset_path(font_source_path)
+                    validate_asset_path(font_asset_path)
             spacing = element.get("spacing", [0.0, 0.0])
             cell_size = element.get("cell_size", [100.0, 100.0])
             padding = element.get("padding", [0, 0, 0, 0])
@@ -260,6 +311,16 @@ def normalize_layout(layout: dict[str, Any] | None) -> list[dict[str, Any]]:
                     "anchored_position": list(vectors["anchored_position"]),
                     "size": list(vectors["size"]),
                     "color": [float(value) for value in color],
+                    "text": text,
+                    "font_size": float(font_size),
+                    "text_alignment": text_alignment,
+                    "font_style": font_style,
+                    "text_overflow": text_overflow,
+                    "enable_auto_sizing": bool(element.get("enable_auto_sizing", False)),
+                    "font_size_min": float(font_size_min),
+                    "font_size_max": float(font_size_max),
+                    "font_source_path": font_source_path,
+                    "font_asset_path": font_asset_path,
                     "preserve_aspect": bool(element.get("preserve_aspect", False)),
                     "raycast_target": bool(element.get("raycast_target", kind == "Button")),
                     "highlighted_asset_id": str(element.get("highlighted_asset_id", "")),
@@ -317,7 +378,6 @@ def prepare_unity_export(
     unity_project: Path,
     package_source: Path,
     layout_path: Path | None = None,
-    import_root: str = "Assets/_Generated/GameUI",
     pixels_per_unit: float = 100.0,
     nine_slice_confidence: float = 0.65,
 ) -> dict[str, Any]:
@@ -334,11 +394,11 @@ def prepare_unity_export(
     qa_report = read_json(qa_report_path)
     if not qa_report.get("ok") or int(qa_report.get("fail_count", 0)) != 0:
         raise ValueError(f"formal QA has unresolved failures: {qa_report_path}")
-    project_id = str(manifest.get("project_id", "game-ui"))
-    import_root = validate_asset_path(import_root)
-    generated_root = f"{import_root}/{project_id}"
-    sprite_root = f"{generated_root}/Sprites"
-    prefab_root = f"{generated_root}/Prefabs"
+    project_id = validate_project_id(str(manifest.get("project_id", "game-ui")))
+    sprite_root = f"{UNITY_SPRITE_ROOT}/{project_id}"
+    screen_prefab_root = UNITY_SCREEN_PREFAB_ROOT
+    scene_root = UNITY_SCENE_ROOT
+    legacy_asset_prefab_root = f"Assets/_Generated/GameUI/{project_id}/Prefabs/Assets"
     layout = read_json(layout_path) if layout_path else None
     screens = normalize_layout(layout)
     overrides = dict((layout or {}).get("nine_slice_overrides", {}))
@@ -462,24 +522,29 @@ def prepare_unity_export(
     report_path = unity_dir / "unity-import-report.json"
     plan_path = unity_dir / "unity-import-plan.json"
     plan = {
-        "schema_version": 1,
+        "schema_version": 2,
         "project_id": project_id,
         "unity_version": unity_version,
-        "generated_root": generated_root,
-        "prefab_root": prefab_root,
+        "sprite_root": sprite_root,
+        "screen_prefab_root": screen_prefab_root,
+        "scene_root": scene_root,
+        "legacy_asset_prefab_root": legacy_asset_prefab_root,
         "report_path": str(report_path),
         "preview_output_dir": str(unity_dir / "previews"),
-        "create_asset_prefabs": True,
         "sprites": sprites,
         "screens": screens,
     }
     write_json(plan_path, plan)
     rollback = {
-        "schema_version": 1,
+        "schema_version": 2,
         "unity_project": str(unity_project),
-        "generated_root": generated_root,
         "embedded_package": package_path,
-        "created_files": created_files,
+        "sprite_export_root": sprite_root,
+        "created_assets": created_files + [
+            f"{screen_prefab_root}/{sanitize_unity_filename(screen['id'])}.prefab" for screen in screens
+        ] + [
+            f"{scene_root}/{sanitize_unity_filename(screen['id'])}-Preview.unity" for screen in screens
+        ],
     }
     write_json(unity_dir / "unity-rollback.json", rollback)
     preflight = {
@@ -504,7 +569,6 @@ def main() -> None:
     parser.add_argument("--unity-project", required=True, type=Path)
     parser.add_argument("--layout", type=Path)
     parser.add_argument("--package-source", type=Path, default=Path(__file__).resolve().parents[1] / "assets" / "unity-package")
-    parser.add_argument("--import-root", default="Assets/_Generated/GameUI")
     parser.add_argument("--pixels-per-unit", type=float, default=100.0)
     parser.add_argument("--nine-slice-confidence", type=float, default=0.65)
     args = parser.parse_args()
@@ -514,7 +578,6 @@ def main() -> None:
             args.unity_project,
             args.package_source,
             args.layout,
-            args.import_root,
             args.pixels_per_unit,
             args.nine_slice_confidence,
         )

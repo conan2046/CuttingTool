@@ -1,10 +1,10 @@
 # CuttingTool 会话交接
 
-> 更新时间：2026-07-21
+> 更新时间：2026-07-22
 > 工作目录：`D:\CuttingTool`  
 > 仓库：`https://github.com/conan2046/CuttingTool.git`  
 > 当前工作分支：`codex/v0.13-quality-nine-slice`
-> 已完成功能基线：v0.13.0 QA 驱动纠错、候选评分与失败 Job 定向重生成；并包含 v0.12.6 九宫格 Panel 拉伸带与控件安全区、Scroll View、Layout Group、低 Alpha 外溢、九宫格 PPU、真实 HUD、Button 四态与 Unity Preview Scene
+> 已完成功能基线：v0.13.1 Unity `_Project` 目录规范与 Sprite-only 美术资源；并包含 v0.13.0 QA 驱动纠错、候选评分与失败 Job 定向重生成
 
 ## 1. 新会话先做什么
 
@@ -39,12 +39,20 @@ game-ui-asset-pipeline
 → 本地色键/Alpha处理
 → 自动检测、切割、归一化、命名
 → Manifest、Contact Sheet、QA
-→ Unity Sprite/Border 配置、资源 Prefab、界面 Prefab
+→ Unity Sprite/Border 配置、界面 Prefab（不生成单资源 Prefab）
 ```
 
 核心原则：AI 负责视觉，Python 脚本负责确定性处理和验收。桌面 GUI 已明确降为长期最低优先级，不是当前开发目标。
 
 ## 3. 已经完成什么
+
+### 3.0 v0.13.1：Unity `_Project` 导出目录
+
+- Sprite：`Assets/_Project/UI/Sprites/<project-id>`。
+- Screen Prefab：`Assets/_Project/Prefabs/UI/Demo`。
+- Preview Scene：`Assets/_Project/Scenes/Demo`。
+- 单资源 Prefab 已取消；同项目旧 `_Generated/GameUI/<project-id>/Prefabs/Assets` 在导入时定向清理。
+- 回滚只处理项目 Sprite 子目录和本次明确生成的 Screen Prefab/Preview Scene，不删除共享目录。
 
 ### 3.0 v0.13.0：QA 驱动纠错与候选评分
 

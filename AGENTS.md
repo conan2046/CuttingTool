@@ -51,11 +51,11 @@ V1 必须支持：
 - 支持从需求接收、生成、已有 Sheet 后处理、未知整图诊断、仅 QA 和断点续跑阶段独立进入；从最靠后的安全阶段开始，但不得跳过后续 QA。
 - 对没有 Layout Guide 的未知整图先执行背景诊断，生成候选 bbox、可编辑修正 JSON 和标注预览。
 - 在不引入桌面 GUI 的前提下，用批准后的 bbox 修正文件完成透明切割和正式 QA。
-- 正式 QA 通过后可导入 Unity 2022.3：配置 Sprite Single/Alpha/PPU/Pivot/Border，生成资源 Prefab 和基于显式布局的 Image/Button 界面 Prefab。
+- 正式 QA 通过后可导入 Unity 2022.3：配置 Sprite Single/Alpha/PPU/Pivot/Border，并基于显式布局生成 Image/Button 界面 Prefab；单独美术资源不生成 Prefab。
 - Panel/Button 自动推断九宫格 Border；只有高置信且中心区有效时写入，低置信必须失败并使用人工覆写。
 - 九宫格 Panel 的龙、莲花、菱形、徽记等独特装饰只能位于四角固定区；上/下/左/右边中段和中央内容区必须干净、连续、可重复拉伸。禁止通过扩大 Border 把边中段装饰纳入固定区来掩盖问题；应编辑或重生成源图。
 - Panel 内按钮、列表、页签等控件必须位于外框安全区，不能覆盖或越过固定边框；优先作为 Panel 子节点声明。验收必须检查四边安全距离和实际 Unity Sliced 渲染，自动 Border/PPU 通过不等于视觉通过。
-- Unity 导出必须限定在 `Assets/_Generated/GameUI/<project-id>`，生成预检、导入报告、日志和回滚清单。
+- Unity 导出统一使用 `Assets/_Project`：Sprite 放入 `Assets/_Project/UI/Sprites/<project-id>`，Screen Prefab 放入 `Assets/_Project/Prefabs/UI/Demo`，Preview Scene 放入 `Assets/_Project/Scenes/Demo`；生成预检、导入报告、日志和逐文件回滚清单。
 
 V1 不包含：
 
@@ -104,10 +104,10 @@ V1 不包含：
 ### P7/P8 Unity 交付链路
 
 - 当前支持 Unity `2022.3.x` 与 UGUI；其他 Unity 主版本必须先兼容性验证。
-- 默认导入 `Assets/_Generated/GameUI/<project-id>`，安装嵌入包 `Packages/com.hongda.game-ui-asset-pipeline`；不得改写用户手工 Prefab。
+- 默认把 Sprite 导入 `Assets/_Project/UI/Sprites/<project-id>`，把 Screen Prefab 导入 `Assets/_Project/Prefabs/UI/Demo`，把 Preview Scene 导入 `Assets/_Project/Scenes/Demo`，并安装嵌入包 `Packages/com.hongda.game-ui-asset-pipeline`；不得生成单资源 Prefab，不得改写任务范围外的用户手工 Prefab。
 - TextureImporter 固定为 Sprite Single、Alpha Is Transparency、无 Mipmap、Clamp、Bilinear、Uncompressed；默认 PPU 100，Panel/Button 按源图与全部布局目标的最小缩放比自动提高 PPU，也可显式覆写。Pivot、Border、PPU 来源均须可追溯。
 - Panel/Button 自动九宫格推断必须记录置信度和来源。低置信、中心区无效、覆写越界，或 Border 经 PPU 换算后不适配任一布局目标尺寸，必须在启动 Unity 前失败。
-- 最终界面 Prefab 只从 schema v1 显式布局生成；父元素必须先声明，元素正式支持 Image、Button、GridLayoutGroup、HorizontalLayoutGroup、VerticalLayoutGroup，并写入稳定 BindingId。
+- 最终界面 Prefab 只从 schema v1 显式布局生成；父元素必须先声明，元素正式支持 Image、Button、Text（TMP）、GridLayoutGroup、HorizontalLayoutGroup、VerticalLayoutGroup，并写入稳定 BindingId。标题、数值占位和按钮文案必须使用 Text 节点，不得只留透明 Image Mount。
 - 装备位、页签、背包格、按钮排等规则排列必须使用 Layout Group 父容器统一控制单元尺寸、间距、行列、内边距和对齐；不得把同组子元素逐个写死坐标。验收必须同时检查 Prefab 组件、子节点数量与 Unity 渲染。
 - 背包、任务列表、商店列表、邮件列表等内容数量可能增长且展示范围有限的区域，优先使用 `ScrollView → Viewport(RectMask2D) → Content(LayoutGroup + ContentSizeFitter)`。Viewport 规定可见范围，超出内容必须隐藏并通过指定轴滚动；禁止只添加 Layout Group 后让子项越界。只有数量固定且确认不会溢出的纯装饰排列才允许不使用 Scroll View。
 - Scroll View 验收必须检查 ScrollRect 的 Content/Viewport 引用、滚动轴、MovementType、Viewport 的 RectMask2D、Content 的尺寸增长方式，以及 Content 大于 Viewport 时的实际裁剪渲染；组件名存在不等于验收通过。

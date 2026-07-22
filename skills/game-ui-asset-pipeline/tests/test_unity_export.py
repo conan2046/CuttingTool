@@ -149,12 +149,30 @@ class UnityExportTest(unittest.TestCase):
             self.assertEqual(plan["sprites"][0]["border_origin"], "auto-inferred")
             self.assertEqual(plan["sprites"][0]["pixels_per_unit_origin"], "layout-derived")
             self.assertEqual(plan["sprites"][0]["pixels_per_unit"], 100.0)
+            self.assertEqual(
+                plan["sprites"][0]["asset_path"],
+                "Assets/_Project/UI/Sprites/commercial-ui/01_Panel_Main_Default_001.png",
+            )
+            self.assertEqual(plan["screen_prefab_root"], "Assets/_Project/Prefabs/UI/Demo")
+            self.assertEqual(plan["scene_root"], "Assets/_Project/Scenes/Demo")
+            self.assertNotIn("create_asset_prefabs", plan)
             self.assertEqual(plan["screens"][0]["elements"][0]["id"], "MainPanel")
             rollback = json.loads((run_dir / "unity" / "unity-rollback.json").read_text(encoding="utf-8"))
-            self.assertEqual(rollback["generated_root"], "Assets/_Generated/GameUI/commercial-ui")
+            self.assertEqual(rollback["sprite_export_root"], "Assets/_Project/UI/Sprites/commercial-ui")
+            self.assertIn("Assets/_Project/Prefabs/UI/Demo/main-screen.prefab", rollback["created_assets"])
+            demo_prefabs = unity_project / "Assets" / "_Project" / "Prefabs" / "UI" / "Demo"
+            demo_prefabs.mkdir(parents=True)
+            (demo_prefabs / "main-screen.prefab").write_text("generated", encoding="utf-8")
+            (demo_prefabs / "Keep.prefab").write_text("handmade", encoding="utf-8")
+            demo_scenes = unity_project / "Assets" / "_Project" / "Scenes" / "Demo"
+            demo_scenes.mkdir(parents=True)
+            (demo_scenes / "main-screen-Preview.unity").write_text("generated", encoding="utf-8")
             rollback_result = UNITY_ROLLBACK.rollback(run_dir / "unity" / "unity-rollback.json")
             self.assertTrue(rollback_result["ok"])
-            self.assertFalse((unity_project / "Assets" / "_Generated" / "GameUI" / "commercial-ui").exists())
+            self.assertFalse((unity_project / "Assets" / "_Project" / "UI" / "Sprites" / "commercial-ui").exists())
+            self.assertFalse((demo_prefabs / "main-screen.prefab").exists())
+            self.assertTrue((demo_prefabs / "Keep.prefab").is_file())
+            self.assertFalse((demo_scenes / "main-screen-Preview.unity").exists())
             self.assertTrue((unity_project / "Packages" / "com.hongda.game-ui-asset-pipeline").is_dir())
 
     def test_rejects_layout_path_escape_and_unknown_assets(self) -> None:
@@ -245,9 +263,11 @@ class UnityExportTest(unittest.TestCase):
         importer = (SKILL_DIR / "assets" / "unity-package" / "Editor" / "GameUIBatchImporter.cs").read_text(
             encoding="utf-8"
         )
-        self.assertIn('spritePlan.category, "Button"', importer)
         self.assertIn("CreatePreviewScenes(plan, issues, out var previewImageCount)", importer)
         self.assertIn("Selectable.Transition.SpriteSwap", importer)
+        self.assertIn("asset_prefab_count = 0", importer)
+        self.assertNotIn("CreateAssetPrefabs(plan", importer)
+        self.assertIn("RemoveLegacyAssetPrefabs(plan, issues)", importer)
 
     def test_rejects_missing_or_failed_formal_qa(self) -> None:
         source = (SCRIPTS_DIR / "prepare_unity_export.py").read_text(encoding="utf-8")
@@ -280,6 +300,52 @@ class UnityExportTest(unittest.TestCase):
         self.assertEqual(elements[1]["highlighted_asset_id"], "Hover")
         self.assertEqual(elements[1]["pressed_asset_id"], "Pressed")
         self.assertEqual(elements[1]["disabled_asset_id"], "Disabled")
+
+    def test_normalizes_text_element_with_tmp_font_paths(self) -> None:
+        layout = {
+            "schema_version": 1,
+            "screens": [{
+                "id": "TextScreen",
+                "reference_size": [1920, 1080],
+                "elements": [{
+                    "id": "ConfirmLabel",
+                    "kind": "Text",
+                    "text": "确认",
+                    "size": [200, 60],
+                    "font_size": 34,
+                    "text_alignment": "Center",
+                    "font_style": "Bold",
+                    "enable_auto_sizing": True,
+                    "font_source_path": "Assets/_Project/UI/Fonts/NotoSansSC-VF.ttf",
+                    "font_asset_path": "Assets/_Project/UI/Fonts/NotoSansSC-VF SDF.asset",
+                }],
+            }],
+        }
+        element = UNITY_EXPORT.normalize_layout(layout)[0]["elements"][0]
+        self.assertEqual(element["text"], "确认")
+        self.assertEqual(element["font_style"], "Bold")
+        self.assertTrue(element["enable_auto_sizing"])
+
+    def test_allows_project_default_tmp_font_when_text_has_no_font_paths(self) -> None:
+        base = {
+            "schema_version": 1,
+            "screens": [{
+                "id": "TextScreen",
+                "reference_size": [1920, 1080],
+                "elements": [{"id": "Label", "kind": "Text"}],
+            }],
+        }
+        with self.assertRaisesRegex(ValueError, "text must be non-empty"):
+            UNITY_EXPORT.normalize_layout(base)
+        base["screens"][0]["elements"][0]["text"] = "Label"
+        element = UNITY_EXPORT.normalize_layout(base)[0]["elements"][0]
+        self.assertEqual(element["font_source_path"], "")
+        self.assertEqual(element["font_asset_path"], "")
+
+    def test_rejects_incomplete_text_font_override(self) -> None:
+        layout = {"schema_version": 1, "screens": [{"id": "TextScreen", "reference_size": [1920, 1080], "elements": [{"id": "Label", "kind": "Text", "text": "确认", "font_source_path": "Assets/_Project/UI/Fonts/Custom.otf"}]}]}
+        with self.assertRaisesRegex(ValueError, "must be provided together"):
+            UNITY_EXPORT.normalize_layout(layout)
 
     def test_normalizes_layout_group_configuration(self) -> None:
         layout = {

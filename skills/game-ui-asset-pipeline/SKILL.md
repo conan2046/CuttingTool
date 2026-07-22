@@ -1,6 +1,6 @@
 ---
 name: game-ui-asset-pipeline
-description: 生成、拆分、透明化、校验并打包游戏 UI 位图资源，并可导入 Unity 2022.3、配置 Sprite、推断九宫格 Border、生成 Image/Button 资源 Prefab 和最终界面 Prefab。当用户要求制作游戏UI、UI资源包、可切割Sheet、透明PNG、Unity UI导入、Sprite Editor、九宫格或可交互Prefab时使用；不用于角色动画、地图切片、普通照片抠图或从遮挡截图恢复不可见资源。
+description: 生成、拆分、透明化、校验并打包游戏 UI 位图资源，并可导入 Unity 2022.3、配置 Sprite、推断九宫格 Border 和生成最终界面 Prefab。当用户要求制作游戏UI、UI资源包、可切割Sheet、透明PNG、Unity UI导入、Sprite Editor、九宫格或可交互Prefab时使用；不用于角色动画、地图切片、普通照片抠图或从遮挡截图恢复不可见资源。
 ---
 
 # Game UI Asset Pipeline
@@ -29,7 +29,7 @@ description: 生成、拆分、透明化、校验并打包游戏 UI 位图资源
 - Icon_Effect 中可通过色键稳定提取的简单硬边特效
 - 使用 GPT Image 2 彩色 Sheet＋灰度 Alpha Matte 推导的烟雾、玻璃、液体和柔光特效
 - 具有可验证生成来源的原生 RGBA 烟雾、玻璃、液体和柔光特效
-- Unity 2022.3 Sprite Single 自动导入、可验证九宫格 Border 和 Image/Button Prefab
+- Unity 2022.3 Sprite Single 自动导入、可验证九宫格 Border 和 Image/Button 界面 Prefab
 - V0.13 QA 质量评分、跨 Sheet 风格一致性、单原因纠错 Prompt、候选哈希去重和失败 Job 定向重生成
 
 以上九项是运行配置和验收 JSON 使用的内部类别名，必须原样返回。`01_Panel` 到 `09_Icon_Effect` 只用于文件名前缀；不要把 `09_Icon_Effect` 当成内部 `category`。
@@ -60,7 +60,7 @@ description: 生成、拆分、透明化、校验并打包游戏 UI 位图资源
 - 首次项目初始化、用户说参考图已放好或需要检查参考图时，读取 `references/reference-intake-contract.md`。
 - 需要确认界面布局/尺寸、自动写参考说明、建立资源清单、跨界面复用或从中间阶段开始时，读取 `references/project-intake-and-reuse-contract.md`。
 - 遇到明确的 WebSocket `stream disconnected before completion` 错误时，读取 `references/task-recovery-contract.md`。
-- 用户要求 Unity 导入、Sprite Editor、九宫格、资源 Prefab 或最终界面 Prefab 时，读取 `references/unity-export-contract.md`。
+- 用户要求 Unity 导入、Sprite Editor、九宫格或最终界面 Prefab 时，读取 `references/unity-export-contract.md`。
 
 不要一次加载无关参考文件。
 
@@ -395,11 +395,11 @@ Contact Sheet 中的棋盘格只用于人工查看透明边缘，不得回写到
   --layout output/<project-id>/unity/unity-layout.json
 ```
 
-脚本把可追溯 PNG 导入 `Assets/_Generated/GameUI/<project-id>`，配置 Sprite Single、Alpha、PPU、Pivot 和 Border，生成独立资源 Prefab、界面 Prefab、可直接运行的 Preview Scene，并由 Unity 渲染像素尺寸一致的预览 PNG。Panel/Button 自动分析九宫格，并按源图到全部布局目标的最小缩放比推导 PPU；只有 Border 置信度、中心拉伸区及换算后的显示尺寸全部有效时才写入，否则预检失败并要求在布局 JSON 的 `nine_slice_overrides` 或 `pixels_per_unit_overrides` 中明确覆写。
+脚本把可追溯 PNG 导入 `Assets/_Project/UI/Sprites/<project-id>`，配置 Sprite Single、Alpha、PPU、Pivot 和 Border；界面 Prefab 统一写入 `Assets/_Project/Prefabs/UI/Demo`，Preview Scene 写入 `Assets/_Project/Scenes/Demo`，并由 Unity 渲染像素尺寸一致的预览 PNG。单独 Sprite 不生成资源 Prefab；导入时清理同项目旧目录 `Assets/_Generated/GameUI/<project-id>/Prefabs/Assets`。Panel/Button 自动分析九宫格，并按源图到全部布局目标的最小缩放比推导 PPU；只有 Border 置信度、中心拉伸区及换算后的显示尺寸全部有效时才写入，否则预检失败并要求在布局 JSON 的 `nine_slice_overrides` 或 `pixels_per_unit_overrides` 中明确覆写。
 
 预计九宫格拉伸的 Panel/Button 只允许在四角固定区保留独特装饰；四边中段拉伸带和中央内容区必须连续、均匀、无星点、莲花、菱形、徽记、卷纹或方向性图案。不要用扩大 Border 的方式包住边中段装饰；应编辑或重生成源资源。Panel 内按钮、列表和页签必须留在外框安全区内，不能覆盖或越过固定边框。Unity 验收必须看实际多尺寸 Sliced 渲染，不只看自动 Border 置信度。
 
-界面元素当前正式支持 `Image`、`Button`、`GridLayoutGroup`、`HorizontalLayoutGroup`、`VerticalLayoutGroup`、`ScrollView` 和 `ScrollViewport`。规则排列必须建立 Layout Group 父容器，由容器统一控制单元尺寸、间距、行列、内边距和对齐，不得逐项写死位置。背包、任务列表、商店列表等内容数量可能增长且展示区域有限的容器，优先使用 `ScrollView → ScrollViewport(RectMask2D) → Content(LayoutGroup + ContentSizeFitter)`；Viewport 只显示规定范围，超出内容必须隐藏并通过指定轴滚动，不得仅用 Layout Group 让内容越界。只有数量固定且确认永不溢出的纯装饰排列才允许只用 Layout Group。每个容器及子对象都附带稳定 `GameUIElementBinding.BindingId`；Button 自动配置 `Image`、`Button.targetGraphic`、Raycast，并在布局提供状态资源时使用真实 Hover/Pressed/Disabled SpriteSwap。无 Sprite 的 Image 可通过 RGBA `color` 作为确定性底色。文字、本地化、业务事件和运行时数据绑定属于项目代码，不得伪造完成。
+界面元素当前正式支持 `Image`、`Button`、`Text`（TMP）、`GridLayoutGroup`、`HorizontalLayoutGroup`、`VerticalLayoutGroup`、`ScrollView` 和 `ScrollViewport`。标题、数值占位和按钮文案必须建立明确的 `Text` 节点；Text 使用 `text`、`font_size`、`text_alignment`、`font_source_path`、`font_asset_path`，由导入器创建或复用动态 TMP Font Asset，保证 CJK 文案可渲染。规则排列必须建立 Layout Group 父容器，由容器统一控制单元尺寸、间距、行列、内边距和对齐，不得逐项写死位置。背包、任务列表、商店列表等内容数量可能增长且展示区域有限的容器，优先使用 `ScrollView → ScrollViewport(RectMask2D) → Content(LayoutGroup + ContentSizeFitter)`；Viewport 只显示规定范围，超出内容必须隐藏并通过指定轴滚动，不得仅用 Layout Group 让内容越界。只有数量固定且确认永不溢出的纯装饰排列才允许只用 Layout Group。每个容器及子对象都附带稳定 `GameUIElementBinding.BindingId`；Button 自动配置 `Image`、`Button.targetGraphic`、Raycast，并在布局提供状态资源时使用真实 Hover/Pressed/Disabled SpriteSwap。无 Sprite 的 Image 可通过 RGBA `color` 作为确定性底色。文字、本地化、业务事件和运行时数据绑定属于项目代码，不得伪造完成。
 
 Unity 导出失败时读取 `unity/unity-preflight.json`、`unity/unity-import-report.json` 和 `unity/unity-batch.log`。需要回滚本次生成目录时运行 `rollback_unity_export.py`；默认保留共享嵌入包，只有明确需要完全移除时才加 `--remove-package`。
 

@@ -21,7 +21,6 @@ def export_unity_ui(
     unity_editor: Path,
     layout: Path,
     package_source: Path,
-    import_root: str = "Assets/_Generated/GameUI",
 ) -> dict[str, Any]:
     run_dir = run_dir.expanduser().resolve()
     unity_project = unity_project.expanduser().resolve()
@@ -33,7 +32,6 @@ def export_unity_ui(
         unity_project,
         package_source,
         layout,
-        import_root,
     )
     if not preflight["ok"]:
         return {"ok": False, "status": "preflight-failed", **preflight}
@@ -84,7 +82,6 @@ def main() -> None:
     parser.add_argument("--unity-editor", required=True, type=Path)
     parser.add_argument("--layout", required=True, type=Path)
     parser.add_argument("--package-source", type=Path, default=Path(__file__).resolve().parents[1] / "assets" / "unity-package")
-    parser.add_argument("--import-root", default="Assets/_Generated/GameUI")
     args = parser.parse_args()
     try:
         result = export_unity_ui(
@@ -93,7 +90,6 @@ def main() -> None:
             args.unity_editor,
             args.layout,
             args.package_source,
-            args.import_root,
         )
     except (OSError, ValueError, KeyError, json.JSONDecodeError) as error:
         parser.error(str(error))

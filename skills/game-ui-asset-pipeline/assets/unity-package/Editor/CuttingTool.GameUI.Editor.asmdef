@@ -3,7 +3,8 @@
   "rootNamespace": "CuttingTool.GameUI.Editor",
   "references": [
     "CuttingTool.GameUI.Runtime",
-    "Unity.ugui"
+    "Unity.ugui",
+    "Unity.TextMeshPro"
   ],
   "includePlatforms": [
     "Editor"
