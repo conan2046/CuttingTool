@@ -15,10 +15,14 @@
 - 安装嵌入包：`Packages/com.hongda.game-ui-asset-pipeline`。
 - Sprite 使用 Single、Alpha Is Transparency、无 Mipmap、Clamp、Bilinear、Uncompressed。默认 PPU 100；Panel/Button 按源图到全部布局目标的最小缩放比自动提高 PPU，确保 Border 的 Unity 单位尺寸不会挤压目标控件。
 - Panel/Button 可写九宫格；其他类别 Border 为零。
-- 正式界面元素支持 `Image`、`Button`、`Text`（TMP）、`GridLayoutGroup`、`HorizontalLayoutGroup`、`VerticalLayoutGroup`、`ScrollView`、`ScrollViewport`。
+- 正式界面元素支持 `Image`、`Button`、`Text`（TMP）、`GridLayoutGroup`、`HorizontalLayoutGroup`、`VerticalLayoutGroup`、`ScrollView`、`ScrollViewport`、`PrefabInstance`。
+- `PrefabInstance` 通过 `prefab_screen_id` 引用同一 `screens[]` 中更早声明的 Screen Prefab；用于把固定区、可替换区组合成根界面，不复制子 Prefab 内容。
+- 根界面可声明 `toggle_groups`，每组至少两个 `Button → target` 绑定和一个 `default_target_id`；导入器生成 `GameUIViewSwitcher`，真实绑定 `Button.onClick` 并保证目标互斥激活。
 - Button 可显式绑定 Hover/Pressed/Disabled SpriteSwap；无 Sprite Image 可使用 RGBA 颜色。
 - 每个 Screen 自动生成 Preview Scene 和由 Unity Camera 渲染的同尺寸 PNG，作为视觉验收证据。
 - 不自动生成业务事件、本地化文本、数据绑定、动画状态机或项目专属控制器。
+
+同一请求可以包含多个 Screen。资源生成仍按 Sheet/Matte 逐张串行完成；资源 QA 全部通过后，编排器读取顶层 `unity_delivery` 一次启动 Unity batchmode，导入共享 Sprite，并对 `screens[]` 逐项生成独立 Prefab、Preview Scene 和预览 PNG。某个 Screen 失败时整次 Unity 交付失败，不得把其他 Screen 的成功冒充整批完成。
 
 ## `unity-layout.json` schema v1
 
@@ -85,6 +89,7 @@
 - 工程尚未导入 TMP Essential Resources 时，导入器从已安装的 `com.unity.textmeshpro` 包一次性导入官方 Essential Resources；字体来源应是项目有权使用的可再分发字体文件。
 - 每个静态标题、容量/数值占位和 Button 可见文案都必须是明确的 Text 子节点或 Text 元素，不能只保留透明 Image Mount。
 - `parent_id` 必须引用同一界面中更早声明的元素，禁止循环父子关系。
+- `PrefabInstance.prefab_screen_id` 必须引用更早声明的 Screen，保证 Unity 导入时子 Prefab 已存在。切换目标通常指向 `PrefabInstance`，切换按钮必须是同一根界面的 `Button`。
 - 所有二元向量必须包含两个数字，`size` 必须为正数。
 - `nine_slice_overrides` 使用 Unity 顺序 `[left,bottom,right,top]`，四值为非负整数，且必须留下非空中心区。
 - `pixels_per_unit_overrides` 必须为正数，优先级高于自动推导；未覆写时 Panel/Button 使用全部布局引用中的最小缩放比推导，其他类别使用默认值。
@@ -110,6 +115,8 @@
 
 执行顺序：Python 预检与九宫格推断 → 安装嵌入包/复制 PNG → Unity batchmode 清理旧资源 Prefab → 配置 importer → 生成屏幕 Prefab → 生成 Preview Scene → Unity 渲染预览 PNG → 写报告。
 
+通过自然语言一键编排时不需要手动调用上述命令；把同样的工程、Editor 和布局写入 `batch-request.json` 的 `unity_delivery`，编排器在资源 QA 通过后自动执行。只重跑 Unity 使用 `orchestrate_ui_delivery.py --run-dir <run-dir> --force-unity`。
+
 ## 验收与回滚
 
 必须检查：
@@ -124,6 +131,7 @@
 - 所有 Text 节点须在 Screen Prefab 中使用 `TextMeshProUGUI`，具备非空文本与 TMP Font Asset；中文/日文等 CJK 文案必须在 Unity Preview 中可读，不能显示缺字方块。
 - 所有规则排列容器必须在 Screen Prefab 中具有对应 Layout Group 组件；检查约束、行列、间距、子节点数量和 Unity 渲染结果，不能只确认组件存在。
 - 所有可增长有限列表必须检查 `ScrollRect.content`、`ScrollRect.viewport`、滚动轴、`RectMask2D`、ContentSizeFitter、Content/Viewport 尺寸关系和裁剪渲染；只添加 GridLayoutGroup 不算通过。
+- 组合界面必须检查根 Prefab 中的子对象仍为 Prefab Instance；`GameUIViewSwitcher` 的按钮、目标和默认索引均非空，运行时点击后两个目标必须严格互斥。
 - Border 来源记录为 `auto-inferred`、`manual-override` 或 `not-applicable`；PPU 来源记录为 `layout-derived`、`manual-override` 或 `default`。不得把低置信或几何不适配结果写入 Unity。
 - 对所有 Sliced Panel/Button 做实际多尺寸拉伸视觉检查：四角不变形、四边中段连续、内部无独特纹理拉长或重复、Panel 子控件不压住外框。自动 Border 通过不代表美术拉伸带一定可交付。
 

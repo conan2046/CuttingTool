@@ -1,6 +1,6 @@
 # CuttingTool
 
-> 当前版本：`v0.13.1`｜Python `>=3.11`｜Unity `2022.3.x` + UGUI
+> 当前版本：`v0.14.2`｜Python `>=3.11`｜Unity `2022.3.x` + UGUI
 
 游戏 UI 位图资源生产与拆分工具。当前实现 `game-ui-asset-pipeline` Skill 的批量可执行核心链路：
 
@@ -28,16 +28,28 @@
 | `v0.11.0` | 自动需求接收、首界面完整产出、后续界面按语义复用、从中间阶段安全起跑 |
 | `v0.12.x` | Unity Sprite/Border/PPU、Image/Button Prefab、Preview Scene、真实 HUD、Layout Group、Scroll View、低 Alpha 外溢与九宫格安全区 |
 | `v0.13.x` | Run/Job/Asset 质量评分、候选哈希去重、单原因定向重生成、跨 Sheet 风格一致性、Panel/Button 内外双重九宫格门禁、Unity `_Project` 目录规范 |
+| `v0.14.x` | 单次多界面需求、严格逐张图片队列、生成前内容策略、快速源门禁、全局额外生图预算、Unity 多 Screen、子 Prefab 组合与按钮互斥视图切换 |
 
 完整逐版本记录见 [CHANGELOG.md](CHANGELOG.md)。
 
-## v0.13.0 最新验收
+## v0.14.2 最新验收
+
+- 背包/商店可用 `content_policy.item_icons=empty-slots|runtime-data` 排除无须生成的道具 Icon。
+- 绿色色键状态图标首轮 Prompt 强制深蓝封闭底板、银白隔离边并禁止绿色反光。
+- 每张源图先检查比例、槽位、触边和色键反光；失败不启动完整 Runner。
+- 默认全局只追加 1 次生图调用，交付摘要显示首轮调用、总调用预算和 5–8 分钟/次的时长区间。
+
+## v0.14.1 Unity 验收
 
 | 项目 | 结果 |
 |---|---:|
-| 源码测试 | `120/120` |
-| Codex 安装态测试 | `120/120` |
-| Skill 源码/安装副本 | 68 个正式文件，SHA-256 `0` 差异 |
+| 源码测试 | `131/131` |
+| Codex 安装态测试 | `131/131` |
+| Skill 源码/安装副本 | 72 个正式文件，SHA-256 `0` 差异 |
+| 逐张生成队列 | 3 个输入只激活 1 个，按 Production → 下一 Job Production → Matte 推进 |
+| 多 Screen Unity 预检 | 2 个 Screen 共享 1 个 Sprite，2 Prefab + 2 Preview Scene 回滚项正确 |
+| 真实组合界面 | 48 Sprite / 4 Screen Prefab / 4 Scene / 4 Preview / 0 issue |
+| 属性/背包切换 | Unity 实际调用两个 `Button.onClick`，默认、切换、恢复三项均通过 |
 | 真实装备强化批次 | 10 pass / 2 warning / 0 fail |
 | Panel/Button 九宫格 | 2 个 Panel + 4 个 Button 状态，6 条边带报告全部通过 |
 | 多尺寸 Sliced 预览 | 原尺寸、`0.5×`、`1.5×`、`2×` 人工视觉验收通过 |
@@ -161,6 +173,12 @@ $PYTHON = 'C:\Users\Admin\.cache\codex-runtimes\codex-primary-runtime\dependenci
 
 Codex 先根据自然语言建立批量请求，格式见 [batch-request-contract.md](skills/game-ui-asset-pipeline/references/batch-request-contract.md)，完整状态机见 [orchestration-contract.md](skills/game-ui-asset-pipeline/references/orchestration-contract.md)。
 
+用户可以一次提出多个界面，例如：
+
+> 一次制作背包、商店和任务三个界面，统一仙侠青玉风格，内部逐张生成资源，最后导入指定 Unity 2022.3 工程并分别生成三个 Screen Prefab。界面尺寸均为 1920×1080，布局按已确认参考图。
+
+Codex 会一次建立完整请求，内部固定按 `sequential-inputs` 逐张调用图片生成。同一时刻只有一个激活输入，记录在 `qa/generation-queue.json/md`；用户不需要按 Sheet 重复提需求。
+
 ```powershell
 & $PYTHON .\skills\game-ui-asset-pipeline\scripts\orchestrate_ui_delivery.py `
   --request .\batch-request.json `
@@ -183,10 +201,14 @@ qa/qa-report.json
 qa/run-summary.json
 qa/delivery-summary.json
 qa/delivery-summary.md
+qa/generation-queue.json
+qa/generation-queue.md
 qa/style-consistency.json
 qa/nine-slice-multi-size-preview.json
 qa/nine-slice-multi-size-preview.png
 ```
+
+批量请求声明 `unity_delivery.enabled=true`、目标工程、Editor 和已确认的多 Screen 显式布局后，资源 QA 通过会自动继续 Unity 导出；不需要再单独调用导出命令。Unity 阶段失败时使用 `--force-unity` 续跑，不重新生成图片。
 
 失败进入定向纠错时还会输出 `qa/regeneration-plan.json/md` 与 `prompts/<job-id>-retry-<NN>.md`；只有全部硬阻断清零后才生成正式交付。
 

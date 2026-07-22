@@ -1,6 +1,6 @@
 [project]
 name = "cuttingtool"
-version = "0.13.3"
+version = "0.14.2"
 description = "Codex-first game UI asset production, QA, Unity sprite import, 9-slice inference, and prefab generation."
 requires-python = ">=3.11"
 dependencies = [

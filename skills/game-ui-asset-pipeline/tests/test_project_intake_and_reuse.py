@@ -124,6 +124,29 @@ class ProjectIntakeAndReuseTest(unittest.TestCase):
             self.assertEqual(reused["reuse_asset_id"], "05_Icon_General_Close_Default_001")
             self.assertEqual(reused["screen_size"], [1600, 900])
 
+    def test_empty_slot_content_policy_excludes_item_icon_generation(self) -> None:
+        with tempfile.TemporaryDirectory() as temporary_directory:
+            project_dir = Path(temporary_directory)
+            canonical = project_dir / "references" / "canonical-style.png"
+            canonical.parent.mkdir(parents=True)
+            canonical.write_bytes(b"fixture")
+            analysis = self.analysis(canonical)
+            analysis["screens"][0]["content_policy"] = {"item_icons": "empty-slots"}
+            analysis["screens"][0]["assets"].append(
+                {"category": "Icon_Item", "semantic_name": "SamplePotion"}
+            )
+
+            result = INTAKE.compile_intake(project_dir, analysis)
+
+            self.assertEqual(result["generate_count"], 3)
+            inventory = json.loads((project_dir / "ui-resource-inventory.json").read_text(encoding="utf-8"))
+            excluded = next(item for item in inventory["assets"] if item["semantic_name"] == "SamplePotion")
+            self.assertEqual(excluded["action"], "exclude")
+            self.assertEqual(excluded["exclusion_reason"], "item-icons:empty-slots")
+            request = json.loads((project_dir / "batch-request.json").read_text(encoding="utf-8"))
+            generated = [asset for category in request["categories"] for asset in category["assets"]]
+            self.assertNotIn("SamplePotion", [asset["semantic_name"] for asset in generated])
+
     def test_rejects_unconfirmed_layout_or_missing_difference_notes(self) -> None:
         with tempfile.TemporaryDirectory() as temporary_directory:
             project_dir = Path(temporary_directory)
@@ -136,6 +159,55 @@ class ProjectIntakeAndReuseTest(unittest.TestCase):
             analysis["screens"][0]["layout_confirmed"] = True
             analysis["screens"][1]["difference_notes"] = ""
             with self.assertRaisesRegex(ValueError, "difference_notes"):
+                INTAKE.compile_intake(project_dir, analysis)
+
+    def test_compiles_confirmed_multi_screen_unity_delivery(self) -> None:
+        with tempfile.TemporaryDirectory() as temporary_directory:
+            project_dir = Path(temporary_directory)
+            canonical = project_dir / "canonical-style.png"
+            canonical.write_bytes(b"fixture")
+            analysis = self.analysis(canonical)
+            analysis["unity_delivery"] = {
+                "enabled": True,
+                "layout_confirmed": True,
+                "unity_project": "D:/UnityProject",
+                "unity_editor": "E:/Unity/Editor/Unity.exe",
+            }
+            for screen in analysis["screens"]:
+                screen["unity_elements"] = [
+                    {
+                        "id": "SharedClose",
+                        "kind": "Image",
+                        "asset_id": "05_Icon_General_Close_Default_002",
+                        "size": [128, 128],
+                    }
+                ]
+
+            INTAKE.compile_intake(project_dir, analysis)
+
+            request = json.loads((project_dir / "batch-request.json").read_text(encoding="utf-8"))
+            self.assertEqual(request["generation_policy"]["mode"], "sequential-inputs")
+            self.assertEqual(request["generation_policy"]["max_concurrent_image_jobs"], 1)
+            unity = request["unity_delivery"]
+            self.assertTrue(unity["enabled"])
+            self.assertTrue(unity["layout_confirmed"])
+            self.assertEqual([screen["id"] for screen in unity["layout"]["screens"]], ["bag", "shop"])
+            self.assertEqual(unity["layout"]["screens"][1]["reference_size"], [1600, 900])
+
+    def test_unity_delivery_requires_explicit_layout_for_every_screen(self) -> None:
+        with tempfile.TemporaryDirectory() as temporary_directory:
+            project_dir = Path(temporary_directory)
+            canonical = project_dir / "canonical-style.png"
+            canonical.write_bytes(b"fixture")
+            analysis = self.analysis(canonical)
+            analysis["unity_delivery"] = {
+                "enabled": True,
+                "layout_confirmed": True,
+                "unity_project": "D:/UnityProject",
+                "unity_editor": "E:/Unity/Editor/Unity.exe",
+            }
+            analysis["screens"][0]["unity_elements"] = [{"id": "Panel", "kind": "Image", "size": [100, 100]}]
+            with self.assertRaisesRegex(ValueError, "unity_elements"):
                 INTAKE.compile_intake(project_dir, analysis)
 
     def test_catalog_merge_uses_semantic_identity_not_dimensions(self) -> None:

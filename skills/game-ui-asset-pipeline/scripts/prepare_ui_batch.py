@@ -88,6 +88,61 @@ def split_assets(assets: list[dict[str, Any]], capacity: int) -> list[list[dict[
     return sheets
 
 
+def normalize_unity_delivery(spec: dict[str, Any], run_dir: Path) -> dict[str, Any]:
+    raw = spec.get("unity_delivery")
+    if raw is None:
+        return {"enabled": False}
+    if not isinstance(raw, dict):
+        raise ValueError("unity_delivery must be an object")
+    enabled = bool(raw.get("enabled", False))
+    if not enabled:
+        return {"enabled": False}
+    if raw.get("layout_confirmed") is not True:
+        raise ValueError("unity_delivery.layout_confirmed must be true")
+    unity_project = str(raw.get("unity_project", "")).strip()
+    unity_editor = str(raw.get("unity_editor", "")).strip()
+    if not unity_project or not unity_editor:
+        raise ValueError("enabled unity_delivery requires unity_project and unity_editor")
+    if not Path(unity_project).is_absolute() or not Path(unity_editor).is_absolute():
+        raise ValueError("unity_project and unity_editor must be absolute paths")
+
+    layout_value = raw.get("layout")
+    if isinstance(layout_value, dict):
+        layout_payload = layout_value
+    elif isinstance(layout_value, str) and layout_value.strip():
+        layout_source = Path(layout_value).expanduser().resolve()
+        if not layout_source.is_file():
+            raise FileNotFoundError(f"Unity layout not found: {layout_source}")
+        layout_payload = read_json(layout_source)
+    else:
+        raise ValueError("enabled unity_delivery requires layout as an object or JSON file path")
+    if layout_payload.get("schema_version") != 1:
+        raise ValueError("unity_delivery layout schema_version must be 1")
+    screens = layout_payload.get("screens")
+    if not isinstance(screens, list) or not screens:
+        raise ValueError("unity_delivery layout requires at least one screen")
+    screen_ids: set[str] = set()
+    for index, screen in enumerate(screens):
+        if not isinstance(screen, dict):
+            raise ValueError(f"unity_delivery.layout.screens[{index}] must be an object")
+        screen_id = str(screen.get("id", "")).strip()
+        if not screen_id or screen_id in screen_ids:
+            raise ValueError(f"invalid duplicate Unity screen id at index {index}")
+        screen_ids.add(screen_id)
+
+    layout_path = run_dir / "unity" / "unity-layout.json"
+    write_json(layout_path, layout_payload)
+    return {
+        "enabled": True,
+        "layout_confirmed": True,
+        "unity_project": unity_project,
+        "unity_editor": unity_editor,
+        "layout": "unity/unity-layout.json",
+        "screen_count": len(screens),
+        "screen_ids": sorted(screen_ids),
+    }
+
+
 def prepare_batch(spec: dict[str, Any], run_dir: Path, force: bool = False) -> Path:
     project_id = slugify(str(spec.get("project_id", "game-ui")))
     categories = spec.get("categories")
@@ -98,6 +153,24 @@ def prepare_batch(spec: dict[str, Any], run_dir: Path, force: bool = False) -> P
     if max_attempts < 1 or max_attempts > 5:
         raise ValueError("retry_policy.max_attempts must be between 1 and 5")
     retry_policy = {"max_attempts": max_attempts, "single_cause_per_attempt": True}
+    raw_budget = spec.get("generation_budget", {})
+    if not isinstance(raw_budget, dict):
+        raise ValueError("generation_budget must be an object")
+    max_extra_calls = int(raw_budget.get("max_extra_calls", 1))
+    minutes_per_call = raw_budget.get("estimated_minutes_per_call", [5, 8])
+    if max_extra_calls < 0 or max_extra_calls > 5:
+        raise ValueError("generation_budget.max_extra_calls must be between 0 and 5")
+    if (
+        not isinstance(minutes_per_call, list)
+        or len(minutes_per_call) != 2
+        or not all(isinstance(item, (int, float)) and item > 0 for item in minutes_per_call)
+        or minutes_per_call[0] > minutes_per_call[1]
+    ):
+        raise ValueError("generation_budget.estimated_minutes_per_call must be [positive min, positive max]")
+    generation_budget = {
+        "max_extra_calls": max_extra_calls,
+        "estimated_minutes_per_call": [float(minutes_per_call[0]), float(minutes_per_call[1])],
+    }
     style_consistency = dict(spec.get("style_consistency", {}))
     style_consistency = {
         "enabled": bool(style_consistency.get("enabled", True)),
@@ -119,8 +192,23 @@ def prepare_batch(spec: dict[str, Any], run_dir: Path, force: bool = False) -> P
         "normalized",
         "final",
         "qa",
+        "unity",
     ):
         (run_dir / relative).mkdir(parents=True, exist_ok=True)
+
+    generation_policy = {
+        "mode": "sequential-inputs",
+        "max_concurrent_image_jobs": 1,
+        "rerun_orchestrator_after_each_input": True,
+    }
+    requested_policy = spec.get("generation_policy")
+    if requested_policy is not None:
+        if not isinstance(requested_policy, dict):
+            raise ValueError("generation_policy must be an object")
+        requested_limit = int(requested_policy.get("max_concurrent_image_jobs", 1))
+        requested_mode = str(requested_policy.get("mode", "sequential-inputs"))
+        if requested_limit != 1 or requested_mode != "sequential-inputs":
+            raise ValueError("image generation is fixed to sequential-inputs with max_concurrent_image_jobs=1")
 
     references: list[dict[str, str]] = []
     generation_method = str(spec.get("generation_method", "built-in-imagegen"))
@@ -243,6 +331,7 @@ def prepare_batch(spec: dict[str, Any], run_dir: Path, force: bool = False) -> P
                     "kind": "production-asset-sheet",
                     "category": category,
                     "sheet_number": sheet_number,
+                    "generation_sequence": len(jobs) + 1,
                     "status": "awaiting-generation",
                     "expected_count": len(chunk),
                     "request_file": f"requests/{job_id}.json",
@@ -264,6 +353,7 @@ def prepare_batch(spec: dict[str, Any], run_dir: Path, force: bool = False) -> P
             )
 
     created_at = datetime.now(timezone.utc).isoformat()
+    unity_delivery = normalize_unity_delivery(spec, run_dir)
     write_json(
         run_dir / "request.json",
         {
@@ -272,14 +362,25 @@ def prepare_batch(spec: dict[str, Any], run_dir: Path, force: bool = False) -> P
             "created_at": created_at,
             "style_notes": str(spec.get("style_notes", "")),
             "generation_method": generation_method,
+            "generation_policy": generation_policy,
+            "generation_budget": generation_budget,
             "retry_policy": retry_policy,
             "style_consistency": style_consistency,
             "references": references,
             "categories": normalized_categories,
             "expected_count": sum(len(item["assets"]) for item in normalized_categories),
+            "unity_delivery": unity_delivery,
         },
     )
-    write_json(run_dir / "jobs.json", {"schema_version": 2, "created_at": created_at, "jobs": jobs})
+    write_json(
+        run_dir / "jobs.json",
+        {
+            "schema_version": 2,
+            "created_at": created_at,
+            "generation_policy": generation_policy,
+            "jobs": jobs,
+        },
+    )
     return run_dir
 
 

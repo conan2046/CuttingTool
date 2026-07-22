@@ -29,8 +29,10 @@ description: 生成、拆分、透明化、校验并打包游戏 UI 位图资源
 - Icon_Effect 中可通过色键稳定提取的简单硬边特效
 - 使用 GPT Image 2 彩色 Sheet＋灰度 Alpha Matte 推导的烟雾、玻璃、液体和柔光特效
 - 具有可验证生成来源的原生 RGBA 烟雾、玻璃、液体和柔光特效
-- Unity 2022.3 Sprite Single 自动导入、可验证九宫格 Border 和 Image/Button 界面 Prefab
+- Unity 2022.3 Sprite Single 自动导入、可验证九宫格 Border、Image/Button 界面 Prefab、子 Prefab 组合和按钮互斥视图切换
 - V0.13 QA 质量评分、跨 Sheet 风格一致性、单原因纠错 Prompt、候选哈希去重和失败 Job 定向重生成
+- V0.14 单次多界面需求、严格逐张图片生成队列，以及资源 QA 通过后的多 Screen Unity 自动导出
+- V0.14.2 生成前内容策略、状态图标防色键污染 Prompt、逐图快速源门禁和全局额外生图预算
 
 以上九项是运行配置和验收 JSON 使用的内部类别名，必须原样返回。`01_Panel` 到 `09_Icon_Effect` 只用于文件名前缀；不要把 `09_Icon_Effect` 当成内部 `category`。
 
@@ -219,6 +221,10 @@ ${CODEX_HOME:-$HOME/.codex}/skills/.system/imagegen/SKILL.md
 
 编排器在缺图时返回 `awaiting-generation`、精确缺失路径、对应 Prompt 和参考图角色。立即使用 `$imagegen` 补齐文件并仅传 `--run-dir` 续跑；输入齐全时自动执行 Runner。`awaiting-generation` 是内部状态，不是向用户停顿的理由。
 
+用户可以一次提出多个界面和全部资源；不要要求用户按图片逐次下需求。编排器固定使用 `sequential-inputs`，`qa/generation-queue.json` 同一时刻只激活一个生成输入。只对当前激活的 Sheet 或 Matte 调用一次 `$imagegen`，保存后立即续跑编排器，再处理下一项；不得并行生成多个图片 Job，也不得把多个完整界面挤进一张生产 Sheet。
+
+建立背包、商店等内容界面前先写 `screens[].content_policy.item_icons`：`generate` 生成示例道具，`empty-slots` 只交付空格位，`runtime-data` 由业务数据运行时填充。后两者必须把 `Icon_Item` 标记为 `exclude`，不得先生成再弃用。批量请求默认写入 `generation_budget.max_extra_calls=1` 和单次 5–8 分钟估算；摘要显示首轮调用数、全局额外调用预算及总时长区间。
+
 ### 4. 生成布局引导图
 
 为每个 Sheet 建立确定性 Layout Guide。它只表达：
@@ -240,6 +246,8 @@ ${CODEX_HOME:-$HOME/.codex}/skills/.system/imagegen/SKILL.md
 - 本分类的资源清单和顺序
 
 要求模型输出准确数量、互不接触、完整居中的资源。普通资源使用纯色色键；复杂半透明资源使用纯黑底彩色 Sheet，并基于该图生成同尺寸、同布局、同轮廓的灰度 Alpha Matte。生成后立即检查数量、分离度、边缘裁切、网格污染、Matte 对齐和风格一致性。
+
+每张 Production Sheet 就绪后，编排器先写 `qa/source-gates/<job-id>.json` 并检查可解码、画布比例、槽位占用、画布触边；绿色色键的 `Icon_Status` 额外检查绿色/青绿色反光。快速门禁失败时不得启动完整 Runner，只生成一个定向纠错任务；全局额外调用预算耗尽后保持硬失败。
 
 ### 6. 确定性后处理
 
@@ -385,6 +393,8 @@ Contact Sheet 中的棋盘格只用于人工查看透明边缘，不得回写到
 
 只有正式 Manifest 和 QA 均通过后才进入 Unity。先从已确认的界面布局生成 `unity-layout.json`；不要让确定性脚本从截图猜坐标或交互语义。
 
+单次请求包含多个界面且用户已确认 Unity 工程、Editor 和每屏显式布局时，把这些信息写入顶层 `unity_delivery`。编排器在最后一个生成输入和资源 QA 完成后自动调用 Unity 导出；每个 `screens[]` 项生成独立 Screen Prefab、Preview Scene 和预览 PNG。Unity 失败只用 `--force-unity` 续跑，不重新生成图片。
+
 读取 `unity-export-contract.md`，验证目标 Unity 项目、2022.3 版本、导入根目录和回滚范围，然后运行：
 
 ```powershell
@@ -443,6 +453,8 @@ output/<project-id>-<timestamp>/
    ├─ style-consistency.json
    ├─ run-summary.json
    ├─ delivery-summary.json
+   ├─ generation-queue.json
+   ├─ generation-queue.md
    ├─ regeneration-plan.json
    └─ delivery-summary.md
 ```

@@ -2,6 +2,38 @@
 
 记录每次正式功能提交的目标、主要改动、验证结果和兼容性影响。按时间倒序维护；纯格式整理或无功能影响的微小修正可以合并记录。
 
+## 2026-07-22｜v0.14.2｜生图调用压缩与快速源门禁
+
+- 新增界面 `content_policy.item_icons`：`empty-slots`/`runtime-data` 直接排除 `Icon_Item`，避免无须使用的道具 Sheet 进入生成与重试。
+- 绿色色键 `Icon_Status` 首轮 Prompt 强制深蓝封闭底板、银白连续隔离边，并禁止绿色/青绿色反光、光晕和内部染色。
+- 新增 `quick_source_gate.py`：完整 Runner 前检查 PNG 解码、画布比例、槽位占用、画布触边和状态图标绿色反光；失败直接生成单原因纠错计划。
+- 新增全局 `generation_budget`：默认首轮之外最多追加 1 次图片调用；摘要输出首轮调用数、2–3 次总预算及按 5–8 分钟/次计算的预计时长。
+- 图片生成继续固定串行并发 1；不启用并行生图，避免风格漂移、Matte 顺序错误和恢复状态竞争。
+- 源码与安装态全量 `unittest` 各 136/136 通过；72 个正式 Skill 文件 SHA-256 差异 0。
+
+## 2026-07-22｜v0.14.1｜Unity 子 Prefab 组合与互斥切换
+
+- Unity schema v1 新增 `PrefabInstance` 与 `toggle_groups`：固定区、属性区、背包区可保存为独立 Prefab，再由根 Prefab 保持嵌套引用。
+- 新增 `GameUIViewSwitcher`，导入时真实绑定 `Button.onClick`，默认显示指定目标，并保证属性/背包目标互斥激活。
+- 真实 `1920×1080` 角色界面完成：48 Sprite、4 Screen Prefab、4 Preview Scene、4 Preview PNG、0 issue；根 Prefab 保留 3 个嵌套 Prefab Instance。
+- Unity batchmode 实际调用属性/背包两个按钮，默认属性、切到背包、恢复属性三项均通过。背包按用户要求保留 25 个空格位，不绑定道具 Icon。
+- 源码与安装态全量 `unittest` 各 131/131 通过；Skill 源码/安装副本 70 个正式文件 SHA-256 差异 0。首次 C# 局部变量重名错误已修复并完成真实 Unity 复验。
+
+## 2026-07-22｜v0.14.0｜单次多界面需求、逐张生成队列与自动 Unity 拼装
+
+- 用户只需一次声明全部界面、资源、Unity 项目和已确认布局；Codex 内部把资源拆成有序 Job，不要求用户逐张下需求。
+- 图片生成固定为 `sequential-inputs`，最大并发图片 Job 为 1。编排器输出 `qa/generation-queue.json/md`，同一时刻只激活一个 Production Sheet、Alpha Matte 或来源侧车；保存后续跑才激活下一项。
+- `compile_ui_project_intake.py` 支持从多个 Screen 的 `unity_elements` 构建统一 `unity-layout.json`；启用 Unity 交付时，每个 Screen 都必须提供已确认的显式布局，禁止从截图猜层级和坐标。
+- `batch-request.json` 新增 `unity_delivery`。全部图片和资源 QA 通过后，编排器自动调用 Unity 导出，为每个 Screen 生成独立 Prefab、Preview Scene 和渲染 PNG。
+- Unity 失败后可使用 `--force-unity` 单独续跑，不重新生成图片或重跑资源切割。
+- 新增逐张队列、多 Screen 自动交付、并发拒绝、双屏共享 Sprite、幂等复用及显式布局门禁测试。
+- 源码与安装态全量 `unittest` 各 129/129 通过；68 个正式 Skill 文件 SHA-256 一致，0 差异。
+
+### 兼容性
+
+- 未声明 `unity_delivery.enabled=true` 的旧批量请求保持原有资源交付行为。
+- `request.json` 与 `jobs.json` 保持 schema v2，新增字段为向后兼容扩展。
+
 ## 2026-07-22｜v0.13.3｜Source Han 默认 TMP 字体
 
 - Text 先使用项目 TMP 默认字体；不存在时才回退 `SourceHanSansOLD-Heavy-2.otf` 与 `TMP_SourceHanSansOLD Heavy SDF.asset`。

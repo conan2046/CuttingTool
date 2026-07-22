@@ -122,6 +122,15 @@ Nine-slice stretch-band contract:
 - Never place a star, diamond, jewel, crest, lotus, badge, spike, notch, protrusion, directional motif, or thickness change at any edge midpoint
 - Do not enlarge corner decoration into a horizontal or vertical stretch band
 """
+    status_isolation_contract = ""
+    if category == "Icon_Status" and transparency_mode == "chroma-key" and chroma_key == "#00FF00":
+        status_isolation_contract = """
+Status-icon isolation contract:
+- Fully enclose every icon subject with one opaque dark-navy circular or medallion backing
+- Add one continuous silver-white isolation rim around that backing
+- The backing and rim must separate every visible subject pixel from the green chroma background
+- No green, cyan-green, jade-green, lime, or emerald reflection, halo, highlight, rim, or interior tint anywhere
+"""
     if transparency_mode == "native-alpha-required":
         background_contract = """Native transparency contract:
 - Output PNG with a genuine RGBA alpha channel created by the image model
@@ -165,6 +174,7 @@ Style:
 - Preserve one coherent UI family across every asset
 - Keep details readable at mobile-game UI size
 {nine_slice_contract}
+{status_isolation_contract}
 
 {background_contract}
 

@@ -24,6 +24,7 @@ SUPPORTED_CATEGORIES = {
     "Icon_Skill",
     "Icon_Effect",
 }
+ITEM_ICON_POLICIES = {"generate", "empty-slots", "runtime-data"}
 
 
 def read_json(path: Path) -> dict[str, Any]:
@@ -74,6 +75,14 @@ def validate_analysis(analysis: dict[str, Any]) -> None:
             raise ValueError(f"screens[{screen_index}].elements_match_canonical must be true or false")
         if screen.get("elements_match_canonical") is False and not str(screen.get("difference_notes", "")).strip():
             raise ValueError(f"screens[{screen_index}].difference_notes is required when elements do not match")
+        content_policy = screen.get("content_policy", {})
+        if not isinstance(content_policy, dict):
+            raise ValueError(f"screens[{screen_index}].content_policy must be an object")
+        item_icons = str(content_policy.get("item_icons", "generate"))
+        if item_icons not in ITEM_ICON_POLICIES:
+            raise ValueError(
+                f"screens[{screen_index}].content_policy.item_icons must be one of {sorted(ITEM_ICON_POLICIES)}"
+            )
         assets = screen.get("assets")
         if not isinstance(assets, list) or not assets:
             raise ValueError(f"screens[{screen_index}].assets requires at least one asset")
@@ -85,6 +94,23 @@ def validate_analysis(analysis: dict[str, Any]) -> None:
                 raise ValueError(f"unsupported category at screens[{screen_index}].assets[{asset_index}]: {category}")
             if not str(asset.get("semantic_name", "")).strip():
                 raise ValueError(f"screens[{screen_index}].assets[{asset_index}].semantic_name is required")
+    unity_delivery = analysis.get("unity_delivery")
+    if unity_delivery is not None:
+        if not isinstance(unity_delivery, dict):
+            raise ValueError("unity_delivery must be an object")
+        if bool(unity_delivery.get("enabled", False)):
+            if unity_delivery.get("layout_confirmed") is not True:
+                raise ValueError("unity_delivery.layout_confirmed must be true")
+            if not str(unity_delivery.get("unity_project", "")).strip():
+                raise ValueError("enabled unity_delivery requires unity_project")
+            if not str(unity_delivery.get("unity_editor", "")).strip():
+                raise ValueError("enabled unity_delivery requires unity_editor")
+            for screen_index, screen in enumerate(screens):
+                elements = screen.get("unity_elements")
+                if not isinstance(elements, list) or not elements:
+                    raise ValueError(
+                        f"screens[{screen_index}].unity_elements requires an explicit non-empty layout"
+                    )
 
 
 def managed_markdown(existing: str, generated: str) -> str:
@@ -146,13 +172,15 @@ def compile_inventory(analysis: dict[str, Any], catalog: dict[str, dict[str, Any
     generated_in_request: dict[str, dict[str, Any]] = {}
     generation_assets: OrderedDict[str, dict[str, Any]] = OrderedDict()
     for screen_index, screen in enumerate(analysis["screens"]):
+        item_icon_policy = str(screen.get("content_policy", {}).get("item_icons", "generate"))
         for asset in screen["assets"]:
             category = str(asset["category"])
             semantic_name = str(asset["semantic_name"]).strip()
             state = str(asset.get("state", "Default")).strip() or "Default"
             key = asset_key(category, semantic_name, state)
-            reuse = None if screen_index == 0 else generated_in_request.get(key) or catalog.get(key)
-            action = "reuse" if reuse else "generate"
+            excluded = category == "Icon_Item" and item_icon_policy in {"empty-slots", "runtime-data"}
+            reuse = None if excluded or screen_index == 0 else generated_in_request.get(key) or catalog.get(key)
+            action = "exclude" if excluded else ("reuse" if reuse else "generate")
             record = {
                 "screen_id": str(screen.get("id", f"screen-{screen_index + 1:02d}")),
                 "screen_name": str(screen.get("name", screen.get("id", f"Screen {screen_index + 1}"))),
@@ -162,6 +190,8 @@ def compile_inventory(analysis: dict[str, Any], catalog: dict[str, dict[str, Any
                 "state": state,
                 "description": str(asset.get("description", "")).strip(),
                 "action": action,
+                "content_policy": item_icon_policy if category == "Icon_Item" else None,
+                "exclusion_reason": f"item-icons:{item_icon_policy}" if excluded else None,
                 "reuse_asset_id": reuse.get("id") if reuse else None,
                 "reuse_output": reuse.get("output") if reuse else None,
                 "reuse_source_run": reuse.get("source_run") if reuse else None,
@@ -211,6 +241,13 @@ def build_batch_request(analysis: dict[str, Any], generation_assets: list[dict[s
                 "description": asset["description"],
             }
         )
+    unity_delivery = build_unity_delivery(analysis)
+    generation_budget = {
+        "max_extra_calls": int(analysis.get("generation_budget", {}).get("max_extra_calls", 1)),
+        "estimated_minutes_per_call": list(
+            analysis.get("generation_budget", {}).get("estimated_minutes_per_call", [5, 8])
+        ),
+    }
     if not grouped:
         return {
             "schema_version": 2,
@@ -218,6 +255,13 @@ def build_batch_request(analysis: dict[str, Any], generation_assets: list[dict[s
             "generation_method": "built-in-imagegen",
             "categories": [],
             "all_assets_reused": True,
+            "generation_policy": {
+                "mode": "sequential-inputs",
+                "max_concurrent_image_jobs": 1,
+                "rerun_orchestrator_after_each_input": True,
+            },
+            "generation_budget": generation_budget,
+            "unity_delivery": unity_delivery,
         }
     category_settings = analysis.get("category_settings", {})
     categories = []
@@ -229,9 +273,43 @@ def build_batch_request(analysis: dict[str, Any], generation_assets: list[dict[s
         "project_id": analysis["project_id"],
         "style_notes": str(analysis.get("style_notes", "")),
         "generation_method": str(analysis.get("generation_method", "built-in-imagegen")),
+        "generation_policy": {
+            "mode": "sequential-inputs",
+            "max_concurrent_image_jobs": 1,
+            "rerun_orchestrator_after_each_input": True,
+        },
+        "generation_budget": generation_budget,
         "canonical_style": str(analysis["canonical_reference"]["file"]),
         "references": [str(item["file"]) for item in analysis.get("supporting_references", [])],
         "categories": categories,
+        "unity_delivery": unity_delivery,
+    }
+
+
+def build_unity_delivery(analysis: dict[str, Any]) -> dict[str, Any]:
+    raw = analysis.get("unity_delivery")
+    if not isinstance(raw, dict) or not bool(raw.get("enabled", False)):
+        return {"enabled": False}
+    screens = []
+    for index, screen in enumerate(analysis["screens"], start=1):
+        screens.append(
+            {
+                "id": str(screen.get("id", f"screen-{index:02d}")),
+                "name": str(screen.get("name", screen.get("id", f"Screen {index}"))),
+                "reference_size": list(screen["target_size"]),
+                "elements": list(screen["unity_elements"]),
+            }
+        )
+    layout: dict[str, Any] = {"schema_version": 1, "screens": screens}
+    for field in ("nine_slice_overrides", "pixels_per_unit_overrides"):
+        if field in raw:
+            layout[field] = raw[field]
+    return {
+        "enabled": True,
+        "layout_confirmed": True,
+        "unity_project": str(raw["unity_project"]),
+        "unity_editor": str(raw["unity_editor"]),
+        "layout": layout,
     }
 
 

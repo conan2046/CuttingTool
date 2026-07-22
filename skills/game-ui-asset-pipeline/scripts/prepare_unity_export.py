@@ -164,7 +164,11 @@ def normalize_layout(layout: dict[str, Any] | None) -> list[dict[str, Any]]:
     if not isinstance(screens, list) or not screens:
         raise ValueError("unity layout requires at least one screen")
     normalized: list[dict[str, Any]] = []
+    declared_screen_ids: set[str] = set()
     for screen_index, screen in enumerate(screens):
+        screen_id = str(screen.get("id", f"screen-{screen_index + 1:02d}")).strip()
+        if not screen_id or screen_id in declared_screen_ids:
+            raise ValueError(f"invalid duplicate screen id at screens[{screen_index}]")
         reference_size = screen.get("reference_size")
         if not isinstance(reference_size, list) or len(reference_size) != 2:
             raise ValueError(f"screens[{screen_index}].reference_size must be [width,height]")
@@ -181,13 +185,23 @@ def normalize_layout(layout: dict[str, Any] | None) -> list[dict[str, Any]]:
             kind = str(element.get("kind", "Image"))
             if kind not in {
                 "Image", "Button", "Text", "GridLayoutGroup", "HorizontalLayoutGroup", "VerticalLayoutGroup",
-                "ScrollView", "ScrollViewport",
+                "ScrollView", "ScrollViewport", "PrefabInstance",
             }:
                 raise ValueError(f"unsupported Unity element kind: {kind}")
             parent_id = str(element.get("parent_id", ""))
             if parent_id and parent_id not in ids:
                 raise ValueError(
                     f"parent_id must reference an earlier element at screens[{screen_index}].elements[{element_index}]"
+                )
+            prefab_screen_id = str(element.get("prefab_screen_id", ""))
+            if kind == "PrefabInstance":
+                if not prefab_screen_id or prefab_screen_id not in declared_screen_ids:
+                    raise ValueError(
+                        f"screens[{screen_index}].elements[{element_index}].prefab_screen_id must reference an earlier screen"
+                    )
+            elif prefab_screen_id:
+                raise ValueError(
+                    f"screens[{screen_index}].elements[{element_index}].prefab_screen_id is only valid for PrefabInstance"
                 )
             vectors = {
                 "anchor_min": element.get("anchor_min", [0.5, 0.5]),
@@ -304,6 +318,7 @@ def normalize_layout(layout: dict[str, Any] | None) -> list[dict[str, Any]]:
                     "id": element_id,
                     "parent_id": parent_id,
                     "asset_id": str(element.get("asset_id", "")),
+                    "prefab_screen_id": prefab_screen_id,
                     "kind": kind,
                     "anchor_min": list(vectors["anchor_min"]),
                     "anchor_max": list(vectors["anchor_max"]),
@@ -362,14 +377,46 @@ def normalize_layout(layout: dict[str, Any] | None) -> list[dict[str, Any]]:
                 raise ValueError(f"ScrollView {element['id']} requires content_id to reference a child of its viewport")
             if not element["horizontal_scroll"] and not element["vertical_scroll"]:
                 raise ValueError(f"ScrollView {element['id']} must enable horizontal_scroll or vertical_scroll")
+        toggle_groups = screen.get("toggle_groups", [])
+        if not isinstance(toggle_groups, list):
+            raise ValueError(f"screens[{screen_index}].toggle_groups must be a list")
+        normalized_toggle_groups = []
+        for group_index, group in enumerate(toggle_groups):
+            group_id = str(group.get("id", "")).strip()
+            default_target_id = str(group.get("default_target_id", "")).strip()
+            bindings = group.get("bindings")
+            if not group_id or not isinstance(bindings, list) or len(bindings) < 2:
+                raise ValueError(f"screens[{screen_index}].toggle_groups[{group_index}] requires id and at least two bindings")
+            normalized_bindings = []
+            target_ids: set[str] = set()
+            for binding_index, binding in enumerate(bindings):
+                button_id = str(binding.get("button_id", "")).strip()
+                target_id = str(binding.get("target_id", "")).strip()
+                button = elements_by_id.get(button_id)
+                target = elements_by_id.get(target_id)
+                if button is None or button["kind"] != "Button":
+                    raise ValueError(f"toggle binding button must reference a Button: {button_id}")
+                if target is None:
+                    raise ValueError(f"toggle binding target does not exist: {target_id}")
+                if target_id in target_ids:
+                    raise ValueError(f"toggle group contains duplicate target: {target_id}")
+                target_ids.add(target_id)
+                normalized_bindings.append({"button_id": button_id, "target_id": target_id})
+            if default_target_id not in target_ids:
+                raise ValueError(f"toggle group default_target_id must reference one of its targets: {default_target_id}")
+            normalized_toggle_groups.append(
+                {"id": group_id, "default_target_id": default_target_id, "bindings": normalized_bindings}
+            )
         normalized.append(
             {
-                "id": str(screen.get("id", f"screen-{screen_index + 1:02d}")),
-                "name": str(screen.get("name", screen.get("id", f"Screen{screen_index + 1}"))),
+                "id": screen_id,
+                "name": str(screen.get("name", screen_id)),
                 "reference_size": list(reference_size),
                 "elements": normalized_elements,
+                "toggle_groups": normalized_toggle_groups,
             }
         )
+        declared_screen_ids.add(screen_id)
     return normalized
 
 

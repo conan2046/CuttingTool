@@ -4,6 +4,7 @@ import sys
 import tempfile
 import unittest
 from pathlib import Path
+from unittest import mock
 
 import numpy as np
 from PIL import Image
@@ -119,14 +120,19 @@ class P6OrchestrationTest(unittest.TestCase):
             self.assertEqual(waiting["status"], "awaiting-generation")
             self.assertEqual(waiting["generation"]["job_count"], 2)
             self.assertEqual(waiting["generation"]["missing_input_count"], 3)
+            self.assertEqual(waiting["generation"]["policy"]["max_concurrent_image_jobs"], 1)
+            self.assertEqual(waiting["generation"]["next_task"]["path"], "generated/icon-item-sheet-01.png")
             self.assertTrue((run_dir / "qa" / "delivery-summary.json").is_file())
             self.assertTrue((run_dir / "qa" / "delivery-summary.md").is_file())
+            queue = json.loads((run_dir / "qa" / "generation-queue.json").read_text(encoding="utf-8"))
+            self.assertEqual([task["status"] for task in queue["tasks"]], ["active", "blocked", "blocked"])
 
             self.write_chroma_sheet(run_dir)
             partial = ORCHESTRATOR.orchestrate(run_dir)
             self.assertEqual(partial["status"], "awaiting-generation")
             self.assertEqual(partial["generation"]["ready_job_count"], 1)
             self.assertEqual(partial["generation"]["missing_input_count"], 2)
+            self.assertEqual(partial["generation"]["next_task"]["path"], "generated/icon-effect-sheet-01.png")
 
             self.write_matte_sheet(run_dir)
             complete = ORCHESTRATOR.orchestrate(run_dir)
@@ -142,6 +148,143 @@ class P6OrchestrationTest(unittest.TestCase):
             self.assertTrue(reused["ok"])
             self.assertTrue(reused["reused_existing_delivery"])
             self.assertEqual(reused["status"], "complete")
+
+    def test_multi_screen_unity_delivery_runs_after_sequential_assets(self) -> None:
+        with tempfile.TemporaryDirectory() as temporary_directory:
+            root = Path(temporary_directory)
+            run_dir = root / "run"
+            request = self.request()
+            shared_asset = "06_Icon_Item_HealthPotion_Default_001"
+            request["unity_delivery"] = {
+                "enabled": True,
+                "layout_confirmed": True,
+                "unity_project": str(root / "UnityProject"),
+                "unity_editor": str(root / "Unity.exe"),
+                "layout": {
+                    "schema_version": 1,
+                    "screens": [
+                        {
+                            "id": "BagScreen",
+                            "reference_size": [1920, 1080],
+                            "elements": [
+                                {"id": "SharedPotion", "kind": "Image", "asset_id": shared_asset, "size": [96, 96]}
+                            ],
+                        },
+                        {
+                            "id": "ShopScreen",
+                            "reference_size": [1600, 900],
+                            "elements": [
+                                {"id": "SharedPotion", "kind": "Image", "asset_id": shared_asset, "size": [72, 72]}
+                            ],
+                        },
+                    ],
+                },
+            }
+            request_path = root / "batch-request.json"
+            request_path.write_text(json.dumps(request), encoding="utf-8")
+
+            waiting = ORCHESTRATOR.orchestrate(run_dir, request_path=request_path)
+            self.assertEqual(waiting["status"], "awaiting-generation")
+            self.assertTrue((run_dir / "unity" / "unity-layout.json").is_file())
+            self.write_chroma_sheet(run_dir)
+            ORCHESTRATOR.orchestrate(run_dir)
+            self.write_matte_sheet(run_dir)
+
+            def fake_unity_export(run_path, *_args):
+                unity_dir = run_path / "unity"
+                (unity_dir / "previews").mkdir(parents=True, exist_ok=True)
+                report = {
+                    "ok": True,
+                    "screen_prefab_count": 2,
+                    "preview_scene_count": 2,
+                    "preview_image_count": 2,
+                }
+                (unity_dir / "unity-import-report.json").write_text(json.dumps(report), encoding="utf-8")
+                for screen_id in ("BagScreen", "ShopScreen"):
+                    (unity_dir / "previews" / f"{screen_id}.png").write_bytes(b"preview")
+                return {"ok": True, "status": "complete", "results": report}
+
+            with mock.patch.object(ORCHESTRATOR, "export_unity_ui", side_effect=fake_unity_export) as exporter:
+                complete = ORCHESTRATOR.orchestrate(run_dir)
+                self.assertTrue(complete["ok"], complete)
+                self.assertEqual(complete["status"], "complete")
+                self.assertEqual(complete["unity"]["screen_count"], 2)
+                self.assertEqual(complete["unity"]["screens"], ["BagScreen", "ShopScreen"])
+                exporter.assert_called_once()
+
+                reused = ORCHESTRATOR.orchestrate(run_dir)
+                self.assertTrue(reused["reused_existing_delivery"])
+                exporter.assert_called_once()
+
+    def test_rejects_parallel_image_generation_policy(self) -> None:
+        with tempfile.TemporaryDirectory() as temporary_directory:
+            root = Path(temporary_directory)
+            request = self.request()
+            request["generation_policy"] = {
+                "mode": "sequential-inputs",
+                "max_concurrent_image_jobs": 2,
+            }
+            request_path = root / "batch-request.json"
+            request_path.write_text(json.dumps(request), encoding="utf-8")
+            with self.assertRaisesRegex(ValueError, "max_concurrent_image_jobs=1"):
+                ORCHESTRATOR.orchestrate(root / "run", request_path=request_path)
+
+    def test_rejects_unity_layout_path_escape(self) -> None:
+        with tempfile.TemporaryDirectory() as temporary_directory:
+            run_dir = Path(temporary_directory).resolve()
+            with self.assertRaisesRegex(ValueError, "must stay inside the run directory"):
+                ORCHESTRATOR.resolve_run_relative(run_dir, "../outside-layout.json", "unity_delivery.layout")
+
+    def test_quick_source_gate_blocks_runner_and_uses_global_extra_call_budget(self) -> None:
+        with tempfile.TemporaryDirectory() as temporary_directory:
+            root = Path(temporary_directory)
+            run_dir = root / "run"
+            request_path = self.write_request(root)
+            ORCHESTRATOR.orchestrate(run_dir, request_path=request_path)
+            self.write_chroma_sheet(run_dir)
+            self.write_matte_sheet(run_dir)
+            item_job = self.jobs(run_dir)["Icon_Item"]
+            source_path = run_dir / item_job["generated_output"]
+            image = np.asarray(Image.open(source_path).convert("RGB")).copy()
+            image[0, 0] = (220, 20, 20)
+            Image.fromarray(image, mode="RGB").save(source_path)
+
+            with mock.patch.object(ORCHESTRATOR, "run_pipeline") as runner:
+                blocked = ORCHESTRATOR.orchestrate(run_dir)
+
+            runner.assert_not_called()
+            self.assertTrue(blocked["ok"])
+            self.assertEqual(blocked["status"], "awaiting-regeneration")
+            self.assertEqual(blocked["retry"]["items"][0]["primary_issue"]["code"], "source-edge-contact")
+            self.assertEqual(blocked["generation"]["budget"]["call_budget_range"], [3, 4])
+            self.assertEqual(blocked["generation"]["budget"]["extra_calls_committed"], 1)
+            self.assertTrue((run_dir / "qa" / "source-gate-summary.json").is_file())
+            queue = json.loads((run_dir / "qa" / "generation-queue.json").read_text(encoding="utf-8"))
+            self.assertEqual(queue["active_task"]["path"], item_job["generated_output"])
+            self.assertIn("retry-02.md", queue["active_task"]["prompt_file"])
+
+    def test_zero_extra_call_budget_turns_quick_gate_failure_into_hard_failure(self) -> None:
+        with tempfile.TemporaryDirectory() as temporary_directory:
+            root = Path(temporary_directory)
+            run_dir = root / "run"
+            request = self.request()
+            request["generation_budget"] = {"max_extra_calls": 0, "estimated_minutes_per_call": [5, 8]}
+            request_path = root / "batch-request.json"
+            request_path.write_text(json.dumps(request), encoding="utf-8")
+            ORCHESTRATOR.orchestrate(run_dir, request_path=request_path)
+            self.write_chroma_sheet(run_dir)
+            self.write_matte_sheet(run_dir)
+            item_job = self.jobs(run_dir)["Icon_Item"]
+            source_path = run_dir / item_job["generated_output"]
+            image = np.asarray(Image.open(source_path).convert("RGB")).copy()
+            image[0, 0] = (220, 20, 20)
+            Image.fromarray(image, mode="RGB").save(source_path)
+
+            blocked = ORCHESTRATOR.orchestrate(run_dir)
+
+            self.assertFalse(blocked["ok"])
+            self.assertEqual(blocked["status"], "failed")
+            self.assertEqual(blocked["retry"]["budget_exhausted_jobs"], ["icon-item-sheet-01"])
 
     def test_failed_matte_preflight_can_resume_after_replacement(self) -> None:
         with tempfile.TemporaryDirectory() as temporary_directory:

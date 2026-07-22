@@ -42,6 +42,7 @@ V1 必须支持：
 - 保留从生成源图到最终文件的可追溯关系。
 - 同一请求包含多个分类时自动建立独立 Job；单分类超出容量时自动拆分多张 Sheet。
 - 在所有生成图就绪后，通过统一确定性 Runner 汇总正式 Manifest、QA 和运行摘要。
+- 用户一次提出多个界面时建立一个项目级请求；内部图片生成固定逐张串行，同一时刻只允许一个 Production Sheet、Alpha Matte 或来源侧车处于激活状态，不要求用户按图片重复提需求。
 - 使用 Codex 将自然语言转换为批量请求，并通过统一编排器完成首次准备、缺图清单、断点续跑、Runner 调用和交付摘要。
 - 首次使用 Skill 且缺少项目名时先询问项目名；获得后由确定性脚本创建 `input/<project-id>/references/reference-notes.md`，重复初始化不得覆盖用户内容。
 - 新建参考图目录后必须告知绝对路径并暂停。用户确认放图后先运行自动检查，再逐图视觉检查；任一参考图不合格时要求替换并继续暂停，全部通过前禁止建立资源清单、请求 JSON 或调用图片生成。
@@ -52,6 +53,7 @@ V1 必须支持：
 - 对没有 Layout Guide 的未知整图先执行背景诊断，生成候选 bbox、可编辑修正 JSON 和标注预览。
 - 在不引入桌面 GUI 的前提下，用批准后的 bbox 修正文件完成透明切割和正式 QA。
 - 正式 QA 通过后可导入 Unity 2022.3：配置 Sprite Single/Alpha/PPU/Pivot/Border，并基于显式布局生成 Image/Button 界面 Prefab；单独美术资源不生成 Prefab。
+- 顶层 `unity_delivery` 已确认时，最后一个图片输入和资源 QA 通过后必须自动继续 Unity；`screens[]` 中每个界面分别生成 Screen Prefab、Preview Scene 和渲染 PNG。Unity 失败只能用 Unity 专用续跑，不得重新生成已通过图片。
 - Panel/Button 自动推断九宫格 Border；只有高置信且中心区有效时写入，低置信必须失败并使用人工覆写。
 - 九宫格 Panel 的龙、莲花、菱形、徽记等独特装饰只能位于四角固定区；上/下/左/右边中段和中央内容区必须干净、连续、可重复拉伸。禁止通过扩大 Border 把边中段装饰纳入固定区来掩盖问题；应编辑或重生成源图。
 - Panel 内按钮、列表、页签等控件必须位于外框安全区，不能覆盖或越过固定边框；优先作为 Panel 子节点声明。验收必须检查四边安全距离和实际 Unity Sliced 渲染，自动 Border/PPU 通过不等于视觉通过。
@@ -88,6 +90,12 @@ V1 不包含：
 - 每次调用必须更新 `qa/delivery-summary.json` 与 `qa/delivery-summary.md`，汇总生成方式、Job/输入就绪度、结果数量、交付路径、人工处理项和下一步动作。
 - 完成态自动把正式 Manifest 合并到 `input/<project-id>/ui-asset-catalog.json`，后续界面复用键固定为 `category + semantic_name + state`，尺寸不参与命中。
 - 编排器不调用图片 API；Codex 仍使用内置 `imagegen` 按缺图清单完成视觉生成。
+- 缺图清单必须转成 `qa/generation-queue.json/md`；队列固定 `sequential-inputs`、`max_concurrent_image_jobs=1`，只生成当前激活项，保存后续跑再激活下一项。
+- 背包、商店等内容界面必须先确认 `content_policy.item_icons`；`empty-slots` 或 `runtime-data` 时排除 `Icon_Item` Job，禁止先生成再弃用。
+- 每张 Production Sheet 就绪后先执行快速源门禁，检查解码、比例、槽位、触边及绿色色键状态图标反光；失败不得启动完整 Runner。
+- 顶层 `generation_budget.max_extra_calls` 默认 1，限制整个请求的额外图片模型调用；交付摘要必须显示首轮调用、总调用预算和预计时长。
+- “一次产出多张”表示用户只提出一次完整需求，内部仍逐张调用图片生成；禁止把多个完整界面合并到一张生产 Sheet，也禁止并行启动多个图片 Job。
+- 可选 `unity_delivery` 包含已确认布局、Unity 工程和 Editor；资源完成后编排器自动导出全部 Screen。只重跑 Unity 使用 `--force-unity`。
 
 ### V0.13 QA 驱动纠错闭环
 
@@ -107,7 +115,8 @@ V1 不包含：
 - 默认把 Sprite 导入 `Assets/_Project/UI/Sprites/<project-id>`，把 Screen Prefab 导入 `Assets/_Project/Prefabs/UI/Demo`，把 Preview Scene 导入 `Assets/_Project/Scenes/Demo`，并安装嵌入包 `Packages/com.hongda.game-ui-asset-pipeline`；不得生成单资源 Prefab，不得改写任务范围外的用户手工 Prefab。
 - TextureImporter 固定为 Sprite Single、Alpha Is Transparency、无 Mipmap、Clamp、Bilinear、Uncompressed；默认 PPU 100，Panel/Button 按源图与全部布局目标的最小缩放比自动提高 PPU，也可显式覆写。Pivot、Border、PPU 来源均须可追溯。
 - Panel/Button 自动九宫格推断必须记录置信度和来源。低置信、中心区无效、覆写越界，或 Border 经 PPU 换算后不适配任一布局目标尺寸，必须在启动 Unity 前失败。
-- 最终界面 Prefab 只从 schema v1 显式布局生成；父元素必须先声明，元素正式支持 Image、Button、Text（TMP）、GridLayoutGroup、HorizontalLayoutGroup、VerticalLayoutGroup，并写入稳定 BindingId。标题、数值占位和按钮文案必须使用 Text 节点，不得只留透明 Image Mount。
+- 最终界面 Prefab 只从 schema v1 显式布局生成；父元素必须先声明，元素正式支持 Image、Button、Text（TMP）、GridLayoutGroup、HorizontalLayoutGroup、VerticalLayoutGroup、ScrollView、ScrollViewport、PrefabInstance，并写入稳定 BindingId。标题、数值占位和按钮文案必须使用 Text 节点，不得只留透明 Image Mount。
+- 固定区与可替换区需要成为独立 Prefab 时，使用 `PrefabInstance.prefab_screen_id` 引用更早生成的 Screen；简单同屏互斥切换使用 `toggle_groups` 生成 `GameUIViewSwitcher` 并真实验证 `Button.onClick`。这不扩大为任意业务事件、数据源或导航控制器自动生成。
 - 装备位、页签、背包格、按钮排等规则排列必须使用 Layout Group 父容器统一控制单元尺寸、间距、行列、内边距和对齐；不得把同组子元素逐个写死坐标。验收必须同时检查 Prefab 组件、子节点数量与 Unity 渲染。
 - 背包、任务列表、商店列表、邮件列表等内容数量可能增长且展示范围有限的区域，优先使用 `ScrollView → Viewport(RectMask2D) → Content(LayoutGroup + ContentSizeFitter)`。Viewport 规定可见范围，超出内容必须隐藏并通过指定轴滚动；禁止只添加 Layout Group 后让子项越界。只有数量固定且确认不会溢出的纯装饰排列才允许不使用 Scroll View。
 - Scroll View 验收必须检查 ScrollRect 的 Content/Viewport 引用、滚动轴、MovementType、Viewport 的 RectMask2D、Content 的尺寸增长方式，以及 Content 大于 Viewport 时的实际裁剪渲染；组件名存在不等于验收通过。

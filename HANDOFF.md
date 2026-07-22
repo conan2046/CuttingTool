@@ -3,8 +3,8 @@
 > 更新时间：2026-07-22
 > 工作目录：`D:\CuttingTool`  
 > 仓库：`https://github.com/conan2046/CuttingTool.git`  
-> 当前工作分支：`codex/v0.13-quality-nine-slice`
-> 已完成功能基线：v0.13.1 Unity `_Project` 目录规范与 Sprite-only 美术资源；并包含 v0.13.0 QA 驱动纠错、候选评分与失败 Job 定向重生成
+> 当前工作分支：`main`
+> 已完成功能基线：v0.14.2 生图调用压缩、快速源门禁、单次多界面、逐张生成、Unity 多 Screen、子 Prefab 组合与互斥切换；并包含 v0.13.x QA 纠错、TMP 文本及 `_Project` 目录规范
 
 ## 1. 新会话先做什么
 
@@ -45,6 +45,33 @@ game-ui-asset-pipeline
 核心原则：AI 负责视觉，Python 脚本负责确定性处理和验收。桌面 GUI 已明确降为长期最低优先级，不是当前开发目标。
 
 ## 3. 已经完成什么
+
+### 3.0 v0.14.2：生图调用压缩与快速源门禁
+
+- `content_policy.item_icons=empty-slots|runtime-data` 会把无须生成的 `Icon_Item` 标记为 `exclude`，不进入批量请求。
+- 绿色色键 `Icon_Status` 首轮 Prompt 使用深蓝封闭底板和银白隔离边，禁止绿色/青绿色反光。
+- `quick_source_gate.py` 在完整 Runner 前检查解码、比例、槽位、触边和状态图标反光；失败只生成定向重试，不启动完整 Runner。
+- `generation_budget.max_extra_calls` 默认 1，限制全请求额外图片调用；摘要显示首轮调用、总预算和 5–8 分钟/次估算。
+- 图片生成继续固定 `sequential-inputs`、最大并发 1；不启用并行图片 Job。
+- 源码与安装态全量 `unittest` 各 136/136 通过；72 个正式 Skill 文件 SHA-256 差异 0。
+
+### 3.0 v0.14.1：真实角色/属性/背包组合交付
+
+- `xiuxian-ui-character-inventory-1920x1080-v1` 完成 1920×1080 真实 Unity 交付：固定左区、属性右区、背包右区三个独立 Prefab，由 `CharacterInventoryScreen` 以 3 个 `PrefabInstance` 组合。
+- 新增通用 `GameUIViewSwitcher` 与 `toggle_groups`，属性默认显示；Unity batchmode 实际调用属性/背包两个 `Button.onClick`，默认、切换、恢复全部通过。
+- 用户明确要求背包不生成/不显示道具 Icon：本次合并 Manifest 为 48 Sprite（旧资源30、装备6、属性12），20 个已生成道具文件保留在来源运行但不进入 Unity 合并 Manifest；背包 Prefab 为 25 个空格位、0 个 ItemMount。
+- Unity 报告：48 Sprite / 0 资源 Prefab / 4 Screen Prefab / 4 Preview Scene / 4 Preview PNG / 0 issue；根预览已人工检查，6 件装备和12个属性图标可见。
+- 源码与安装态全量 `unittest` 各 131/131 通过；Skill 源码/安装副本 70 个正式文件 SHA-256 差异 0。首次 Unity 编译变量重名失败已修复，后续导入与交互验收均通过。
+
+### 3.0 v0.14.0：单次多界面、逐张图片队列与自动 Unity 拼装
+
+- 用户一次声明全部界面即可；Codex 建立一个项目级批量请求，不要求用户逐张下需求。
+- `prepare_ui_batch.py` 固定写入 `generation_policy.mode=sequential-inputs`、`max_concurrent_image_jobs=1`，并为 Job 写稳定 `generation_sequence`。
+- `orchestrate_ui_delivery.py` 每次更新 `qa/generation-queue.json/md`；同一时刻只有一个图片输入为 `active`，其余为 `blocked`，完成后续跑才激活下一项。
+- `compile_ui_project_intake.py` 可从多个 Screen 的 `unity_elements` 构建统一布局；启用 Unity 时强制 `layout_confirmed=true`、绝对工程/Editor 路径和每屏非空显式布局。
+- 资源 QA 通过后自动执行 Unity 导出；每个 Screen 分别生成 Prefab、Preview Scene 和预览 PNG。Unity 失败使用 `--force-unity` 单独续跑，不重新生成图片。
+- 两个 Screen 可共享同一 Sprite；自动导出完成态重复调用幂等复用，不重复启动 Unity。
+- 源码与安装态全量 `unittest` 各 129/129 通过；68 个正式 Skill 文件 SHA-256 一致，0 差异。
 
 ### 3.0 v0.13.1：Unity `_Project` 导出目录
 
@@ -257,7 +284,7 @@ game-ui-asset-pipeline
 
 ## 4. 当前卡在哪
 
-当前没有代码、测试、图片生成或 API 权限阻塞。P6 已完成代码与定向测试，最终验证数量以 CHANGELOG 最新记录为准。
+当前没有代码、测试、图片生成或 API 权限阻塞。v0.14.0 已完成代码、定向测试和源码全量测试，下一步由用户使用真实多界面需求验收图片顺序与 Unity 拼装结果。
 
 已知环境限制：WindowsApps 内的 `codex.exe` 从 PowerShell 直接执行会报“拒绝访问”，所以不能用 `codex exec` 做新任务触发验收。此前已改用 Codex 桌面的独立任务接口完成 9 类验收，不要再浪费时间重复尝试 WindowsApps CLI。
 
@@ -274,7 +301,8 @@ game-ui-asset-pipeline
 
 - 自然语言由 Codex 转为批量请求，确定性脚本不实现伪 NLP。
 - 首次准备、缺图清单、补图续跑、Runner 和交付摘要已统一。
-- 下一维护项为 P6.1 跨风格 Matte 回归。
+- v0.14.0 已把缺图清单升级为严格逐张队列，并把多 Screen Unity 导出串入完成阶段。
+- 下一维护项为用户真实多界面验收后，根据 Prefab、Preview Scene 和渲染差异修正。
 
 ### P7/P8：Unity 自动导入与九宫格（已实现）
 

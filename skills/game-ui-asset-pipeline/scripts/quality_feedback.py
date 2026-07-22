@@ -16,6 +16,11 @@ class IssueRule:
 
 
 ISSUE_RULES: dict[str, IssueRule] = {
+    "source-decode-failed": IssueRule("source_integrity", 45, "Generate a valid decodable PNG source sheet at the declared output path."),
+    "source-aspect-ratio-mismatch": IssueRule("dimensions", 40, "Preserve the requested canvas aspect ratio exactly; do not crop or stretch the production sheet."),
+    "source-edge-contact": IssueRule("framing", 34, "Keep every resource fully inside the canvas with clean chroma background on all four outer edges."),
+    "source-slot-count-mismatch": IssueRule("count_accuracy", 45, "Fill exactly the declared slots in row-major order with one complete resource per slot and no extras."),
+    "status-green-reflection": IssueRule("alpha_cleanliness", 36, "Remove every green or cyan-green reflection, halo, rim, highlight, and interior tint; fully isolate each status symbol from the green chroma background with an opaque dark-navy backing and continuous silver-white rim."),
     "count-mismatch": IssueRule("count_accuracy", 45, "Generate exactly the requested number of resources in the declared row-major order."),
     "empty-slot": IssueRule("count_accuracy", 40, "Fill every declared slot with exactly one complete resource; do not leave any slot empty."),
     "cross-slot-connected-component": IssueRule("separation", 38, "Increase clean background separation and reduce each resource scale so no pixels connect across neighboring slots."),

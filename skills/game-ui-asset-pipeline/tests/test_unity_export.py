@@ -40,6 +40,49 @@ def frame_image(size: int = 128, border: int = 14) -> Image.Image:
 
 
 class UnityExportTest(unittest.TestCase):
+    def test_normalizes_composed_prefab_and_mutual_view_toggle(self) -> None:
+        layout = {
+            "schema_version": 1,
+            "screens": [
+                {"id": "LeftSection", "reference_size": [1920, 1080], "elements": [{"id": "LeftPanel", "kind": "Image"}]},
+                {"id": "AttributeSection", "reference_size": [1920, 1080], "elements": [{"id": "AttributePanel", "kind": "Image"}]},
+                {"id": "InventorySection", "reference_size": [1920, 1080], "elements": [{"id": "InventoryPanel", "kind": "Image"}]},
+                {
+                    "id": "CompositeScreen",
+                    "reference_size": [1920, 1080],
+                    "elements": [
+                        {"id": "Left", "kind": "PrefabInstance", "prefab_screen_id": "LeftSection", "size": [1920, 1080]},
+                        {"id": "Attributes", "kind": "PrefabInstance", "prefab_screen_id": "AttributeSection", "size": [1920, 1080]},
+                        {"id": "Inventory", "kind": "PrefabInstance", "prefab_screen_id": "InventorySection", "size": [1920, 1080]},
+                        {"id": "ShowAttributes", "kind": "Button"},
+                        {"id": "ShowInventory", "kind": "Button"},
+                    ],
+                    "toggle_groups": [{
+                        "id": "RightPanelTabs",
+                        "default_target_id": "Attributes",
+                        "bindings": [
+                            {"button_id": "ShowAttributes", "target_id": "Attributes"},
+                            {"button_id": "ShowInventory", "target_id": "Inventory"},
+                        ],
+                    }],
+                },
+            ],
+        }
+        screens = UNITY_EXPORT.normalize_layout(layout)
+        self.assertEqual(screens[3]["elements"][0]["prefab_screen_id"], "LeftSection")
+        self.assertEqual(screens[3]["toggle_groups"][0]["default_target_id"], "Attributes")
+
+    def test_rejects_prefab_instance_that_references_later_screen(self) -> None:
+        layout = {
+            "schema_version": 1,
+            "screens": [
+                {"id": "Composite", "reference_size": [1920, 1080], "elements": [{"id": "Later", "kind": "PrefabInstance", "prefab_screen_id": "LaterScreen"}]},
+                {"id": "LaterScreen", "reference_size": [1920, 1080], "elements": [{"id": "Panel", "kind": "Image"}]},
+            ],
+        }
+        with self.assertRaisesRegex(ValueError, "must reference an earlier screen"):
+            UNITY_EXPORT.normalize_layout(layout)
+
     def test_infers_high_confidence_frame_border(self) -> None:
         result = NINE_SLICE.infer_nine_slice(frame_image())
         self.assertTrue(result["apply"], result)
@@ -174,6 +217,79 @@ class UnityExportTest(unittest.TestCase):
             self.assertTrue((demo_prefabs / "Keep.prefab").is_file())
             self.assertFalse((demo_scenes / "main-screen-Preview.unity").exists())
             self.assertTrue((unity_project / "Packages" / "com.hongda.game-ui-asset-pipeline").is_dir())
+
+    def test_prepares_two_screen_prefabs_sharing_one_sprite(self) -> None:
+        with tempfile.TemporaryDirectory() as temporary_directory:
+            root = Path(temporary_directory)
+            run_dir = root / "run"
+            unity_project = root / "UnityProject"
+            (unity_project / "Assets").mkdir(parents=True)
+            (unity_project / "Packages").mkdir()
+            (unity_project / "ProjectSettings").mkdir()
+            (unity_project / "ProjectSettings" / "ProjectVersion.txt").write_text(
+                "m_EditorVersion: 2022.3.62f1\n", encoding="utf-8"
+            )
+            asset_id = "05_Icon_General_Close_Default_001"
+            asset_path = run_dir / "final" / "Icon_General" / f"{asset_id}.png"
+            asset_path.parent.mkdir(parents=True)
+            Image.new("RGBA", (64, 64), (220, 230, 255, 255)).save(asset_path)
+            manifest = {
+                "schema_version": 2,
+                "project_id": "multi-screen-ui",
+                "assets": [
+                    {
+                        "id": asset_id,
+                        "category": "Icon_General",
+                        "semantic_name": "Close",
+                        "state": "Default",
+                        "output": f"final/Icon_General/{asset_id}.png",
+                        "width": 64,
+                        "height": 64,
+                        "pivot": [0.5, 0.5],
+                        "qa": "pass",
+                    }
+                ],
+            }
+            (run_dir / "final" / "manifest.json").write_text(json.dumps(manifest), encoding="utf-8")
+            (run_dir / "qa").mkdir()
+            (run_dir / "qa" / "qa-report.json").write_text(
+                json.dumps({"schema_version": 2, "ok": True, "fail_count": 0}), encoding="utf-8"
+            )
+            layout = {
+                "schema_version": 1,
+                "screens": [
+                    {
+                        "id": "BagScreen",
+                        "reference_size": [1920, 1080],
+                        "elements": [{"id": "Close", "kind": "Image", "asset_id": asset_id, "size": [64, 64]}],
+                    },
+                    {
+                        "id": "ShopScreen",
+                        "reference_size": [1600, 900],
+                        "elements": [{"id": "Close", "kind": "Image", "asset_id": asset_id, "size": [48, 48]}],
+                    },
+                ],
+            }
+            layout_path = root / "unity-layout.json"
+            layout_path.write_text(json.dumps(layout), encoding="utf-8")
+
+            result = UNITY_EXPORT.prepare_unity_export(
+                run_dir,
+                unity_project,
+                SKILL_DIR / "assets" / "unity-package",
+                layout_path,
+            )
+
+            self.assertTrue(result["ok"], result)
+            self.assertEqual(result["sprite_count"], 1)
+            self.assertEqual(result["screen_count"], 2)
+            plan = json.loads((run_dir / "unity" / "unity-import-plan.json").read_text(encoding="utf-8"))
+            self.assertEqual([screen["id"] for screen in plan["screens"]], ["BagScreen", "ShopScreen"])
+            rollback = json.loads((run_dir / "unity" / "unity-rollback.json").read_text(encoding="utf-8"))
+            self.assertIn("Assets/_Project/Prefabs/UI/Demo/BagScreen.prefab", rollback["created_assets"])
+            self.assertIn("Assets/_Project/Prefabs/UI/Demo/ShopScreen.prefab", rollback["created_assets"])
+            self.assertIn("Assets/_Project/Scenes/Demo/BagScreen-Preview.unity", rollback["created_assets"])
+            self.assertIn("Assets/_Project/Scenes/Demo/ShopScreen-Preview.unity", rollback["created_assets"])
 
     def test_rejects_layout_path_escape_and_unknown_assets(self) -> None:
         with self.assertRaisesRegex(ValueError, "Assets"):

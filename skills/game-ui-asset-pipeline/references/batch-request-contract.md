@@ -42,7 +42,48 @@
 | `references` | 否 | 其他风格参考图路径列表 |
 | `retry_policy` | 否 | V0.13 定向重生成策略；`max_attempts` 默认 3，可设为 1–5 |
 | `style_consistency` | 否 | 跨 Sheet 风格评分；默认启用，`warning_below=60`、`fail_below=40` |
+| `generation_policy` | 否 | 固定为 `sequential-inputs`、图片 Job 最大并发 1；省略时自动写入 |
+| `generation_budget` | 否 | 全局图片调用预算；`max_extra_calls` 默认 1，`estimated_minutes_per_call` 默认 `[5,8]` |
+| `unity_delivery` | 否 | 资源 QA 通过后自动导出多个 Unity Screen；必须提供确认布局、工程和 Editor |
 | `categories` | 是 | 一个或多个分类任务 |
+
+多界面 Unity 请求在顶层增加：
+
+```json
+{
+  "generation_policy": {
+    "mode": "sequential-inputs",
+    "max_concurrent_image_jobs": 1
+  },
+  "unity_delivery": {
+    "enabled": true,
+    "layout_confirmed": true,
+    "unity_project": "D:/CodeProjects/MyGame",
+    "unity_editor": "E:/Unity/2022.3/Editor/Unity.exe",
+    "layout": {
+      "schema_version": 1,
+      "screens": [
+        {
+          "id": "BagScreen",
+          "reference_size": [1920, 1080],
+          "elements": [
+            {"id": "Background", "kind": "Image", "asset_id": "01_Panel_Bag_Default_001", "size": [1200, 760]}
+          ]
+        },
+        {
+          "id": "ShopScreen",
+          "reference_size": [1920, 1080],
+          "elements": [
+            {"id": "Background", "kind": "Image", "asset_id": "01_Panel_Shop_Default_002", "size": [1200, 760]}
+          ]
+        }
+      ]
+    }
+  }
+}
+```
+
+每个 `elements` 必须是非空显式布局。用户只需一次说明全部界面；Codex 负责建立本结构，内部按队列逐张生成。
 
 ## 分类字段
 
@@ -70,6 +111,7 @@
 - 单个状态组超过整张 Sheet 容量时直接失败，不得拆散或缩小硬塞。
 - `category_index` 在分类内跨 Sheet 连续，最终文件名使用该编号。
 - 每个 Job 生成独立请求、Prompt、Layout Guide、背景报告和切割报告。
+- 所有 Job 按 `generation_sequence` 串行推进；同一时刻只有一个图片输入可生成。
 
 ## 阶段边界
 
@@ -82,5 +124,7 @@
 自然语言完整交付由 Codex 先建立本契约的请求 JSON，再交给 `orchestrate_ui_delivery.py`。编排器不解析自然语言、不调用图片 API；它负责生成 Job、报告精确缺图、补图续跑和汇总正式交付。状态机和摘要格式见 `orchestration-contract.md`。
 
 V0.13 会把规范化后的 `retry_policy` 写入运行目录 `request.json`。失败候选按内容哈希去重，每轮只纠正一个最高优先级原因；达到候选上限后保持硬失败。
+
+V0.14.2 同时写入 `generation_budget`。首轮调用数按 Production Sheet 和 Alpha Matte 计数；来源侧车不计图片调用。定向重生成在发出计划时消耗全局额外预算，默认只允许整个请求追加 1 次图片调用，不能按 Job 各自追加。
 
 `style_consistency` 必须满足 `0 <= fail_below <= warning_below <= 100`。存在 Canonical 且至少两个 Job 时，Runner 输出 `qa/style-consistency.json`；风格漂移绑定到具体 Job，可触发定向重生成。

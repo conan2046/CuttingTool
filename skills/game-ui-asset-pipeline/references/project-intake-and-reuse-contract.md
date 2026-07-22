@@ -12,6 +12,7 @@
 - UI 元素造型是否与主参考一致。
 - 不一致时的明确差异与仍需继承的视觉部分。
 - 每个完整 UI 界面的目标像素尺寸，例如 `1920×1080`。
+- 如果本次要直接拼入 Unity，同时确认目标工程、Unity Editor 和每个界面的显式元素层级、锚点、位置与尺寸。
 
 不要拆成多轮逐项追问。用户已在需求中明确的内容直接带入确认摘要，不重复询问。
 
@@ -44,6 +45,12 @@
 - 同一新资源在多个后续界面出现时只生成一次，其余界面引用本次待生成资源。
 - 语义不确定或状态不同不得强行复用；宁可生成新资源，也不要仅凭外观相似误判。
 
+## 内容生成策略
+
+- 背包、商店等界面在确认时写入 `screens[].content_policy.item_icons`。
+- `generate`：生成清单中的 `Icon_Item`；`empty-slots`：只交付空格位；`runtime-data`：由业务数据运行时填充。
+- `empty-slots` 与 `runtime-data` 下，清单保留资源记录和排除原因，但 `action=exclude`，不得进入批量请求或消耗图片调用。
+
 完成 Runner 且 QA 无 fail 后，`orchestrate_ui_delivery.py` 自动把正式 Manifest 合并到：
 
 ```text
@@ -56,6 +63,8 @@ input/<project-id>/ui-asset-catalog.json
 
 - `all_assets_reused=true`：跳过生成，直接交付引用清单。
 - 存在待生成资源：立即运行编排器，按缺图清单调用内置图片生成，保存到精确路径，再次运行编排器直到 `complete` 或出现真实失败。
+
+多个界面仍只进行一次需求确认。启用 Unity 交付时，每个 Screen 在分析 JSON 中提供 `unity_elements`；脚本自动汇总为一个 `unity_delivery.layout.screens[]`。内部图片严格逐张生成，全部资源 QA 通过后一次导入 Unity，并逐 Screen 生成 Prefab、Preview Scene 和预览图。
 
 除了项目名、参考图放置、上述一次性界面确认、参考图不合格替换和不可安全推断的重大歧义，不向用户停顿。
 

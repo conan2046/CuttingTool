@@ -50,6 +50,22 @@ namespace CuttingTool.GameUI.Editor
             public string name = string.Empty;
             public float[] reference_size = Array.Empty<float>();
             public ElementPlan[] elements = Array.Empty<ElementPlan>();
+            public ToggleGroupPlan[] toggle_groups = Array.Empty<ToggleGroupPlan>();
+        }
+
+        [Serializable]
+        private sealed class ToggleGroupPlan
+        {
+            public string id = string.Empty;
+            public string default_target_id = string.Empty;
+            public ToggleBindingPlan[] bindings = Array.Empty<ToggleBindingPlan>();
+        }
+
+        [Serializable]
+        private sealed class ToggleBindingPlan
+        {
+            public string button_id = string.Empty;
+            public string target_id = string.Empty;
         }
 
         [Serializable]
@@ -58,6 +74,7 @@ namespace CuttingTool.GameUI.Editor
             public string id = string.Empty;
             public string parent_id = string.Empty;
             public string asset_id = string.Empty;
+            public string prefab_screen_id = string.Empty;
             public string kind = "Image";
             public float[] anchor_min = Array.Empty<float>();
             public float[] anchor_max = Array.Empty<float>();
@@ -244,6 +261,34 @@ namespace CuttingTool.GameUI.Editor
                 var objects = new Dictionary<string, GameObject>(StringComparer.Ordinal);
                 foreach (var element in screen.elements ?? Array.Empty<ElementPlan>())
                 {
+                    if (string.Equals(element.kind, "PrefabInstance", StringComparison.Ordinal))
+                    {
+                        var prefabPath = $"{directory}/{SanitizeFileName(element.prefab_screen_id)}.prefab";
+                        var prefab = AssetDatabase.LoadAssetAtPath<GameObject>(prefabPath);
+                        if (prefab == null)
+                        {
+                            AddIssue(issues, "layout-prefab-missing", element.id, $"Unknown earlier screen prefab: {element.prefab_screen_id}");
+                            continue;
+                        }
+                        var instance = PrefabUtility.InstantiatePrefab(prefab) as GameObject;
+                        if (instance == null)
+                        {
+                            AddIssue(issues, "layout-prefab-instantiation-failed", element.id, $"Could not instantiate screen prefab: {element.prefab_screen_id}");
+                            continue;
+                        }
+                        instance.name = element.id;
+                        var binding = instance.GetComponent<GameUIElementBinding>() ?? instance.AddComponent<GameUIElementBinding>();
+                        binding.Configure(element.id);
+                        var instanceParent = root.transform;
+                        if (!string.IsNullOrWhiteSpace(element.parent_id) && objects.TryGetValue(element.parent_id, out var instanceParentObject))
+                        {
+                            instanceParent = instanceParentObject.transform;
+                        }
+                        instance.transform.SetParent(instanceParent, false);
+                        ConfigureRect(instance.GetComponent<RectTransform>(), element);
+                        objects[element.id] = instance;
+                        continue;
+                    }
                     sprites.TryGetValue(element.asset_id ?? string.Empty, out var sprite);
                     if (!string.IsNullOrWhiteSpace(element.asset_id) && sprite == null)
                     {
@@ -257,12 +302,7 @@ namespace CuttingTool.GameUI.Editor
                         parent = parentObject.transform;
                     }
                     item.transform.SetParent(parent, false);
-                    var rect = item.GetComponent<RectTransform>();
-                    rect.anchorMin = ReadVector2(element.anchor_min, new Vector2(0.5f, 0.5f));
-                    rect.anchorMax = ReadVector2(element.anchor_max, new Vector2(0.5f, 0.5f));
-                    rect.pivot = ReadVector2(element.pivot, new Vector2(0.5f, 0.5f));
-                    rect.anchoredPosition = ReadVector2(element.anchored_position, Vector2.zero);
-                    rect.sizeDelta = ReadVector2(element.size, new Vector2(100f, 100f));
+                    ConfigureRect(item.GetComponent<RectTransform>(), element);
                     var image = item.GetComponent<Image>();
                     if (image != null)
                     {
@@ -279,6 +319,7 @@ namespace CuttingTool.GameUI.Editor
                     objects[element.id] = item;
                 }
                 ConfigureScrollViews(screen.elements, objects, issues);
+                ConfigureToggleGroups(screen.toggle_groups, objects, root, issues);
 
                 var path = $"{directory}/{SanitizeFileName(screen.id)}.prefab";
                 PrefabUtility.SaveAsPrefabAsset(root, path, out var success);
@@ -291,6 +332,52 @@ namespace CuttingTool.GameUI.Editor
                 count++;
             }
             return count;
+        }
+
+        private static void ConfigureRect(RectTransform rect, ElementPlan element)
+        {
+            rect.anchorMin = ReadVector2(element.anchor_min, new Vector2(0.5f, 0.5f));
+            rect.anchorMax = ReadVector2(element.anchor_max, new Vector2(0.5f, 0.5f));
+            rect.pivot = ReadVector2(element.pivot, new Vector2(0.5f, 0.5f));
+            rect.anchoredPosition = ReadVector2(element.anchored_position, Vector2.zero);
+            rect.sizeDelta = ReadVector2(element.size, new Vector2(100f, 100f));
+        }
+
+        private static void ConfigureToggleGroups(
+            ToggleGroupPlan[] plans,
+            IReadOnlyDictionary<string, GameObject> objects,
+            GameObject root,
+            ICollection<ImportIssue> issues)
+        {
+            foreach (var plan in plans ?? Array.Empty<ToggleGroupPlan>())
+            {
+                var bindings = plan.bindings ?? Array.Empty<ToggleBindingPlan>();
+                var buttons = new Button[bindings.Length];
+                var targets = new GameObject[bindings.Length];
+                var defaultIndex = -1;
+                for (var index = 0; index < bindings.Length; index++)
+                {
+                    if (!objects.TryGetValue(bindings[index].button_id, out var buttonObject) ||
+                        (buttons[index] = buttonObject.GetComponent<Button>()) == null)
+                    {
+                        AddIssue(issues, "toggle-button-missing", plan.id, $"Toggle button is missing: {bindings[index].button_id}");
+                    }
+                    if (!objects.TryGetValue(bindings[index].target_id, out targets[index]))
+                    {
+                        AddIssue(issues, "toggle-target-missing", plan.id, $"Toggle target is missing: {bindings[index].target_id}");
+                    }
+                    if (string.Equals(bindings[index].target_id, plan.default_target_id, StringComparison.Ordinal))
+                    {
+                        defaultIndex = index;
+                    }
+                }
+                if (buttons.Any(button => button == null) || targets.Any(target => target == null) || defaultIndex < 0)
+                {
+                    continue;
+                }
+                var switcher = root.AddComponent<GameUIViewSwitcher>();
+                switcher.Configure(plan.id, buttons, targets, defaultIndex);
+            }
         }
 
         private static int CreatePreviewScenes(ImportPlan plan, ICollection<ImportIssue> issues, out int previewImageCount)

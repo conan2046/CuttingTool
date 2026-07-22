@@ -22,9 +22,11 @@ V0.13 起，QA 失败时不再只返回错误：系统会生成单原因纠错 P
 
 同一批次至少有两张生产 Sheet 且提供 Canonical 时，还会生成 `qa/style-consistency.json`。它能发现某张 Sheet 的配色、材质、描边和光照漂移，但仍必须人工查看 Contact Sheet，确认装备语义、按钮状态和造型是否正确。
 
-如果同时提供 Unity 项目路径，QA 通过后还会自动配置 Sprite、九宫格并从确认过的布局生成 Image/Button Prefab。当前已验证目标为 Unity 2022.3 LTS；业务点击事件、文本本地化和运行时数据仍由项目代码接线。
+如果同时提供 Unity 项目路径，QA 通过后还会自动配置 Sprite、九宫格并从确认过的布局生成 Image/Button Prefab。当前已验证目标为 Unity 2022.3 LTS；固定区与可替换区可生成独立 Prefab，再通过 `PrefabInstance + toggle_groups` 组合并绑定简单的同屏互斥切换。其他业务点击事件、文本本地化和运行时数据仍由项目代码接线。
 
 Unity 布局示例：`D:\CuttingTool\samples\unity-layout-example.json`。正式执行会生成 `unity-preflight.json`、`unity-import-report.json`、Unity 日志和回滚清单；九宫格低置信度时会要求明确 Border 覆写，不会猜测写入。
+
+需要一次制作多个界面时，把全部界面一次告诉 Codex，并明确“内部逐张生成，最后拼入 Unity”。Codex 会建立单一批量请求，按 `qa/generation-queue.json` 每次只生成一张 Sheet 或 Matte；全部资源 QA 通过后，再为 `screens[]` 中每个界面分别生成 Prefab、Preview Scene 和预览图。不要把多个完整界面塞进一张生产 Sheet。
 
 ## 2. 参考图放在哪里
 
