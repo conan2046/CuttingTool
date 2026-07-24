@@ -141,7 +141,20 @@ namespace CuttingTool.GameUI.Editor
             public int screen_prefab_count;
             public int preview_scene_count;
             public int preview_image_count;
+            public int removed_helper_component_count;
             public ImportIssue[] issues = Array.Empty<ImportIssue>();
+        }
+
+        private sealed class PreviewWorkItem
+        {
+            public Scene scene;
+            public Camera camera;
+            public GameObject instance;
+            public List<Canvas> preview_canvases = new List<Canvas>();
+            public string preview_path = string.Empty;
+            public string scene_path = string.Empty;
+            public int width;
+            public int height;
         }
 
         public static void RunFromCommandLine()
@@ -170,20 +183,71 @@ namespace CuttingTool.GameUI.Editor
             var issues = new List<ImportIssue>();
             RemoveLegacyAssetPrefabs(plan, issues);
             var importedSprites = ConfigureSprites(plan, issues);
-            var screenPrefabCount = CreateScreenPrefabs(plan, importedSprites, issues);
-            var previewSceneCount = CreatePreviewScenes(plan, issues, out var previewImageCount);
+            var screenPrefabCount = CreateScreenPrefabs(plan, importedSprites, issues, out var removedHelperComponentCount);
             AssetDatabase.SaveAssets();
             AssetDatabase.Refresh(ImportAssetOptions.ForceSynchronousImport);
+            SchedulePreviewCompletion(
+                plan,
+                issues,
+                importedSprites.Count,
+                screenPrefabCount,
+                removedHelperComponentCount);
+        }
 
+        private static void SchedulePreviewCompletion(
+            ImportPlan plan,
+            List<ImportIssue> issues,
+            int importedSpriteCount,
+            int screenPrefabCount,
+            int removedHelperComponentCount)
+        {
+            // Imported textures and Prefabs need real editor ticks before the
+            // first preview scene can be prepared.
+            var remainingUpdates = 4;
+            EditorApplication.CallbackFunction completeAfterUpdates = null;
+            completeAfterUpdates = () =>
+            {
+                if (--remainingUpdates > 0)
+                {
+                    return;
+                }
+                EditorApplication.update -= completeAfterUpdates;
+                SchedulePreviewScenes(plan, issues, (previewSceneCount, previewImageCount) =>
+                {
+                    AssetDatabase.SaveAssets();
+                    AssetDatabase.Refresh(ImportAssetOptions.ForceSynchronousImport);
+                    WriteReportAndExit(
+                        plan,
+                        issues,
+                        importedSpriteCount,
+                        screenPrefabCount,
+                        previewSceneCount,
+                        previewImageCount,
+                        removedHelperComponentCount);
+                });
+            };
+            EditorApplication.update += completeAfterUpdates;
+        }
+
+        private static void WriteReportAndExit(
+            ImportPlan plan,
+            List<ImportIssue> issues,
+            int importedSpriteCount,
+            int screenPrefabCount,
+            int previewSceneCount,
+            int previewImageCount,
+            int removedHelperComponentCount)
+        {
             var report = new ImportReport
             {
                 ok = issues.All(issue => issue.severity != "fail"),
                 project_id = plan.project_id,
-                imported_sprite_count = importedSprites.Count,
+                imported_sprite_count = importedSpriteCount,
                 asset_prefab_count = 0,
                 screen_prefab_count = screenPrefabCount,
                 preview_scene_count = previewSceneCount,
                 preview_image_count = previewImageCount,
+                removed_helper_component_count = removedHelperComponentCount,
                 issues = issues.ToArray(),
             };
             Directory.CreateDirectory(Path.GetDirectoryName(plan.report_path) ?? ".");
@@ -246,11 +310,16 @@ namespace CuttingTool.GameUI.Editor
             }
         }
 
-        private static int CreateScreenPrefabs(ImportPlan plan, IReadOnlyDictionary<string, Sprite> sprites, ICollection<ImportIssue> issues)
+        private static int CreateScreenPrefabs(
+            ImportPlan plan,
+            IReadOnlyDictionary<string, Sprite> sprites,
+            ICollection<ImportIssue> issues,
+            out int removedHelperComponentCount)
         {
             var directory = plan.screen_prefab_root;
             EnsureAssetDirectory(directory);
             var count = 0;
+            removedHelperComponentCount = 0;
             foreach (var screen in plan.screens ?? Array.Empty<ScreenPlan>())
             {
                 var root = new GameObject(string.IsNullOrWhiteSpace(screen.name) ? screen.id : screen.name, typeof(RectTransform), typeof(CanvasGroup));
@@ -320,6 +389,7 @@ namespace CuttingTool.GameUI.Editor
                 }
                 ConfigureScrollViews(screen.elements, objects, issues);
                 ConfigureToggleGroups(screen.toggle_groups, objects, root, issues);
+                removedHelperComponentCount += StripTransientBindingComponents(root);
 
                 var path = $"{directory}/{SanitizeFileName(screen.id)}.prefab";
                 PrefabUtility.SaveAsPrefabAsset(root, path, out var success);
@@ -332,6 +402,16 @@ namespace CuttingTool.GameUI.Editor
                 count++;
             }
             return count;
+        }
+
+        private static int StripTransientBindingComponents(GameObject root)
+        {
+            var bindings = root.GetComponentsInChildren<GameUIElementBinding>(true);
+            foreach (var binding in bindings)
+            {
+                UnityEngine.Object.DestroyImmediate(binding);
+            }
+            return bindings.Length;
         }
 
         private static void ConfigureRect(RectTransform rect, ElementPlan element)
@@ -380,75 +460,196 @@ namespace CuttingTool.GameUI.Editor
             }
         }
 
-        private static int CreatePreviewScenes(ImportPlan plan, ICollection<ImportIssue> issues, out int previewImageCount)
+        private static void SchedulePreviewScenes(
+            ImportPlan plan,
+            List<ImportIssue> issues,
+            Action<int, int> completion)
         {
             var directory = plan.scene_root;
             EnsureAssetDirectory(directory);
             Directory.CreateDirectory(plan.preview_output_dir);
-            var count = 0;
-            previewImageCount = 0;
-            foreach (var screen in plan.screens ?? Array.Empty<ScreenPlan>())
+            var screens = plan.screens ?? Array.Empty<ScreenPlan>();
+            var screenIndex = 0;
+            var previewSceneCount = 0;
+            var previewImageCount = 0;
+            var remainingUpdates = 0;
+            PreviewWorkItem workItem = null;
+            EditorApplication.CallbackFunction processPreview = null;
+            processPreview = () =>
             {
-                var prefabPath = $"{plan.screen_prefab_root}/{SanitizeFileName(screen.id)}.prefab";
-                var screenPrefab = AssetDatabase.LoadAssetAtPath<GameObject>(prefabPath);
-                if (screenPrefab == null)
+                try
                 {
-                    AddIssue(issues, "preview-screen-prefab-missing", prefabPath, "Screen prefab is unavailable for preview scene generation.");
-                    continue;
+                    if (workItem == null)
+                    {
+                        if (screenIndex >= screens.Length)
+                        {
+                            EditorApplication.update -= processPreview;
+                            completion(previewSceneCount, previewImageCount);
+                            return;
+                        }
+                        workItem = PreparePreviewScene(plan, screens[screenIndex++], issues);
+                        remainingUpdates = 20;
+                        return;
+                    }
+                    if (--remainingUpdates > 0)
+                    {
+                        return;
+                    }
+                    if (RenderPreview(
+                        workItem.camera,
+                        workItem.width,
+                        workItem.height,
+                        workItem.preview_path,
+                        issues))
+                    {
+                        previewImageCount++;
+                    }
+                    ReleasePreviewCanvases(workItem.preview_canvases);
+                    if (EditorSceneManager.SaveScene(workItem.scene, workItem.scene_path))
+                    {
+                        previewSceneCount++;
+                    }
+                    else
+                    {
+                        AddIssue(
+                            issues,
+                            "preview-scene-save-failed",
+                            workItem.scene_path,
+                            "Unity could not save the preview scene.");
+                    }
+                    EditorSceneManager.NewScene(NewSceneSetup.EmptyScene, NewSceneMode.Single);
+                    workItem = null;
                 }
-
-                var scene = EditorSceneManager.NewScene(NewSceneSetup.EmptyScene, NewSceneMode.Single);
-                var cameraObject = new GameObject("PreviewCamera", typeof(Camera));
-                var camera = cameraObject.GetComponent<Camera>();
-                camera.clearFlags = CameraClearFlags.SolidColor;
-                camera.backgroundColor = new Color(0.015f, 0.035f, 0.075f, 1f);
-                camera.orthographic = true;
-                cameraObject.tag = "MainCamera";
-
-                var canvasObject = new GameObject("PreviewCanvas", typeof(RectTransform), typeof(Canvas), typeof(CanvasScaler), typeof(GraphicRaycaster));
-                var canvas = canvasObject.GetComponent<Canvas>();
-                canvas.renderMode = RenderMode.ScreenSpaceCamera;
-                canvas.worldCamera = camera;
-                canvas.planeDistance = 1f;
-                var scaler = canvasObject.GetComponent<CanvasScaler>();
-                scaler.uiScaleMode = CanvasScaler.ScaleMode.ScaleWithScreenSize;
-                scaler.referenceResolution = ReadVector2(screen.reference_size, new Vector2(1920f, 1080f));
-                scaler.screenMatchMode = CanvasScaler.ScreenMatchMode.MatchWidthOrHeight;
-                scaler.matchWidthOrHeight = 0.5f;
-
-                var eventSystemObject = new GameObject("EventSystem", typeof(EventSystem), typeof(StandaloneInputModule));
-                SceneManager.MoveGameObjectToScene(cameraObject, scene);
-                SceneManager.MoveGameObjectToScene(canvasObject, scene);
-                SceneManager.MoveGameObjectToScene(eventSystemObject, scene);
-                var instance = PrefabUtility.InstantiatePrefab(screenPrefab, scene) as GameObject;
-                if (instance == null)
+                catch (Exception exception)
                 {
-                    AddIssue(issues, "preview-prefab-instantiation-failed", prefabPath, "Screen prefab could not be instantiated in preview scene.");
-                    continue;
+                    EditorApplication.update -= processPreview;
+                    Debug.LogException(exception);
+                    AddIssue(issues, "preview-generation-failed", plan.project_id, exception.Message);
+                    completion(previewSceneCount, previewImageCount);
                 }
-                instance.transform.SetParent(canvasObject.transform, false);
-                var rect = instance.GetComponent<RectTransform>();
-                rect.anchorMin = rect.anchorMax = new Vector2(0.5f, 0.5f);
-                rect.pivot = new Vector2(0.5f, 0.5f);
-                rect.anchoredPosition = Vector2.zero;
-                rect.sizeDelta = ReadVector2(screen.reference_size, new Vector2(1920f, 1080f));
+            };
+            EditorApplication.update += processPreview;
+        }
 
-                var previewSize = ReadVector2(screen.reference_size, new Vector2(1920f, 1080f));
-                var previewPath = Path.Combine(plan.preview_output_dir, $"{SanitizeFileName(screen.id)}.png");
-                if (RenderPreview(camera, Mathf.RoundToInt(previewSize.x), Mathf.RoundToInt(previewSize.y), previewPath, issues))
-                {
-                    previewImageCount++;
-                }
-
-                var scenePath = $"{directory}/{SanitizeFileName(screen.id)}-Preview.unity";
-                if (!EditorSceneManager.SaveScene(scene, scenePath))
-                {
-                    AddIssue(issues, "preview-scene-save-failed", scenePath, "Unity could not save the preview scene.");
-                    continue;
-                }
-                count++;
+        private static PreviewWorkItem PreparePreviewScene(
+            ImportPlan plan,
+            ScreenPlan screen,
+            ICollection<ImportIssue> issues)
+        {
+            var prefabPath = $"{plan.screen_prefab_root}/{SanitizeFileName(screen.id)}.prefab";
+            var screenPrefab = AssetDatabase.LoadAssetAtPath<GameObject>(prefabPath);
+            if (screenPrefab == null)
+            {
+                AddIssue(issues, "preview-screen-prefab-missing", prefabPath, "Screen prefab is unavailable for preview scene generation.");
+                return null;
             }
-            return count;
+
+            var previewSize = ReadVector2(screen.reference_size, new Vector2(1920f, 1080f));
+            var scene = EditorSceneManager.NewScene(NewSceneSetup.EmptyScene, NewSceneMode.Single);
+            var cameraObject = new GameObject("PreviewCamera", typeof(Camera));
+            var camera = cameraObject.GetComponent<Camera>();
+            camera.clearFlags = CameraClearFlags.SolidColor;
+            camera.backgroundColor = new Color(0.015f, 0.035f, 0.075f, 1f);
+            camera.orthographic = true;
+            camera.orthographicSize = previewSize.y * 0.5f;
+            camera.aspect = previewSize.x / previewSize.y;
+            cameraObject.transform.position = new Vector3(0f, 0f, -10f);
+            cameraObject.tag = "MainCamera";
+
+            var canvasObject = new GameObject("PreviewCanvas", typeof(RectTransform), typeof(Canvas), typeof(CanvasScaler), typeof(GraphicRaycaster));
+            var canvas = canvasObject.GetComponent<Canvas>();
+            canvas.renderMode = RenderMode.WorldSpace;
+            canvas.worldCamera = camera;
+            var canvasRect = canvasObject.GetComponent<RectTransform>();
+            canvasRect.sizeDelta = previewSize;
+            canvasRect.localScale = Vector3.one;
+            var scaler = canvasObject.GetComponent<CanvasScaler>();
+            scaler.uiScaleMode = CanvasScaler.ScaleMode.ConstantPixelSize;
+            scaler.scaleFactor = 1f;
+            scaler.referenceResolution = previewSize;
+
+            var eventSystemObject = new GameObject("EventSystem", typeof(EventSystem), typeof(StandaloneInputModule));
+            SceneManager.MoveGameObjectToScene(cameraObject, scene);
+            SceneManager.MoveGameObjectToScene(canvasObject, scene);
+            SceneManager.MoveGameObjectToScene(eventSystemObject, scene);
+            var instance = PrefabUtility.InstantiatePrefab(screenPrefab, scene) as GameObject;
+            if (instance == null)
+            {
+                AddIssue(issues, "preview-prefab-instantiation-failed", prefabPath, "Screen prefab could not be instantiated in preview scene.");
+                return null;
+            }
+            instance.transform.SetParent(canvasObject.transform, false);
+            var rect = instance.GetComponent<RectTransform>();
+            rect.anchorMin = rect.anchorMax = new Vector2(0.5f, 0.5f);
+            rect.pivot = new Vector2(0.5f, 0.5f);
+            rect.anchoredPosition = Vector2.zero;
+            rect.sizeDelta = previewSize;
+            var previewCanvases = ForcePreviewContentReady(instance);
+            return new PreviewWorkItem
+            {
+                scene = scene,
+                camera = camera,
+                instance = instance,
+                preview_canvases = previewCanvases,
+                preview_path = Path.Combine(plan.preview_output_dir, $"{SanitizeFileName(screen.id)}.png"),
+                scene_path = $"{plan.scene_root}/{SanitizeFileName(screen.id)}-Preview.unity",
+                width = Mathf.RoundToInt(previewSize.x),
+                height = Mathf.RoundToInt(previewSize.y),
+            };
+        }
+
+        private static List<Canvas> ForcePreviewContentReady(GameObject instance)
+        {
+            var previewCanvases = new List<Canvas>();
+            var sortingOrder = 1;
+            // Unity 2022.3 batchmode can omit arbitrary members of a UGUI draw
+            // batch during immediate off-screen rendering. Split Graphics into
+            // temporary nested Canvases for the preview only. The saved Screen
+            // Prefab is untouched and these components are removed before the
+            // Preview Scene is saved.
+            foreach (var graphic in instance.GetComponentsInChildren<Graphic>(true))
+            {
+                var nestedCanvas = graphic.GetComponent<Canvas>();
+                if (nestedCanvas == null)
+                {
+                    nestedCanvas = graphic.gameObject.AddComponent<Canvas>();
+                    previewCanvases.Add(nestedCanvas);
+                }
+                nestedCanvas.overrideSorting = true;
+                nestedCanvas.sortingOrder = sortingOrder++;
+            }
+            foreach (var image in instance.GetComponentsInChildren<Image>(true))
+            {
+                if (image.sprite != null && image.sprite.texture != null)
+                {
+                    _ = image.sprite.texture.GetNativeTexturePtr();
+                }
+                image.SetAllDirty();
+            }
+            foreach (var text in instance.GetComponentsInChildren<TMP_Text>(true))
+            {
+                text.ForceMeshUpdate(true, true);
+                text.SetAllDirty();
+            }
+            var rootRect = instance.GetComponent<RectTransform>();
+            if (rootRect != null)
+            {
+                LayoutRebuilder.ForceRebuildLayoutImmediate(rootRect);
+            }
+            Canvas.ForceUpdateCanvases();
+            return previewCanvases;
+        }
+
+        private static void ReleasePreviewCanvases(IEnumerable<Canvas> previewCanvases)
+        {
+            foreach (var previewCanvas in previewCanvases ?? Array.Empty<Canvas>())
+            {
+                if (previewCanvas != null)
+                {
+                    UnityEngine.Object.DestroyImmediate(previewCanvas);
+                }
+            }
+            Canvas.ForceUpdateCanvases();
         }
 
         private static bool RenderPreview(Camera camera, int width, int height, string outputPath, ICollection<ImportIssue> issues)
@@ -467,11 +668,37 @@ namespace CuttingTool.GameUI.Editor
                 camera.targetTexture = renderTexture;
                 RenderTexture.active = renderTexture;
                 Canvas.ForceUpdateCanvases();
+                // Warm up UI meshes and texture uploads before reading pixels.
+                // A single immediate batch-mode render can omit randomly batched
+                // Images/Buttons even though the saved prefab is complete.
                 camera.Render();
                 texture = new Texture2D(width, height, TextureFormat.RGBA32, false);
-                texture.ReadPixels(new Rect(0, 0, width, height), 0, 0);
+                const int capturePassCount = 4;
+                Color32[] compositePixels = null;
+                for (var pass = 0; pass < capturePassCount; pass++)
+                {
+                    Canvas.ForceUpdateCanvases();
+                    camera.Render();
+                    texture.ReadPixels(new Rect(0, 0, width, height), 0, 0);
+                    texture.Apply(false, false);
+                    var pixels = texture.GetPixels32();
+                    if (compositePixels == null)
+                    {
+                        compositePixels = pixels;
+                        continue;
+                    }
+                    for (var index = 0; index < pixels.Length; index++)
+                    {
+                        compositePixels[index].r = Math.Max(compositePixels[index].r, pixels[index].r);
+                        compositePixels[index].g = Math.Max(compositePixels[index].g, pixels[index].g);
+                        compositePixels[index].b = Math.Max(compositePixels[index].b, pixels[index].b);
+                        compositePixels[index].a = Math.Max(compositePixels[index].a, pixels[index].a);
+                    }
+                }
+                texture.SetPixels32(compositePixels);
                 texture.Apply(false, false);
                 File.WriteAllBytes(outputPath, texture.EncodeToPNG());
+                FlushPreviewRenderState(camera, width, height);
                 return true;
             }
             catch (Exception exception)
@@ -491,6 +718,24 @@ namespace CuttingTool.GameUI.Editor
                 {
                     UnityEngine.Object.DestroyImmediate(texture);
                 }
+            }
+        }
+
+        private static void FlushPreviewRenderState(Camera camera, int width, int height)
+        {
+            var previous = RenderTexture.active;
+            var flushTexture = new RenderTexture(width, height, 0, RenderTextureFormat.ARGB32);
+            try
+            {
+                camera.targetTexture = flushTexture;
+                RenderTexture.active = flushTexture;
+                camera.Render();
+            }
+            finally
+            {
+                camera.targetTexture = null;
+                RenderTexture.active = previous;
+                UnityEngine.Object.DestroyImmediate(flushTexture);
             }
         }
 

@@ -39,11 +39,13 @@
 
 - 项目的第一个 UI 界面列出的资源全部进入生成清单。
 - 后续界面按 `category + semantic_name + state` 判定是否已有资源。
+- Panel 例外：先按 `frame_style` 判定四边和四角设计；同一请求内即使 `semantic_name` 不同，只要 `frame_style` 相同也复用首个 Panel。
 - 目标尺寸不参与复用判定；Unity 可在导入后缩放。
 - 已有资源标记为 `reuse`，从本次前序界面或 `ui-asset-catalog.json` 记录 `reuse_asset_id`、`reuse_output` 和 `reuse_source_run`。
 - 未命中的资源标记为 `generate`。
 - 同一新资源在多个后续界面出现时只生成一次，其余界面引用本次待生成资源。
 - 语义不确定或状态不同不得强行复用；宁可生成新资源，也不要仅凭外观相似误判。
+- Panel 的 `frame_style` 必须来自明确的边框设计判断；设计不确定时使用不同键，禁止为了省生图强行合并。
 
 ## 内容生成策略
 
@@ -64,7 +66,7 @@ input/<project-id>/ui-asset-catalog.json
 - `all_assets_reused=true`：跳过生成，直接交付引用清单。
 - 存在待生成资源：立即运行编排器，按缺图清单调用内置图片生成，保存到精确路径，再次运行编排器直到 `complete` 或出现真实失败。
 
-多个界面仍只进行一次需求确认。启用 Unity 交付时，每个 Screen 在分析 JSON 中提供 `unity_elements`；脚本自动汇总为一个 `unity_delivery.layout.screens[]`。内部图片严格逐张生成，全部资源 QA 通过后一次导入 Unity，并逐 Screen 生成 Prefab、Preview Scene 和预览图。
+多个界面仍只进行一次需求确认。启用 Unity 交付时，每个 Screen 在分析 JSON 中提供 `unity_elements`；脚本自动汇总为一个 `unity_delivery.layout.screens[]`。内部独立 Production Sheet 按自适应波次生成，Matte、来源侧车和重试串行；全部资源 QA 通过后一次导入 Unity，并逐 Screen 生成 Prefab、Preview Scene 和预览图。
 
 除了项目名、参考图放置、上述一次性界面确认、参考图不合格替换和不可安全推断的重大歧义，不向用户停顿。
 

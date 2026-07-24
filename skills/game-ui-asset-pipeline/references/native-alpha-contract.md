@@ -28,8 +28,8 @@
 ```text
 prompts/<job-id>.md
 prompts/<job-id>-alpha-matte.md
-generated/<job-id>.png
-generated/<job-id>-alpha-matte.png
+generated/current/<job-id>.png
+generated/current/<job-id>-alpha-matte.png
 ```
 
 ### 彩色 Sheet

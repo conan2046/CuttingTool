@@ -31,8 +31,15 @@ description: 生成、拆分、透明化、校验并打包游戏 UI 位图资源
 - 具有可验证生成来源的原生 RGBA 烟雾、玻璃、液体和柔光特效
 - Unity 2022.3 Sprite Single 自动导入、可验证九宫格 Border、Image/Button 界面 Prefab、子 Prefab 组合和按钮互斥视图切换
 - V0.13 QA 质量评分、跨 Sheet 风格一致性、单原因纠错 Prompt、候选哈希去重和失败 Job 定向重生成
-- V0.14 单次多界面需求、严格逐张图片生成队列，以及资源 QA 通过后的多 Screen Unity 自动导出
+- V0.14 单次多界面需求、自适应图片生成队列，以及资源 QA 通过后的多 Screen Unity 自动导出
 - V0.14.2 生成前内容策略、状态图标防色键污染 Prompt、逐图快速源门禁和全局额外生图预算
+- V0.14.3 独立 Production Sheet 自适应并发 3、高风险限流、依赖/重试串行和故障持久降级
+- V0.14.4 最终 Screen Prefab 清理临时 `GameUIElementBinding`，保留必要交互脚本
+- V0.14.5 九宫格空拉伸带与空风格特征不再导致 Runner 崩溃，统一转为可追溯 hard fail
+- V0.14.6 低对比材质渐变不再误报九宫格装饰，Unity Preview 使用确定性多帧合成并支持逐 Screen 隔离渲染
+- V0.14.7 Panel 按 `frame_style` 去重，同边框只生成一个 `200×200` 紧凑资源，界面尺寸统一交给 Unity Sliced 九宫格
+- V0.14.8 Panel 默认 Unity Border 固定为 `L/B/R/T = 50`；显式覆写优先，Button 继续自动推断
+- V0.15 风险资源优先生成、契约感知源门禁缓存、自动色键冲突预检、生产目录隔离和可恢复流水线状态账本
 
 以上九项是运行配置和验收 JSON 使用的内部类别名，必须原样返回。`01_Panel` 到 `09_Icon_Effect` 只用于文件名前缀；不要把 `09_Icon_Effect` 当成内部 `category`。
 
@@ -221,9 +228,9 @@ ${CODEX_HOME:-$HOME/.codex}/skills/.system/imagegen/SKILL.md
 
 编排器在缺图时返回 `awaiting-generation`、精确缺失路径、对应 Prompt 和参考图角色。立即使用 `$imagegen` 补齐文件并仅传 `--run-dir` 续跑；输入齐全时自动执行 Runner。`awaiting-generation` 是内部状态，不是向用户停顿的理由。
 
-用户可以一次提出多个界面和全部资源；不要要求用户按图片逐次下需求。编排器固定使用 `sequential-inputs`，`qa/generation-queue.json` 同一时刻只激活一个生成输入。只对当前激活的 Sheet 或 Matte 调用一次 `$imagegen`，保存后立即续跑编排器，再处理下一项；不得并行生成多个图片 Job，也不得把多个完整界面挤进一张生产 Sheet。
+用户可以一次提出多个界面和全部资源；不要要求用户按图片逐次下需求。编排器默认使用 `adaptive-parallel`，读取 `qa/generation-queue.json` 的 `active_tasks`：先生成 Panel、Button、Icon_Status 高风险波次并通过快速门禁，再激活普通图标；高风险同波最多 2 个，全部 Production Sheet 最大并发 3；不得启动 `blocked` 项。Alpha Matte、原生来源侧车和全部重试必须独占串行。每张 Production Sheet 保存后立即执行快速源门禁，当前波次全部处理后续跑编排器。发生限流、超时或断线时，用 `--generation-event rate-limit|timeout|disconnect` 记录一次并按 `3→2→1` 持久降级；连续重复的同类故障只记录、不重复降级。不得把多个完整界面挤进一张生产 Sheet。
 
-建立背包、商店等内容界面前先写 `screens[].content_policy.item_icons`：`generate` 生成示例道具，`empty-slots` 只交付空格位，`runtime-data` 由业务数据运行时填充。后两者必须把 `Icon_Item` 标记为 `exclude`，不得先生成再弃用。批量请求默认写入 `generation_budget.max_extra_calls=1` 和单次 5–8 分钟估算；摘要显示首轮调用数、全局额外调用预算及总时长区间。
+建立背包、商店等内容界面前先写 `screens[].content_policy.item_icons`：`generate` 生成示例道具，`empty-slots` 只交付空格位，`runtime-data` 由业务数据运行时填充。后两者必须把 `Icon_Item` 标记为 `exclude`，不得先生成再弃用。未显式设置总额时，额外生图预算按本批风险动态预留：Panel、Button 各 1 次，Nav/Status/Item 色键风险组 1 次，再保留 1 次全局兜底，最高 5 次；摘要显示预算策略、首轮调用及预计时长。
 
 ### 4. 生成布局引导图
 
@@ -247,7 +254,7 @@ ${CODEX_HOME:-$HOME/.codex}/skills/.system/imagegen/SKILL.md
 
 要求模型输出准确数量、互不接触、完整居中的资源。普通资源使用纯色色键；复杂半透明资源使用纯黑底彩色 Sheet，并基于该图生成同尺寸、同布局、同轮廓的灰度 Alpha Matte。生成后立即检查数量、分离度、边缘裁切、网格污染、Matte 对齐和风格一致性。
 
-每张 Production Sheet 就绪后，编排器先写 `qa/source-gates/<job-id>.json` 并检查可解码、画布比例、槽位占用、画布触边；绿色色键的 `Icon_Status` 额外检查绿色/青绿色反光。快速门禁失败时不得启动完整 Runner，只生成一个定向纠错任务；全局额外调用预算耗尽后保持硬失败。
+每张 Production Sheet 就绪后，编排器先写 `qa/source-gates/<job-id>.json` 并检查可解码、画布比例、槽位占用、画布触边；绿色色键的 `Icon_Status` 额外检查绿色/青绿色反光，Panel/Button 额外检查四边中间 60% 的九宫格拉伸带。缓存指纹必须包含图片、Job 请求、Layout Guide、透明模式和源门禁版本；任一契约变化都重新检查。快速门禁失败时不得启动完整 Runner，只生成一个定向纠错任务。
 
 ### 6. 确定性后处理
 
@@ -266,7 +273,7 @@ V0.13 中，Runner 失败后编排器还会写出 `qa/regeneration-plan.json/md`
 
 当存在 Canonical 且至少有两个生产 Job 时，读取顶层 `style_consistency` 并输出 `qa/style-consistency.json`。评分组合 Canonical 相似度与 Sheet 间可见 RGBA 的调色板、平均色、亮度、饱和度和边缘密度；低于门槛时把 `cross-sheet-style-drift` 绑定到具体 Job，进入同一单原因纠错闭环。它是自动门禁，不替代 Contact Sheet 的人工语义、造型和用途检查。
 
-内置 `imagegen` 当前不能直接用于 `native-alpha-required`，但可以用于 `model-matte-derived`，不需要 API Key。原生模式仍需用户明确确认外部透明生成回退，并保存 `generated/<job-id>.provenance.json`；来源侧车中的模型与生成方式都必须为非空值。
+内置 `imagegen` 当前不能直接用于 `native-alpha-required`，但可以用于 `model-matte-derived`，不需要 API Key。原生模式仍需用户明确确认外部透明生成回退，并保存 `generated/current/<job-id>.provenance.json`；来源侧车中的模型与生成方式都必须为非空值。
 
 以下分步命令保留用于单 Sheet 调试和人工校正：
 
@@ -301,7 +308,7 @@ V0.13 中，Runner 失败后编排器还会写出 `qa/regeneration-plan.json/md`
 
 ```bash
 "$PYTHON" scripts/remove_chroma_key.py \
-  --input generated/<sheet>.png \
+  --input generated/current/<sheet>.png \
   --output extracted/<sheet>-alpha.png \
   --chroma-key "#00FF00" \
   --adaptive-thresholds \
@@ -405,11 +412,13 @@ Contact Sheet 中的棋盘格只用于人工查看透明边缘，不得回写到
   --layout output/<project-id>/unity/unity-layout.json
 ```
 
-脚本把可追溯 PNG 导入 `Assets/_Project/UI/Sprites/<project-id>`，配置 Sprite Single、Alpha、PPU、Pivot 和 Border；界面 Prefab 统一写入 `Assets/_Project/Prefabs/UI/Demo`，Preview Scene 写入 `Assets/_Project/Scenes/Demo`，并由 Unity 渲染像素尺寸一致的预览 PNG。单独 Sprite 不生成资源 Prefab；导入时清理同项目旧目录 `Assets/_Generated/GameUI/<project-id>/Prefabs/Assets`。Panel/Button 自动分析九宫格，并按源图到全部布局目标的最小缩放比推导 PPU；只有 Border 置信度、中心拉伸区及换算后的显示尺寸全部有效时才写入，否则预检失败并要求在布局 JSON 的 `nine_slice_overrides` 或 `pixels_per_unit_overrides` 中明确覆写。
+脚本把可追溯 PNG 导入 `Assets/_Project/UI/Sprites/<project-id>`，配置 Sprite Single、Alpha、PPU、Pivot 和 Border；界面 Prefab 统一写入 `Assets/_Project/Prefabs/UI/Demo`，Preview Scene 写入 `Assets/_Project/Scenes/Demo`，并由 Unity 渲染像素尺寸一致的预览 PNG。单独 Sprite 不生成资源 Prefab；导入时清理同项目旧目录 `Assets/_Generated/GameUI/<project-id>/Prefabs/Assets`。Panel 未显式覆写时固定使用 Unity Border `[left,bottom,right,top] = [50,50,50,50]`；`nine_slice_overrides` 优先，Button 继续自动分析九宫格。Panel/Button 均按源图到全部布局目标的最小缩放比推导 PPU；只有中心拉伸区及换算后的显示尺寸有效时才写入，否则预检失败并要求调整源图、`nine_slice_overrides` 或 `pixels_per_unit_overrides`。
 
 预计九宫格拉伸的 Panel/Button 只允许在四角固定区保留独特装饰；四边中段拉伸带和中央内容区必须连续、均匀、无星点、莲花、菱形、徽记、卷纹或方向性图案。不要用扩大 Border 的方式包住边中段装饰；应编辑或重生成源资源。Panel 内按钮、列表和页签必须留在外框安全区内，不能覆盖或越过固定边框。Unity 验收必须看实际多尺寸 Sliced 渲染，不只看自动 Border 置信度。
 
-界面元素当前正式支持 `Image`、`Button`、`Text`（TMP）、`GridLayoutGroup`、`HorizontalLayoutGroup`、`VerticalLayoutGroup`、`ScrollView` 和 `ScrollViewport`。标题、数值占位和按钮文案必须建立明确的 `Text` 节点；Text 使用 `text`、`font_size`、`text_alignment`、`font_source_path`、`font_asset_path`，由导入器创建或复用动态 TMP Font Asset，保证 CJK 文案可渲染。规则排列必须建立 Layout Group 父容器，由容器统一控制单元尺寸、间距、行列、内边距和对齐，不得逐项写死位置。背包、任务列表、商店列表等内容数量可能增长且展示区域有限的容器，优先使用 `ScrollView → ScrollViewport(RectMask2D) → Content(LayoutGroup + ContentSizeFitter)`；Viewport 只显示规定范围，超出内容必须隐藏并通过指定轴滚动，不得仅用 Layout Group 让内容越界。只有数量固定且确认永不溢出的纯装饰排列才允许只用 Layout Group。每个容器及子对象都附带稳定 `GameUIElementBinding.BindingId`；Button 自动配置 `Image`、`Button.targetGraphic`、Raycast，并在布局提供状态资源时使用真实 Hover/Pressed/Disabled SpriteSwap。无 Sprite 的 Image 可通过 RGBA `color` 作为确定性底色。文字、本地化、业务事件和运行时数据绑定属于项目代码，不得伪造完成。
+Panel 先按 `frame_style` 判断四边和四角设计是否相同。同一设计只保留一个生成项和一个紧凑透明源资源，默认 `1×1` Job 并归一化到 `200×200`；不同 Screen、不同宽高和不同长宽比直接复用该 Sprite，通过 Unity `Image.Type=Sliced` 拉伸。只有四边或四角设计变化时才使用新的 `frame_style` 并生成新 Panel。
+
+界面元素当前正式支持 `Image`、`Button`、`Text`（TMP）、`GridLayoutGroup`、`HorizontalLayoutGroup`、`VerticalLayoutGroup`、`ScrollView` 和 `ScrollViewport`。标题、数值占位和按钮文案必须建立明确的 `Text` 节点；Text 使用 `text`、`font_size`、`text_alignment`、`font_source_path`、`font_asset_path`，由导入器创建或复用动态 TMP Font Asset，保证 CJK 文案可渲染。规则排列必须建立 Layout Group 父容器，由容器统一控制单元尺寸、间距、行列、内边距和对齐，不得逐项写死位置。背包、任务列表、商店列表等内容数量可能增长且展示区域有限的容器，优先使用 `ScrollView → ScrollViewport(RectMask2D) → Content(LayoutGroup + ContentSizeFitter)`；Viewport 只显示规定范围，超出内容必须隐藏并通过指定轴滚动，不得仅用 Layout Group 让内容越界。只有数量固定且确认永不溢出的纯装饰排列才允许只用 Layout Group。导入期可临时附加 `GameUIElementBinding.BindingId` 完成确定性定位；ScrollRect、Toggle 和 PrefabInstance 接线完成后，必须在保存 Screen Prefab 前递归移除这些临时组件。Button 自动配置 `Image`、`Button.targetGraphic`、Raycast，并在布局提供状态资源时使用真实 Hover/Pressed/Disabled SpriteSwap。无 Sprite 的 Image 可通过 RGBA `color` 作为确定性底色。保留实际按钮切换所需的 `GameUIViewSwitcher`；文字、本地化、业务事件和运行时数据绑定属于项目代码，不得伪造完成。
 
 Unity 导出失败时读取 `unity/unity-preflight.json`、`unity/unity-import-report.json` 和 `unity/unity-batch.log`。需要回滚本次生成目录时运行 `rollback_unity_export.py`；默认保留共享嵌入包，只有明确需要完全移除时才加 `--remove-package`。
 
@@ -434,7 +443,9 @@ output/<project-id>-<timestamp>/
 ├─ references/
 ├─ requests/
 ├─ prompts/
-├─ generated/
+├─ generated/current/
+├─ reused-staging/
+├─ .local/backups/
 ├─ extracted/
 ├─ normalized/
 ├─ final/
@@ -455,6 +466,8 @@ output/<project-id>-<timestamp>/
    ├─ delivery-summary.json
    ├─ generation-queue.json
    ├─ generation-queue.md
+   ├─ pipeline-state.json
+   ├─ operation-heartbeat.json
    ├─ regeneration-plan.json
    └─ delivery-summary.md
 ```

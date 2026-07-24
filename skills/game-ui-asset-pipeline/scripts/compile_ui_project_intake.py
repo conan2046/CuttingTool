@@ -40,6 +40,10 @@ def asset_key(category: str, semantic_name: str, state: str) -> str:
     return "|".join((category.strip(), semantic_name.strip().casefold(), state.strip().casefold()))
 
 
+def panel_frame_key(asset: dict[str, Any]) -> str:
+    return str(asset.get("frame_style", "default")).strip().casefold() or "default"
+
+
 def load_catalog(path: Path) -> dict[str, dict[str, Any]]:
     if not path.is_file():
         return {}
@@ -170,6 +174,7 @@ def render_reference_notes(analysis: dict[str, Any]) -> str:
 def compile_inventory(analysis: dict[str, Any], catalog: dict[str, dict[str, Any]]) -> tuple[list[dict[str, Any]], list[dict[str, Any]]]:
     inventory: list[dict[str, Any]] = []
     generated_in_request: dict[str, dict[str, Any]] = {}
+    generated_panels_by_frame: dict[str, dict[str, Any]] = {}
     generation_assets: OrderedDict[str, dict[str, Any]] = OrderedDict()
     for screen_index, screen in enumerate(analysis["screens"]):
         item_icon_policy = str(screen.get("content_policy", {}).get("item_icons", "generate"))
@@ -179,7 +184,10 @@ def compile_inventory(analysis: dict[str, Any], catalog: dict[str, dict[str, Any
             state = str(asset.get("state", "Default")).strip() or "Default"
             key = asset_key(category, semantic_name, state)
             excluded = category == "Icon_Item" and item_icon_policy in {"empty-slots", "runtime-data"}
-            reuse = None if excluded or screen_index == 0 else generated_in_request.get(key) or catalog.get(key)
+            frame_style = panel_frame_key(asset) if category == "Panel" else None
+            reuse = None if excluded or frame_style is None else generated_panels_by_frame.get(frame_style)
+            if reuse is None and not excluded and screen_index > 0:
+                reuse = generated_in_request.get(key) or catalog.get(key)
             action = "exclude" if excluded else ("reuse" if reuse else "generate")
             record = {
                 "screen_id": str(screen.get("id", f"screen-{screen_index + 1:02d}")),
@@ -189,6 +197,7 @@ def compile_inventory(analysis: dict[str, Any], catalog: dict[str, dict[str, Any
                 "semantic_name": semantic_name,
                 "state": state,
                 "description": str(asset.get("description", "")).strip(),
+                "frame_style": frame_style,
                 "action": action,
                 "content_policy": item_icon_policy if category == "Icon_Item" else None,
                 "exclusion_reason": f"item-icons:{item_icon_policy}" if excluded else None,
@@ -203,12 +212,15 @@ def compile_inventory(analysis: dict[str, Any], catalog: dict[str, dict[str, Any
                     "output": "本次生成后写入 Manifest",
                     "source_run": "current-run",
                 }
+                if frame_style is not None:
+                    generated_panels_by_frame[frame_style] = generated_in_request[key]
                 if key not in generation_assets:
                     generation_assets[key] = {
                         "category": category,
                         "semantic_name": semantic_name,
                         "state": state,
                         "description": record["description"],
+                        "frame_style": frame_style,
                     }
     return inventory, list(generation_assets.values())
 
@@ -239,14 +251,27 @@ def build_batch_request(analysis: dict[str, Any], generation_assets: list[dict[s
                 "semantic_name": asset["semantic_name"],
                 "state": asset["state"],
                 "description": asset["description"],
+                **({"frame_style": asset["frame_style"]} if asset.get("frame_style") is not None else {}),
             }
         )
     unity_delivery = build_unity_delivery(analysis)
+    generated_categories = set(grouped)
+    budget_reserves: dict[str, int] = {}
+    for category in ("Panel", "Button"):
+        if category in generated_categories:
+            budget_reserves[category] = 1
+    if generated_categories & {"Icon_Nav", "Icon_Status", "Icon_Item"}:
+        budget_reserves["chroma-risk-icons"] = 1
+    suggested_extra_calls = min(5, sum(budget_reserves.values()) + 1)
+    raw_generation_budget = analysis.get("generation_budget", {})
     generation_budget = {
-        "max_extra_calls": int(analysis.get("generation_budget", {}).get("max_extra_calls", 1)),
+        "max_extra_calls": int(raw_generation_budget.get("max_extra_calls", suggested_extra_calls)),
         "estimated_minutes_per_call": list(
-            analysis.get("generation_budget", {}).get("estimated_minutes_per_call", [5, 8])
+            raw_generation_budget.get("estimated_minutes_per_call", [5, 8])
         ),
+        "reserved_extra_calls": budget_reserves,
+        "global_fallback_calls": 1,
+        "strategy": "explicit-total" if "max_extra_calls" in raw_generation_budget else "risk-reserved",
     }
     if not grouped:
         return {
@@ -256,9 +281,14 @@ def build_batch_request(analysis: dict[str, Any], generation_assets: list[dict[s
             "categories": [],
             "all_assets_reused": True,
             "generation_policy": {
-                "mode": "sequential-inputs",
-                "max_concurrent_image_jobs": 1,
-                "rerun_orchestrator_after_each_input": True,
+                "mode": "adaptive-parallel",
+                "max_concurrent_image_jobs": 3,
+                "minimum_concurrent_image_jobs": 1,
+                "max_concurrent_high_risk_jobs": 2,
+                "dependent_inputs_serial": True,
+                "retry_inputs_serial": True,
+                "fallback_on": ["rate-limit", "timeout", "disconnect"],
+                "rerun_orchestrator_after_each_wave": True,
             },
             "generation_budget": generation_budget,
             "unity_delivery": unity_delivery,
@@ -274,9 +304,14 @@ def build_batch_request(analysis: dict[str, Any], generation_assets: list[dict[s
         "style_notes": str(analysis.get("style_notes", "")),
         "generation_method": str(analysis.get("generation_method", "built-in-imagegen")),
         "generation_policy": {
-            "mode": "sequential-inputs",
-            "max_concurrent_image_jobs": 1,
-            "rerun_orchestrator_after_each_input": True,
+            "mode": "adaptive-parallel",
+            "max_concurrent_image_jobs": 3,
+            "minimum_concurrent_image_jobs": 1,
+            "max_concurrent_high_risk_jobs": 2,
+            "dependent_inputs_serial": True,
+            "retry_inputs_serial": True,
+            "fallback_on": ["rate-limit", "timeout", "disconnect"],
+            "rerun_orchestrator_after_each_wave": True,
         },
         "generation_budget": generation_budget,
         "canonical_style": str(analysis["canonical_reference"]["file"]),

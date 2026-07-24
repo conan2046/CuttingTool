@@ -20,6 +20,7 @@ UNITY_CANVAS_REFERENCE_PPU = 100.0
 UNITY_SPRITE_ROOT = "Assets/_Project/UI/Sprites"
 UNITY_SCREEN_PREFAB_ROOT = "Assets/_Project/Prefabs/UI/Demo"
 UNITY_SCENE_ROOT = "Assets/_Project/Scenes/Demo"
+DEFAULT_PANEL_BORDER = 50
 
 
 def read_json(path: Path) -> dict[str, Any]:
@@ -65,6 +66,16 @@ def validate_project_id(value: str) -> str:
     if not normalized or normalized in {".", ".."} or any(character in normalized for character in "/\\"):
         raise ValueError(f"project_id must be one safe folder name: {value}")
     return normalized
+
+
+def default_panel_border(width: int, height: int) -> list[int]:
+    border = [DEFAULT_PANEL_BORDER] * 4
+    if border[0] + border[2] >= width or border[1] + border[3] >= height:
+        raise ValueError(
+            f"default Panel Border {DEFAULT_PANEL_BORDER} leaves no stretchable center "
+            f"for {width}x{height}; provide a larger Panel or explicit nine_slice_overrides"
+        )
+    return border
 
 
 def sanitize_unity_filename(value: str) -> str:
@@ -502,6 +513,9 @@ def prepare_unity_export(
                 if border[0] + border[2] >= source_width or border[1] + border[3] >= source_height:
                     raise ValueError(f"nine_slice_overrides leaves no stretchable center for {asset_id}")
                 border_origin = "manual-override"
+            elif category == "Panel":
+                border = default_panel_border(source_width, source_height)
+                border_origin = "panel-default-50"
             else:
                 with Image.open(source) as image:
                     inferred = infer_nine_slice(image, minimum_confidence=nine_slice_confidence)

@@ -1,10 +1,10 @@
 # CuttingTool 会话交接
 
-> 更新时间：2026-07-22
+> 更新时间：2026-07-24
 > 工作目录：`D:\CuttingTool`  
 > 仓库：`https://github.com/conan2046/CuttingTool.git`  
 > 当前工作分支：`main`
-> 已完成功能基线：v0.14.2 生图调用压缩、快速源门禁、单次多界面、逐张生成、Unity 多 Screen、子 Prefab 组合与互斥切换；并包含 v0.13.x QA 纠错、TMP 文本及 `_Project` 目录规范
+> 已完成功能基线：v0.15.0 P0/P1/P2 生成可靠性优化、v0.14.8 Panel 默认 Border 50、v0.14.7 Panel 单资源复用与 200×200 紧凑源、五界面 Unity 交付、自适应生图、快速源门禁、QA 纠错、TMP 文本及 `_Project` 目录规范
 
 ## 1. 新会话先做什么
 
@@ -46,12 +46,76 @@ game-ui-asset-pipeline
 
 ## 3. 已经完成什么
 
+### 3.0 v0.15.0：P0/P1/P2 生成可靠性优化
+
+- 风险波次先生成 Panel、Button、Icon_Status；通过快速源门禁后再解锁普通图标。
+- 快速源门禁缓存绑定图片、Job 请求、Layout Guide、透明模式和门禁版本；Panel/Button 在完整 Runner 前检查九宫格中间 60%。
+- 自动色键使用 `subject_colors` / `subject_uses_*` 从绿、品红、青色中避冲突选择；显式冲突在生图前失败。
+- 默认额外预算按 Panel、Button、色键风险图标组预留，并增加全局兜底，最高 5；显式总额优先。
+- 新运行目录隔离为 `generated/current/`、`.local/backups/`、`reused-staging/` 和 `final/`；污染时写 `qa/run-preflight.json` 并阻断。
+- `qa/pipeline-state.json` 保存恢复阶段和输入 SHA-256；`qa/operation-heartbeat.json` 标记 Runner 长操作状态。
+- Unity layout schema 在生图前校验；连续重复同类生成故障不会重复降级并发。
+- 源码与 Codex 安装态全量 `unittest` 均为 157/157；74 个正式 Skill 文件 SHA-256 差异 0。
+
+### 3.0 v0.14.8：Panel 默认 Border 50
+
+- Panel 未显式覆写时固定使用 Unity Border `[left,bottom,right,top] = [50,50,50,50]`，来源为 `panel-default-50`。
+- `nine_slice_overrides` 优先；Button 继续自动推断，低置信仍阻断。
+- Panel 源图宽或高不大于 `100px` 时预检失败，避免空中心拉伸区。
+- 真实五界面重导中两张 Panel 均为四边 50；Unity 报告 `ok=true`、49 Sprite、5 Screen、0 issue。Editor 写出 `GameUIImportComplete` 后退出残留，已终止该完成态进程。
+- 源码与 Codex 安装态全量 `unittest` 均为 150/150；74 个正式 Skill 文件 SHA-256 差异 0。
+
+### 3.0 v0.14.7：Panel 单资源复用
+
+- Panel 使用 `frame_style` 表达四边/四角设计；同值资源只生成一次，尺寸不参与判定，Unity 通过 Sliced 九宫格适配。
+- 默认 Panel Job 为 `1024×1024 / 1×1`；本批通用 Panel 与边框设计不同的背包格 Panel 均使用预乘 Alpha 等比缩放归一化到 `200×200`，未追加生图调用。
+- `output/xiuxian-ui-five-functions-v0144` 现为 42 个本批资源＋7 个复用资源，共 49 Sprite；QA 49/49 通过、0 warning、0 fail、质量 100、风格 71.41。
+- 五个静态 Screen 共用通用 Panel，只保留四边设计不同的背包格 Panel；Unity 导入报告为 49 Sprite、5 Prefab、5 Scene、5 PNG、0 issue、296 个 Binding 已清理。
+- 用户明确静态界面不需要继续追查 batchmode 预览偶发漏绘；当前以 Prefab 层级、Sprite 引用和导入报告完成结构验收。
+- 源码与 Codex 安装态全量 `unittest` 均为 149/149；74 个正式 Skill 文件 SHA-256 差异 0，其中 Panel 复用、批处理和 Unity 导出定向测试 38/38。
+
+### 3.0 v0.14.6：四角九宫资源与五界面 Unity 稳定交付
+
+- `panel-sheet-01.png` 已按用户纠正重生成：中心与四边中间 60% 无图案，装饰只在四角固定区。
+- Button/Panel 纹理 QA 只放宽低对比、低梯度材质变化；高对比图案仍 hard fail。
+- `output/xiuxian-ui-five-functions-v0144` 最终为 45 个新资源＋7 个复用装备资源，共 52 Sprite；QA 52/52 通过、0 warning、0 fail。
+- 五个 1920×1080 Screen 已导入 `D:\CodeProjects\UIText`：5 Prefab、5 Preview Scene、5 Preview PNG、0 单资源 Prefab、0 issue，移除 296 个临时 Binding。
+- Unity Preview 使用 1:1 WorldSpace、纹理/UGUI 强制就绪、四帧合成；逐 Screen 独立复验记录位于 `unity/isolated-runs/`。
+- 源码全量 `unittest` 146/146 通过；安装态与哈希一致性需在本段最后同步后确认。
+
+### 3.0 v0.14.5：Runner 空特征崩溃修复
+
+- 九宫格拉伸带出现空列/空行时记录 `gap_positions` 并 hard fail，不再触发 `IndexError`。
+- 风格缩略图没有最低可见 Alpha 像素时记录 `style-profile-empty-visible-pixels`，携带 `asset_id/job_id/file`，不再抛异常中断。
+- 真实五界面批次 `output/xiuxian-ui-five-functions-v0144` 已落盘完整 QA：期望 45、导出 44、21 hard fail、质量分 8、风格分 71.36；Unity 未启动。
+- 当前候选失败原因：Button 实际 13 件且跨槽连通、缺 1 态、九宫格中段违规；`Amplify` 46 个可见色键污染像素；`RefiningStone` 1100 个可见色键污染像素。
+- 全局额外生图预算 1 已被 Button 首轮重试耗尽；当前 `batch-request.json` 还错误写成 `unity_delivery.enabled=false`。
+- 源码与安装态全量 `unittest` 各 144/144 通过；74 个正式 Skill 文件 SHA-256 差异 0。
+
+### 3.0 v0.14.4：最终 Prefab 辅助脚本清理
+
+- `GameUIElementBinding` 改为仅供导入期定位；全部接线完成后、保存 Screen Prefab 前递归移除。
+- `GameUIViewSwitcher`、Button、Layout Group、ScrollRect、TMP 等正式功能组件不清理，按钮互斥切换保持有效。
+- Unity 导入报告新增 `removed_helper_component_count`，最终 Prefab 不应再出现截图中的 `Game UI Element Binding (Script)`。
+- 已真实重导 `xiuxian-ui-character-inventory-1920x1080-v1`：48 Sprite、4 Screen Prefab、4 Preview Scene、4 Preview PNG、0 issue，移除 125 个辅助组件；`CharacterLeftFixed`、`CharacterAttributeRight`、`CharacterInventoryRight`、`CharacterInventoryScreen` 的 Binding GUID 均为 0。
+- `interaction-v0144.json`：`entry_count=2`，默认态、第二按钮切换、第一按钮恢复均通过，0 issue；根 Prefab 仍保留 1 个 `GameUIViewSwitcher`。
+- 源码与安装态全量 `unittest` 各 140/140 通过；72 个正式 Skill 文件 SHA-256 差异 0。
+
+### 3.0 v0.14.3：自适应三路图片生成
+
+- 独立 Production Sheet 默认最多并行 3 个；Panel、Button、Icon_Status 同波最多 2 个，低风险 Job 可填补第 3 槽。
+- Alpha Matte、原生来源侧车和所有重试保持独占串行；每个已到达 Production Sheet 立即执行快速源门禁。
+- `qa/generation-runtime.json` 持久保存有效并发；`--generation-event rate-limit|timeout|disconnect` 每次降一级，最低 1。
+- `qa/generation-queue.json` 升级为 schema v2，增加 `active_tasks`、波次类型、配置并发和有效并发，同时保留 `active_task` 兼容字段。
+- 全局额外图片调用预算仍默认 1；任何硬 `fail` 继续阻断正式 Manifest。
+- 源码与安装态全量 `unittest` 各 139/139 通过；72 个正式 Skill 文件 SHA-256 差异 0。
+
 ### 3.0 v0.14.2：生图调用压缩与快速源门禁
 
 - `content_policy.item_icons=empty-slots|runtime-data` 会把无须生成的 `Icon_Item` 标记为 `exclude`，不进入批量请求。
 - 绿色色键 `Icon_Status` 首轮 Prompt 使用深蓝封闭底板和银白隔离边，禁止绿色/青绿色反光。
 - `quick_source_gate.py` 在完整 Runner 前检查解码、比例、槽位、触边和状态图标反光；失败只生成定向重试，不启动完整 Runner。
-- `generation_budget.max_extra_calls` 默认 1，限制全请求额外图片调用；摘要显示首轮调用、总预算和 5–8 分钟/次估算。
+- v0.14.2 当时默认 `generation_budget.max_extra_calls=1`；v0.15.0 已改为按风险动态预留，显式总额仍优先。
 - 图片生成继续固定 `sequential-inputs`、最大并发 1；不启用并行图片 Job。
 - 源码与安装态全量 `unittest` 各 136/136 通过；72 个正式 Skill 文件 SHA-256 差异 0。
 
@@ -284,7 +348,9 @@ game-ui-asset-pipeline
 
 ## 4. 当前卡在哪
 
-当前没有代码、测试、图片生成或 API 权限阻塞。v0.14.0 已完成代码、定向测试和源码全量测试，下一步由用户使用真实多界面需求验收图片顺序与 Unity 拼装结果。
+当前没有被旧五界面美术批次阻断。该批次已收敛为 49/49、0 warning、0 fail，并完成 49 Sprite、5 Screen Unity 结构交付；v0.15.0 的 P0/P1/P2 优化已在源码测试中通过。
+
+本任务 P0/P1/P2 已完成，源码和安装副本验证通过。当前无技术阻断；未提交、未推送，除非用户另行明确要求。
 
 已知环境限制：WindowsApps 内的 `codex.exe` 从 PowerShell 直接执行会报“拒绝访问”，所以不能用 `codex exec` 做新任务触发验收。此前已改用 Codex 桌面的独立任务接口完成 9 类验收，不要再浪费时间重复尝试 WindowsApps CLI。
 
@@ -301,8 +367,8 @@ game-ui-asset-pipeline
 
 - 自然语言由 Codex 转为批量请求，确定性脚本不实现伪 NLP。
 - 首次准备、缺图清单、补图续跑、Runner 和交付摘要已统一。
-- v0.14.0 已把缺图清单升级为严格逐张队列，并把多 Screen Unity 导出串入完成阶段。
-- 下一维护项为用户真实多界面验收后，根据 Prefab、Preview Scene 和渲染差异修正。
+- v0.15.0 已把队列升级为风险资源优先，并增加契约缓存、目录预检、状态账本和恢复心跳。
+- 下一阶段仅需用下一次真实 UI 生产任务观察动态预算与风险波次是否进一步减少图片调用；不需要重跑已完成五界面批次。
 
 ### P7/P8：Unity 自动导入与九宫格（已实现）
 

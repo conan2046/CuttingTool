@@ -112,12 +112,18 @@ def evaluate_style_consistency(
 ) -> dict[str, Any]:
     if not 0 <= fail_below <= warning_below <= 100:
         raise ValueError("style consistency thresholds must satisfy 0 <= fail <= warning <= 100")
-    grouped: dict[str, list[Path]] = defaultdict(list)
+    grouped: dict[str, list[dict[str, str]]] = defaultdict(list)
     for entry in manifest.get("assets", []):
         job_id = str(entry.get("job_id", ""))
         output = entry.get("output")
         if job_id and output:
-            grouped[job_id].append(run_dir / str(output))
+            grouped[job_id].append(
+                {
+                    "path": str(run_dir / str(output)),
+                    "output": str(output),
+                    "asset_id": str(entry.get("id", "")),
+                }
+            )
     if len(grouped) < 2:
         return {
             "schema_version": 1,
@@ -132,12 +138,39 @@ def evaluate_style_consistency(
     with Image.open(canonical_path) as canonical_image:
         canonical_profile = image_profile(canonical_image, minimum_alpha=1)
     job_profiles: dict[str, dict[str, Any]] = {}
-    for job_id, paths in sorted(grouped.items()):
+    profile_issues: list[dict[str, Any]] = []
+    for job_id, entries in sorted(grouped.items()):
         profiles = []
-        for path in paths:
+        for entry in entries:
+            path = Path(entry["path"])
             with Image.open(path) as image:
-                profiles.append(image_profile(image))
-        job_profiles[job_id] = aggregate_profiles(profiles)
+                try:
+                    profiles.append(image_profile(image))
+                except ValueError as error:
+                    if str(error) != "style-profile-empty-visible-pixels":
+                        raise
+                    profile_issues.append(
+                        {
+                            "severity": "fail",
+                            "code": "style-profile-empty-visible-pixels",
+                            "job_id": job_id,
+                            "asset_id": entry["asset_id"],
+                            "file": entry["output"],
+                        }
+                    )
+        if profiles:
+            job_profiles[job_id] = aggregate_profiles(profiles)
+
+    if len(job_profiles) < 2:
+        return {
+            "schema_version": 1,
+            "ok": not profile_issues,
+            "evaluated": False,
+            "reason": "cross-sheet scoring requires at least two jobs with visible profiles",
+            "issues": profile_issues,
+            "jobs": [],
+            "pairs": [],
+        }
 
     pairs = []
     pair_scores: dict[str, list[float]] = defaultdict(list)
@@ -150,7 +183,7 @@ def evaluate_style_consistency(
             pair_scores[second_id].append(similarity["score"])
 
     jobs = []
-    issues = []
+    issues = list(profile_issues)
     for job_id in job_ids:
         canonical = profile_similarity(job_profiles[job_id], canonical_profile)
         cross_sheet = round(float(np.mean(pair_scores[job_id])), 2) if pair_scores[job_id] else canonical["score"]

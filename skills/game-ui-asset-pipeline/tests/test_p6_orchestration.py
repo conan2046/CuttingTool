@@ -7,7 +7,7 @@ from pathlib import Path
 from unittest import mock
 
 import numpy as np
-from PIL import Image
+from PIL import Image, ImageDraw
 
 
 SKILL_DIR = Path(__file__).resolve().parents[1]
@@ -120,19 +120,24 @@ class P6OrchestrationTest(unittest.TestCase):
             self.assertEqual(waiting["status"], "awaiting-generation")
             self.assertEqual(waiting["generation"]["job_count"], 2)
             self.assertEqual(waiting["generation"]["missing_input_count"], 3)
-            self.assertEqual(waiting["generation"]["policy"]["max_concurrent_image_jobs"], 1)
-            self.assertEqual(waiting["generation"]["next_task"]["path"], "generated/icon-item-sheet-01.png")
+            self.assertEqual(waiting["generation"]["policy"]["max_concurrent_image_jobs"], 3)
+            self.assertEqual(waiting["generation"]["next_task"]["path"], "generated/current/icon-item-sheet-01.png")
+            self.assertEqual(
+                [task["path"] for task in waiting["generation"]["next_tasks"]],
+                ["generated/current/icon-item-sheet-01.png", "generated/current/icon-effect-sheet-01.png"],
+            )
             self.assertTrue((run_dir / "qa" / "delivery-summary.json").is_file())
             self.assertTrue((run_dir / "qa" / "delivery-summary.md").is_file())
+            self.assertTrue((run_dir / "qa" / "pipeline-state.json").is_file())
             queue = json.loads((run_dir / "qa" / "generation-queue.json").read_text(encoding="utf-8"))
-            self.assertEqual([task["status"] for task in queue["tasks"]], ["active", "blocked", "blocked"])
+            self.assertEqual([task["status"] for task in queue["tasks"]], ["active", "active", "blocked"])
 
             self.write_chroma_sheet(run_dir)
             partial = ORCHESTRATOR.orchestrate(run_dir)
             self.assertEqual(partial["status"], "awaiting-generation")
             self.assertEqual(partial["generation"]["ready_job_count"], 1)
             self.assertEqual(partial["generation"]["missing_input_count"], 2)
-            self.assertEqual(partial["generation"]["next_task"]["path"], "generated/icon-effect-sheet-01.png")
+            self.assertEqual(partial["generation"]["next_task"]["path"], "generated/current/icon-effect-sheet-01.png")
 
             self.write_matte_sheet(run_dir)
             complete = ORCHESTRATOR.orchestrate(run_dir)
@@ -149,7 +154,7 @@ class P6OrchestrationTest(unittest.TestCase):
             self.assertTrue(reused["reused_existing_delivery"])
             self.assertEqual(reused["status"], "complete")
 
-    def test_multi_screen_unity_delivery_runs_after_sequential_assets(self) -> None:
+    def test_multi_screen_unity_delivery_runs_after_adaptive_assets(self) -> None:
         with tempfile.TemporaryDirectory() as temporary_directory:
             root = Path(temporary_directory)
             run_dir = root / "run"
@@ -216,18 +221,28 @@ class P6OrchestrationTest(unittest.TestCase):
                 self.assertTrue(reused["reused_existing_delivery"])
                 exporter.assert_called_once()
 
-    def test_rejects_parallel_image_generation_policy(self) -> None:
+    def test_accepts_adaptive_parallel_three_and_rejects_invalid_limits(self) -> None:
         with tempfile.TemporaryDirectory() as temporary_directory:
             root = Path(temporary_directory)
             request = self.request()
             request["generation_policy"] = {
-                "mode": "sequential-inputs",
-                "max_concurrent_image_jobs": 2,
+                "mode": "adaptive-parallel",
+                "max_concurrent_image_jobs": 3,
             }
             request_path = root / "batch-request.json"
             request_path.write_text(json.dumps(request), encoding="utf-8")
-            with self.assertRaisesRegex(ValueError, "max_concurrent_image_jobs=1"):
-                ORCHESTRATOR.orchestrate(root / "run", request_path=request_path)
+            waiting = ORCHESTRATOR.orchestrate(root / "run", request_path=request_path)
+            self.assertEqual(waiting["generation"]["runtime"]["effective_concurrency"], 3)
+
+            invalid = self.request()
+            invalid["generation_policy"] = {
+                "mode": "adaptive-parallel",
+                "max_concurrent_image_jobs": 4,
+            }
+            invalid_path = root / "invalid-request.json"
+            invalid_path.write_text(json.dumps(invalid), encoding="utf-8")
+            with self.assertRaisesRegex(ValueError, "between 1 and 3"):
+                ORCHESTRATOR.orchestrate(root / "invalid-run", request_path=invalid_path)
 
     def test_rejects_unity_layout_path_escape(self) -> None:
         with tempfile.TemporaryDirectory() as temporary_directory:
@@ -242,7 +257,6 @@ class P6OrchestrationTest(unittest.TestCase):
             request_path = self.write_request(root)
             ORCHESTRATOR.orchestrate(run_dir, request_path=request_path)
             self.write_chroma_sheet(run_dir)
-            self.write_matte_sheet(run_dir)
             item_job = self.jobs(run_dir)["Icon_Item"]
             source_path = run_dir / item_job["generated_output"]
             image = np.asarray(Image.open(source_path).convert("RGB")).copy()
@@ -256,12 +270,210 @@ class P6OrchestrationTest(unittest.TestCase):
             self.assertTrue(blocked["ok"])
             self.assertEqual(blocked["status"], "awaiting-regeneration")
             self.assertEqual(blocked["retry"]["items"][0]["primary_issue"]["code"], "source-edge-contact")
-            self.assertEqual(blocked["generation"]["budget"]["call_budget_range"], [3, 4])
+            self.assertEqual(blocked["generation"]["budget"]["call_budget_range"], [3, 5])
             self.assertEqual(blocked["generation"]["budget"]["extra_calls_committed"], 1)
             self.assertTrue((run_dir / "qa" / "source-gate-summary.json").is_file())
             queue = json.loads((run_dir / "qa" / "generation-queue.json").read_text(encoding="utf-8"))
             self.assertEqual(queue["active_task"]["path"], item_job["generated_output"])
             self.assertIn("retry-02.md", queue["active_task"]["prompt_file"])
+
+    def test_quick_source_gate_scales_layout_boxes_for_same_aspect_source(self) -> None:
+        with tempfile.TemporaryDirectory() as temporary_directory:
+            root = Path(temporary_directory)
+            run_dir = root / "run"
+            request_path = self.write_request(root)
+            ORCHESTRATOR.orchestrate(run_dir, request_path=request_path)
+            item_job = self.jobs(run_dir)["Icon_Item"]
+            layout = self.layout(run_dir, item_job)
+            array = np.zeros((64, 128, 3), dtype=np.uint8)
+            array[:, :] = (0, 255, 0)
+            for slot in layout["slots"][:2]:
+                box = slot["safe_box"]
+                left = int(round(box["left"] * 0.5))
+                right = int(round(box["right"] * 0.5))
+                top = int(round(box["top"] * 0.5))
+                bottom = int(round(box["bottom"] * 0.5))
+                array[top:bottom, left:right] = (220, 20, 20)
+            source_path = run_dir / item_job["generated_output"]
+            source_path.parent.mkdir(parents=True, exist_ok=True)
+            Image.fromarray(array, mode="RGB").save(source_path)
+
+            report = ORCHESTRATOR.validate_source_sheet(item_job, run_dir)
+
+            self.assertTrue(report["ok"])
+            self.assertEqual(report["checks"]["actual_size"], [128, 64])
+            self.assertEqual(report["checks"]["occupied_slots"], [1, 2])
+            self.assertEqual(report["checks"]["slot_detection_scale"], [0.5, 0.5])
+
+    def test_quick_source_gate_cache_changes_when_request_contract_changes(self) -> None:
+        with tempfile.TemporaryDirectory() as temporary_directory:
+            root = Path(temporary_directory)
+            run_dir = root / "run"
+            request_path = self.write_request(root)
+            ORCHESTRATOR.orchestrate(run_dir, request_path=request_path)
+            self.write_chroma_sheet(run_dir)
+            item_job = self.jobs(run_dir)["Icon_Item"]
+
+            first = ORCHESTRATOR.validate_source_sheet(item_job, run_dir)
+            request_file = run_dir / item_job["request_file"]
+            request = json.loads(request_file.read_text(encoding="utf-8"))
+            request["cache_contract_probe"] = "changed"
+            request_file.write_text(json.dumps(request), encoding="utf-8")
+            second = ORCHESTRATOR.validate_source_sheet(item_job, run_dir)
+
+            self.assertNotEqual(first["contract_fingerprint"], second["contract_fingerprint"])
+            self.assertEqual(second["schema_version"], 3)
+
+    def test_quick_source_gate_rejects_panel_decoration_in_stretch_band(self) -> None:
+        with tempfile.TemporaryDirectory() as temporary_directory:
+            run_dir = Path(temporary_directory)
+            for relative in ("generated/current", "requests", "references/layout-guides"):
+                (run_dir / relative).mkdir(parents=True, exist_ok=True)
+            job = {
+                "id": "panel-sheet-01",
+                "category": "Panel",
+                "expected_count": 1,
+                "transparency_mode": "chroma-key",
+                "generated_output": "generated/current/panel-sheet-01.png",
+                "request_file": "requests/panel-sheet-01.json",
+                "layout_json": "references/layout-guides/panel-sheet-01.json",
+            }
+            (run_dir / job["request_file"]).write_text(
+                json.dumps({"chroma_key": "#00FF00"}),
+                encoding="utf-8",
+            )
+            (run_dir / job["layout_json"]).write_text(
+                json.dumps(
+                    {
+                        "layout": {"width": 200, "height": 200},
+                        "slots": [{"index": 1, "slot": {"left": 0, "top": 0, "right": 200, "bottom": 200}}],
+                    }
+                ),
+                encoding="utf-8",
+            )
+            image = Image.new("RGB", (200, 200), (0, 255, 0))
+            draw = ImageDraw.Draw(image)
+            draw.rectangle((20, 20, 180, 180), outline=(180, 100, 30), width=18)
+            draw.rectangle((80, 5, 120, 50), fill=(20, 40, 220))
+            image.save(run_dir / job["generated_output"])
+
+            report = ORCHESTRATOR.validate_source_sheet(job, run_dir)
+
+            self.assertFalse(report["ok"])
+            self.assertIn("panel-stretch-band-decoration", {issue["code"] for issue in report["issues"]})
+
+    def test_runtime_preflight_rejects_backups_inside_generated(self) -> None:
+        with tempfile.TemporaryDirectory() as temporary_directory:
+            root = Path(temporary_directory)
+            run_dir = root / "run"
+            request_path = self.write_request(root)
+            ORCHESTRATOR.orchestrate(run_dir, request_path=request_path)
+            (run_dir / "generated" / "old-backup.png").write_bytes(b"backup")
+
+            blocked = ORCHESTRATOR.orchestrate(run_dir)
+
+            self.assertFalse(blocked["ok"])
+            self.assertEqual(blocked["status"], "configuration-invalid")
+            self.assertEqual(
+                blocked["preflight"]["issues"][0]["code"],
+                "generated-directory-contaminated",
+            )
+
+    def test_adaptive_queue_uses_three_slots_but_only_two_high_risk_jobs(self) -> None:
+        with tempfile.TemporaryDirectory() as temporary_directory:
+            run_dir = Path(temporary_directory)
+            jobs = []
+            for sequence, category in enumerate(("Panel", "Button", "Icon_Status", "Icon_Item"), start=1):
+                jobs.append(
+                    {
+                        "id": f"job-{sequence}",
+                        "category": category,
+                        "expected_count": 1,
+                        "generation_sequence": sequence,
+                        "transparency_mode": "chroma-key",
+                        "generated_output": f"generated/job-{sequence}.png",
+                        "prompt_file": f"prompts/job-{sequence}.md",
+                    }
+                )
+            policy = ORCHESTRATOR.normalized_generation_policy({})
+            runtime = ORCHESTRATOR.generation_runtime_state(run_dir, policy)
+
+            queue = ORCHESTRATOR.build_generation_queue(jobs, run_dir, policy, runtime)
+
+            self.assertEqual(queue["effective_concurrency"], 3)
+            self.assertEqual(queue["wave_kind"], "risk-production")
+            self.assertEqual(
+                [task["category"] for task in queue["active_tasks"]],
+                ["Panel", "Button"],
+            )
+
+    def test_matte_inputs_and_retries_are_exclusive_serial_waves(self) -> None:
+        with tempfile.TemporaryDirectory() as temporary_directory:
+            run_dir = Path(temporary_directory)
+            (run_dir / "generated").mkdir(parents=True)
+            jobs = []
+            for sequence in (1, 2):
+                source = run_dir / "generated" / f"effect-{sequence}.png"
+                source.write_bytes(f"source-{sequence}".encode())
+                jobs.append(
+                    {
+                        "id": f"effect-{sequence}",
+                        "category": "Icon_Effect",
+                        "expected_count": 1,
+                        "generation_sequence": sequence,
+                        "transparency_mode": "model-matte-derived",
+                        "generated_output": f"generated/effect-{sequence}.png",
+                        "alpha_matte_output": f"generated/effect-{sequence}-alpha-matte.png",
+                        "prompt_file": f"prompts/effect-{sequence}.md",
+                        "alpha_matte_prompt_file": f"prompts/effect-{sequence}-matte.md",
+                    }
+                )
+            policy = ORCHESTRATOR.normalized_generation_policy({})
+            runtime = ORCHESTRATOR.generation_runtime_state(run_dir, policy)
+            matte_queue = ORCHESTRATOR.build_generation_queue(jobs, run_dir, policy, runtime)
+            self.assertEqual(matte_queue["wave_kind"], "dependent")
+            self.assertEqual(len(matte_queue["active_tasks"]), 1)
+            self.assertEqual(matte_queue["active_tasks"][0]["kind"], "alpha-matte")
+
+            first = jobs[0]
+            first["retry"] = {
+                "target_paths": [first["generated_output"]],
+                "awaiting_hashes": {
+                    first["generated_output"]: ORCHESTRATOR.file_sha256(
+                        run_dir / first["generated_output"]
+                    )
+                },
+                "prompt_file": "prompts/effect-1-retry.md",
+            }
+            retry_queue = ORCHESTRATOR.build_generation_queue(jobs, run_dir, policy, runtime)
+            self.assertEqual(retry_queue["wave_kind"], "retry")
+            self.assertEqual(len(retry_queue["active_tasks"]), 1)
+            self.assertTrue(retry_queue["active_tasks"][0]["is_retry"])
+
+    def test_generation_failures_degrade_concurrency_three_to_two_to_one(self) -> None:
+        with tempfile.TemporaryDirectory() as temporary_directory:
+            run_dir = Path(temporary_directory)
+            policy = ORCHESTRATOR.normalized_generation_policy({})
+            initial = ORCHESTRATOR.generation_runtime_state(run_dir, policy)
+            after_limit = ORCHESTRATOR.generation_runtime_state(run_dir, policy, "rate-limit")
+            after_timeout = ORCHESTRATOR.generation_runtime_state(run_dir, policy, "timeout")
+            after_disconnect = ORCHESTRATOR.generation_runtime_state(run_dir, policy, "disconnect")
+
+            self.assertEqual(initial["effective_concurrency"], 3)
+            self.assertEqual(after_limit["effective_concurrency"], 2)
+            self.assertEqual(after_timeout["effective_concurrency"], 1)
+            self.assertEqual(after_disconnect["effective_concurrency"], 1)
+
+    def test_duplicate_consecutive_generation_failure_is_recorded_without_double_degradation(self) -> None:
+        with tempfile.TemporaryDirectory() as temporary_directory:
+            run_dir = Path(temporary_directory)
+            policy = ORCHESTRATOR.normalized_generation_policy({})
+            first = ORCHESTRATOR.generation_runtime_state(run_dir, policy, "timeout")
+            duplicate = ORCHESTRATOR.generation_runtime_state(run_dir, policy, "timeout")
+
+            self.assertEqual(first["effective_concurrency"], 2)
+            self.assertEqual(duplicate["effective_concurrency"], 2)
+            self.assertTrue(duplicate["degradation_events"][-1]["deduplicated"])
 
     def test_zero_extra_call_budget_turns_quick_gate_failure_into_hard_failure(self) -> None:
         with tempfile.TemporaryDirectory() as temporary_directory:

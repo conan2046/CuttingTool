@@ -1,6 +1,6 @@
 # CuttingTool
 
-> 当前版本：`v0.14.2`｜Python `>=3.11`｜Unity `2022.3.x` + UGUI
+> 当前版本：`v0.15.0`｜Python `>=3.11`｜Unity `2022.3.x` + UGUI
 
 游戏 UI 位图资源生产与拆分工具。当前实现 `game-ui-asset-pipeline` Skill 的批量可执行核心链路：
 
@@ -28,11 +28,69 @@
 | `v0.11.0` | 自动需求接收、首界面完整产出、后续界面按语义复用、从中间阶段安全起跑 |
 | `v0.12.x` | Unity Sprite/Border/PPU、Image/Button Prefab、Preview Scene、真实 HUD、Layout Group、Scroll View、低 Alpha 外溢与九宫格安全区 |
 | `v0.13.x` | Run/Job/Asset 质量评分、候选哈希去重、单原因定向重生成、跨 Sheet 风格一致性、Panel/Button 内外双重九宫格门禁、Unity `_Project` 目录规范 |
-| `v0.14.x` | 单次多界面需求、严格逐张图片队列、生成前内容策略、快速源门禁、全局额外生图预算、Unity 多 Screen、子 Prefab 组合与按钮互斥视图切换 |
+| `v0.14.x` | 单次多界面需求、自适应图片并发 3、生成前内容策略、逐图快速源门禁、全局额外生图预算、Unity 多 Screen、子 Prefab 组合与按钮互斥视图切换 |
+| `v0.15.0` | P0/P1/P2 生产优化：风险资源优先、动态重试预算、契约感知缓存、九宫格快速门禁、自动色键预检、目录隔离、状态账本和运行心跳 |
 
 完整逐版本记录见 [CHANGELOG.md](CHANGELOG.md)。
 
-## v0.14.2 最新验收
+## v0.15.0 最新验收
+
+- 生成队列先处理 Panel、Button、Icon_Status；高风险波次通过快速源门禁后才解锁普通图标。
+- Panel/Button 源图在完整 Runner 前检查九宫格四边中间 60%；源门禁缓存同时绑定图片、请求、Layout、透明模式和门禁版本。
+- 自动色键根据结构化主体颜色声明在绿、品红、青色中选择；显式冲突在图片生成前失败。
+- 未显式配置预算时，为 Panel、Button、色键风险图标组各预留重试，并增加一次全局兜底，最高 5。
+- 新任务使用 `generated/current/`、`.local/backups/`、`reused-staging/`、`final/` 四区隔离；污染活动目录会在 Runner 前阻断。
+- `qa/pipeline-state.json` 保存安全恢复阶段和必需输入 SHA-256；`qa/operation-heartbeat.json` 标记 Runner 的运行、完成或中断状态。
+- Unity 布局结构在生图前校验，可提前拦截 LayoutGroup `spacing` 类型等配置错误。
+- 源码与 Codex 安装态全量 `unittest` 均为 157/157；74 个正式 Skill 文件 SHA-256 差异 0。
+
+## v0.14.8 最新验收
+
+- Panel 未显式覆写时，Unity 九宫格 Border 固定为 `[left,bottom,right,top] = [50,50,50,50]`。
+- `nine_slice_overrides` 仍优先；Button 保持自动推断，不受 Panel 默认值影响。
+- Panel 源图宽或高不大于 `100px` 时会因无法保留中心拉伸区而在 Unity 预检阶段失败。
+- 真实五界面重导的两张 Panel 均为四边 50、来源 `panel-default-50`；Unity 报告 49 Sprite、5 Screen、0 issue。
+- 源码与 Codex 安装态全量 `unittest` 均为 150/150；74 个正式 Skill 文件 SHA-256 差异 0。
+
+## v0.14.7 最新验收
+
+- Panel 按四边/四角设计键 `frame_style` 去重；同一设计只生成一次，默认 `1×1` Job、最终透明资源 `200×200`。
+- 不再为界面宽高或长宽比生成 Panel 变体；五界面共用同一个通用 Panel，Unity 使用 Sliced 九宫格适配。
+- 本批仅保留通用外框与边框设计不同的背包格两种 Panel，二者均已归一化为 `200×200`，未追加图片生成调用。
+- `xiuxian-ui-five-functions-v0144` 收敛为 42 个本批资源＋7 个复用资源，共 49 Sprite；正式 QA 49/49 通过、0 warning、0 fail。
+- 五个静态 Screen 的 Prefab、Preview Scene、Preview PNG 均已导出；导入报告 49 Sprite、5 Screen、0 单资源 Prefab、0 issue，移除 296 个临时 Binding。
+- 源码与 Codex 安装态全量 `unittest` 均为 149/149；74 个正式 Skill 文件 SHA-256 差异 0，其中 Panel 复用、批处理和 Unity 导出定向回归 38/38。
+
+## v0.14.6 最新验收
+
+- Panel/Button 仍严格阻断高对比图案进入四边中间 60%；仅对低对比、低梯度材质变化放宽误报，不允许用扩大 Border 掩盖装饰。
+- `xiuxian-ui-five-functions-v0144` 最终为 45 个新资源＋7 个复用装备资源，共 52 Sprite；正式 QA 52/52 通过、0 warning、0 fail。
+- 五个 1920×1080 Screen 均已生成 Prefab、Preview Scene 和真实 Unity PNG；`asset_prefab_count=0`，共移除 296 个临时 Binding。
+- Unity 批预览改为 1:1 WorldSpace、纹理/UGUI 强制就绪、四帧合成；逐 Screen 隔离日志保留在运行目录。
+- 源码全量 `unittest` 为 `146/146`。
+
+## v0.14.5 最新验收
+
+- Panel/Button 中间 60% 拉伸带存在空列或空行时，不再触发 `IndexError`；报告 `gap_positions` 并以九宫格 hard fail 阻断。
+- 风格评分缩略图中没有达到最低可见 Alpha 的像素时，不再抛出未处理异常；报告 `style-profile-empty-visible-pixels`，并携带 `asset_id`、`job_id` 和文件路径。
+- 真实五界面批次已验证两个异常均能正常落入 QA；当前美术候选仍有 21 个 hard fail，未进入 Unity，详见 `output/xiuxian-ui-five-functions-v0144/qa/qa-report.json`。
+- 源码与 Codex 安装态全量 `unittest` 各 `144/144` 通过；74 个正式 Skill 文件 SHA-256 差异 0。
+
+## v0.14.4 最新验收
+
+- Screen Prefab 在布局、ScrollRect、PrefabInstance 和 Toggle 接线完成后，递归移除全部 `GameUIElementBinding` 临时组件。
+- 保留 `GameUIViewSwitcher`、Button、Layout Group、ScrollRect、TMP 等实际运行组件，不破坏按钮切换。
+- Unity 导入报告新增 `removed_helper_component_count`，可追溯每批清理数量。
+- `CharacterInventory` 真实重导：4 个 Screen Prefab 共清理 125 个辅助组件，最终 Binding 残留 0；两按钮切换、默认态和恢复态全部通过。
+
+## v0.14.3 验收
+
+- 独立 Production Sheet 默认最多并发 3 个；Panel、Button、Icon_Status 等高风险类别同波最多 2 个，低风险 Job 可补足第 3 个槽位。
+- Alpha Matte、原生来源侧车和所有重试保持独占串行；每个 Production Sheet 到达后立即执行快速源门禁。
+- 限流、超时或断线会持久降级 `3→2→1`，状态记录在 `qa/generation-runtime.json`。
+- 全局额外图片调用预算仍默认 1；质量分不覆盖任何硬 `fail`。
+
+## v0.14.2 验收
 
 - 背包/商店可用 `content_policy.item_icons=empty-slots|runtime-data` 排除无须生成的道具 Icon。
 - 绿色色键状态图标首轮 Prompt 强制深蓝封闭底板、银白隔离边并禁止绿色反光。
@@ -46,7 +104,7 @@
 | 源码测试 | `131/131` |
 | Codex 安装态测试 | `131/131` |
 | Skill 源码/安装副本 | 72 个正式文件，SHA-256 `0` 差异 |
-| 逐张生成队列 | 3 个输入只激活 1 个，按 Production → 下一 Job Production → Matte 推进 |
+| 自适应生成队列 | 独立 Production 最多激活 3 个；Matte、来源侧车和重试仅激活 1 个 |
 | 多 Screen Unity 预检 | 2 个 Screen 共享 1 个 Sprite，2 Prefab + 2 Preview Scene 回滚项正确 |
 | 真实组合界面 | 48 Sprite / 4 Screen Prefab / 4 Scene / 4 Preview / 0 issue |
 | 属性/背包切换 | Unity 实际调用两个 `Button.onClick`，默认、切换、恢复三项均通过 |
@@ -107,10 +165,10 @@
 - 至少两个生产 Job 且存在 Canonical 时，输出 `qa/style-consistency.json`：综合 Canonical 与 Sheet 间的调色板、平均色、亮度、饱和度和边缘密度；漂移绑定具体 Job 并进入定向重生成。
 - 完成态自动把正式 Manifest 合并到 `input/<project-id>/ui-asset-catalog.json`，供后续界面确定性复用。
 - 支持 Unity 2022.3 自动导入：Sprite Single、Alpha、布局自适应 PPU、Pivot、无 Mipmap、Clamp、Bilinear 和 Uncompressed。
-- 对 Panel/Button 自动推断九宫格 Border，并结合全部布局目标尺寸推导 PPU；低置信、无有效中心区或 Border 显示尺寸超限时阻断，支持显式人工覆写。
+- Panel 默认使用四边 `50` 的九宫格 Border，Button 自动推断；两者结合全部布局目标尺寸推导 PPU。无有效中心区、Button 低置信或 Border 显示尺寸超限时阻断，支持显式人工覆写。
 - 九宫格 Panel/Button 只在四角固定区保留独特装饰，四边中段和中心区保持干净可拉伸；实际多尺寸 Sliced 预览必须检查角饰、连续边线、内部纹理和控件安全边距。
 - Panel/Button Prompt 强制禁止四边中点装饰；正式 QA 同时检查四边中间 60% 的外轮廓与内部纹理变化，并在报告中写出 `nine_slice_stretch_bands`。凸起、凹口或独特边带花纹直接硬失败。
-- 从已确认的 `unity-layout.json` 生成 Image/Button/TMP Text 界面 Prefab 并附稳定 BindingId；标题、数值占位和按钮名为明确 Text 节点，支持 CJK 字体来源与动态 TMP Font Asset。单独美术资源不生成 Prefab。Sprite 写入 `Assets/_Project/UI/Sprites/<project-id>`，界面 Prefab 写入 `Assets/_Project/Prefabs/UI/Demo`。
+- 从已确认的 `unity-layout.json` 生成 Image/Button/TMP Text 界面 Prefab；稳定元素 ID 用于导入期定位，最终 Prefab 清理临时 `GameUIElementBinding`。标题、数值占位和按钮名为明确 Text 节点，支持 CJK 字体来源与动态 TMP Font Asset。单独美术资源不生成 Prefab。Sprite 写入 `Assets/_Project/UI/Sprites/<project-id>`，界面 Prefab 写入 `Assets/_Project/Prefabs/UI/Demo`。
 - 背包、任务、商店等可增长有限区域使用 ScrollView、RectMask2D Viewport、Layout Group Content 和 ContentSizeFitter；内容超出规定范围时裁剪并滚动，不允许越界显示。
 - 每次 Unity 导出生成预检、导入报告、批处理日志和安全回滚清单。
 - Unity 布局支持 RGBA 底色和 Button 四态 SpriteSwap，并自动生成可运行 Preview Scene 与同尺寸 Unity 渲染图。
@@ -122,7 +180,8 @@
 - 单次合并确认：布局、一致性和尺寸一次确认，减少对话往返。
 - Job 自动装箱：同类资源按容量拆 Sheet，状态组不跨 Sheet。
 - 完成态和有效输入按哈希/现有状态复用，失败只重做问题 Job。
-- 仍保持图片生成和 Runner 重任务串行；并行重任务容易抢占显存、内存并增加断线概率，当前不以稳定性换取表面并发速度。
+- 独立 Production Sheet 使用最多 3 路自适应并发；Runner、Matte、来源侧车和重试仍为单路重任务。
+- 限流、超时或断线按 `3→2→1` 降级，并保留运行目录级恢复状态。
 
 碎片策略真实校准样本位于 `output/p2-fragment-calibration`：面板、按钮、装备、技能共 16 件，包含尖角、链条、悬挂件、独立符文和硬边火花。
 
@@ -175,9 +234,9 @@ Codex 先根据自然语言建立批量请求，格式见 [batch-request-contrac
 
 用户可以一次提出多个界面，例如：
 
-> 一次制作背包、商店和任务三个界面，统一仙侠青玉风格，内部逐张生成资源，最后导入指定 Unity 2022.3 工程并分别生成三个 Screen Prefab。界面尺寸均为 1920×1080，布局按已确认参考图。
+> 一次制作背包、商店和任务三个界面，统一仙侠青玉风格，内部按自适应队列生成资源，最后导入指定 Unity 2022.3 工程并分别生成三个 Screen Prefab。界面尺寸均为 1920×1080，布局按已确认参考图。
 
-Codex 会一次建立完整请求，内部固定按 `sequential-inputs` 逐张调用图片生成。同一时刻只有一个激活输入，记录在 `qa/generation-queue.json/md`；用户不需要按 Sheet 重复提需求。
+Codex 会一次建立完整请求，默认按 `adaptive-parallel` 调度。`qa/generation-queue.json/md` 的 `active_tasks` 是当前可启动波次：独立 Production Sheet 最多 3 个，高风险类别同波最多 2 个；Matte、来源侧车和重试只激活 1 个。用户不需要按 Sheet 重复提需求。
 
 ```powershell
 & $PYTHON .\skills\game-ui-asset-pipeline\scripts\orchestrate_ui_delivery.py `
@@ -203,6 +262,7 @@ qa/delivery-summary.json
 qa/delivery-summary.md
 qa/generation-queue.json
 qa/generation-queue.md
+qa/generation-runtime.json
 qa/style-consistency.json
 qa/nine-slice-multi-size-preview.json
 qa/nine-slice-multi-size-preview.png
@@ -286,7 +346,7 @@ references/layout-guides/<sheet>.json
 将选中的结果复制到：
 
 ```text
-generated/<sheet>.png
+generated/current/<sheet>.png
 ```
 
 ### 3. 色键转 Alpha

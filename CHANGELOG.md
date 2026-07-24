@@ -2,6 +2,75 @@
 
 记录每次正式功能提交的目标、主要改动、验证结果和兼容性影响。按时间倒序维护；纯格式整理或无功能影响的微小修正可以合并记录。
 
+## 2026-07-24｜v0.15.0｜P0/P1/P2 生成可靠性优化
+
+- P0：生成队列改为风险优先；Panel、Button、Icon_Status 先形成最多 2 项的风险波次，通过快速源门禁后才解锁普通图标。
+- P0：Panel/Button 快速源门禁新增四边中间 60% 九宫格检查；缓存 schema v3 绑定源图、Job 请求、Layout Guide、透明模式和门禁版本，布局或模式变化不会复用旧结论。
+- P0：未显式设置额外预算时，按 Panel、Button、Nav/Status/Item 色键风险组各预留 1 次，并增加 1 次全局兜底，最高 5；显式预算继续优先。
+- P1：自动色键从绿、品红、青色中选择未与 `subject_colors` / `subject_uses_*` 冲突的颜色；显式色键冲突在生图前失败。
+- P1：Unity 布局结构在生图前执行完整 schema 校验；LayoutGroup `spacing` 类型、父子顺序、ScrollView 链路等错误提前阻断。
+- P1：新运行使用 `generated/current/`、`.local/backups/`、`reused-staging/`、`final/` 四区隔离；活动目录污染写入 `qa/run-preflight.json` 并在 Runner 前阻断。
+- P2：每次编排写 `qa/pipeline-state.json`，保存安全阶段、恢复入口及全部必需输入 SHA-256；Runner 使用 `qa/operation-heartbeat.json` 标记运行、完成或中断。
+- P2：连续重复的同类图片服务故障只记录、不重复降低并发；后续不同事件仍按 `3→2→1` 降级。
+- 源码与 Codex 安装态全量 `unittest` 均为 157/157；74 个正式 Skill 文件 SHA-256 差异 0。
+
+## 2026-07-24｜v0.14.8｜Panel 默认九宫格 Border 50
+
+- Panel 未提供 `nine_slice_overrides` 时固定写入 Unity Border `[left,bottom,right,top] = [50,50,50,50]`，来源记录为 `panel-default-50`。
+- 显式覆写继续优先；Button 仍走原有结构推断与低置信阻断，不套用 Panel 默认值。
+- Panel 源图宽或高不大于 `100px` 时阻断，防止四边 50 后中心拉伸区为空。
+- 真实批次两张 Panel 均写入四边 50；Unity 报告 `ok=true`、49 Sprite、5 Screen、0 issue。Editor 在完成后的退出阶段残留，确认报告与 `GameUIImportComplete` 后已终止进程。
+- 源码与 Codex 安装态全量 `unittest` 均为 150/150；74 个正式 Skill 文件 SHA-256 差异 0。
+
+## 2026-07-24｜v0.14.7｜Panel 单资源复用与 200×200 紧凑源
+
+- Panel 默认从 `2048×2048 / 2×2` 改为 `1024×1024 / 1×1`，单体归一化到 `200×200`。
+- 项目接收与批处理新增 `frame_style`：同一四边/四角设计即使语义名不同也只生成一次，并记录 `reuse_aliases`；不同设计仍分别生成。
+- 五界面布局将主外框、详情框和行框统一引用同一个通用 Panel；只额外保留四边设计不同的背包格 Panel。
+- 通用 Panel 与复用的背包格 Panel 均以预乘 Alpha 等比缩放归一化到 `200×200`，没有重新生图；两者九宫格四边门禁全部通过。
+- 真实批次从 52 Sprite 收敛为 49 Sprite；正式 QA 49/49 通过、0 warning、0 fail，质量 100，风格 71.41。
+- Unity 报告：49 Sprite、5 Screen Prefab、5 Preview Scene、5 Preview PNG、0 单资源 Prefab、0 issue，移除 296 个临时 Binding。
+- 用户确认界面为静态，本批不再以 batchmode 预览偶发漏绘阻塞；Prefab 层级、Sprite 引用和导入报告作为结构验收依据。
+- 源码与 Codex 安装态全量 `unittest` 均为 149/149；74 个正式 Skill 文件 SHA-256 差异 0，其中 Panel 复用、批处理和 Unity 导出定向回归 38/38。
+
+## 2026-07-23｜v0.14.6｜四角九宫资源与五界面 Unity 稳定交付
+
+- Panel 生产 Sheet 重生成：移除边中段菱形、内部横线、藤纹、星点等图案，只在四角固定区保留设计。
+- 九宫格纹理检查仅对低对比、低梯度材质变化使用放宽阈值；高对比图案继续按原硬门禁阻断。
+- Unity Preview 改为固定 1:1 WorldSpace Canvas，渲染前强制 Sprite 纹理驻留、UGUI/TMP/Layout 重建，并用四帧通道最大值合成，解决批处理偶发缺 Sprite。
+- 五个 Screen 支持逐界面独立 Unity 进程复验；保留逐屏报告与日志，再恢复五界面总 Plan/Report。
+- 真实批次 `xiuxian-ui-five-functions-v0144`：45 个新资源＋7 个复用装备资源，共 52 Sprite；正式 QA 52/52 通过、0 warning、0 fail。
+- Unity 2022.3.62f3c1 导出 5 Screen Prefab、5 Preview Scene、5 Preview PNG，0 单资源 Prefab、0 issue，移除 296 个临时 Binding。
+- 源码全量 `unittest` 146/146 通过。
+
+## 2026-07-23｜v0.14.5｜Runner 空特征崩溃修复与真实批次硬阻断
+
+- 九宫格拉伸带轮廓允许记录空位置：空列/空行写入 `gap_positions`，`silhouette_ok=false`，不再因索引空数组触发 `IndexError`。
+- 风格一致性评分对缩略后无可见像素的资产写出 `style-profile-empty-visible-pixels`，包含 `asset_id`、`job_id`、`file`，不再中断整批 QA。
+- 新增两组回归测试，分别覆盖 Panel 空中段轮廓和风格空特征。
+- 真实批次 `xiuxian-ui-five-functions-v0144` 已完整落盘 QA：期望 45、导出 44、21 个 hard fail、质量分 8、风格分 71.36；失败候选未进入 Unity。
+- 真实失败集中于 Button 多主体跨槽/缺态/九宫格违规，以及 Nav、Item 的可见色键污染；全局额外生图预算已耗尽，保持阻断。
+- 源码与安装态全量 `unittest` 各 144/144 通过；74 个正式 Skill 文件 SHA-256 差异 0。
+
+## 2026-07-23｜v0.14.4｜最终 Prefab 辅助脚本清理
+
+- `GameUIBatchImporter` 在布局、ScrollRect、PrefabInstance 与 Toggle 接线完成后、保存 Screen Prefab 前，递归移除全部 `GameUIElementBinding`。
+- `GameUIViewSwitcher` 及 Unity 原生 UI/TMP/Layout/Scroll 组件继续保留，避免清理过程破坏真实交互。
+- Unity 导入报告新增 `removed_helper_component_count`，记录本批次移除的临时组件数量。
+- 真实重导 `xiuxian-ui-character-inventory-1920x1080-v1`：48 Sprite、4 Screen Prefab、4 Preview Scene、4 Preview PNG、0 issue；共移除 125 个 Binding，四个本批 Prefab 残留 0。
+- `CharacterInventoryScreen` 交互复验通过：2 个入口非空，默认态、切到背包、恢复属性全部为 `true`。
+- 新增保存顺序与递归清理静态回归测试；源码与安装态全量 `unittest` 各 140/140 通过，72 个正式 Skill 文件 SHA-256 差异 0。
+
+## 2026-07-22｜v0.14.3｜自适应三路图片生成
+
+- `generation_policy` 默认升级为 `adaptive-parallel`、最大并发 3；兼容旧 `sequential-inputs` + 1 请求。
+- 独立 Production Sheet 可并发；Panel、Button、Icon_Status 同波最多 2 个，低风险类别可填充第 3 槽。
+- Alpha Matte、原生来源侧车和所有定向重试保持独占串行，避免依赖错序和覆盖竞争。
+- 任一 Production Sheet 保存后立即运行快速源门禁，不再等待整批图片齐全。
+- 新增 `qa/generation-runtime.json` 与 `--generation-event`；限流、超时、断线按 `3→2→1` 持久降级。
+- 全局额外图片调用预算仍默认 1，硬 `fail` 仍禁止正式交付。
+- 源码与安装态全量 `unittest` 各 139/139 通过；72 个正式 Skill 文件 SHA-256 差异 0。
+
 ## 2026-07-22｜v0.14.2｜生图调用压缩与快速源门禁
 
 - 新增界面 `content_policy.item_icons`：`empty-slots`/`runtime-data` 直接排除 `Icon_Item`，避免无须使用的道具 Sheet 进入生成与重试。

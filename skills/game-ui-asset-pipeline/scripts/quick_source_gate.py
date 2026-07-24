@@ -11,12 +11,32 @@ from typing import Any
 import numpy as np
 from PIL import Image
 
+from validate_asset_pack import nine_slice_stretch_band_report
+
+
+SOURCE_GATE_SCHEMA_VERSION = 3
+SOURCE_GATE_CONTRACT_VERSION = "nine-slice-source-gate-v1"
+
 
 def _sha256(path: Path) -> str:
     digest = hashlib.sha256()
     with path.open("rb") as handle:
         for chunk in iter(lambda: handle.read(1024 * 1024), b""):
             digest.update(chunk)
+    return digest.hexdigest()
+
+
+def _contract_fingerprint(job: dict[str, Any], run_dir: Path, source_hash: str) -> str:
+    """Bind cached verdicts to source, request, layout, mode, and gate behavior."""
+    digest = hashlib.sha256()
+    digest.update(SOURCE_GATE_CONTRACT_VERSION.encode("utf-8"))
+    digest.update(source_hash.encode("ascii"))
+    digest.update(str(job.get("transparency_mode", "chroma-key")).encode("utf-8"))
+    for field in ("request_file", "layout_json"):
+        relative = str(job[field])
+        path = run_dir / relative
+        digest.update(relative.encode("utf-8"))
+        digest.update(_sha256(path).encode("ascii"))
     return digest.hexdigest()
 
 
@@ -32,9 +52,13 @@ def validate_source_sheet(job: dict[str, Any], run_dir: Path) -> dict[str, Any]:
     if not source.is_file():
         return {"ok": False, "status": "missing", "issues": [{"code": "source-missing"}]}
     source_hash = _sha256(source)
+    contract_fingerprint = _contract_fingerprint(job, run_dir, source_hash)
     if report_path.is_file():
         cached = json.loads(report_path.read_text(encoding="utf-8"))
-        if cached.get("source_sha256") == source_hash:
+        if (
+            cached.get("schema_version") == SOURCE_GATE_SCHEMA_VERSION
+            and cached.get("contract_fingerprint") == contract_fingerprint
+        ):
             return cached
 
     issues: list[dict[str, Any]] = []
@@ -42,11 +66,12 @@ def validate_source_sheet(job: dict[str, Any], run_dir: Path) -> dict[str, Any]:
         rgba = np.asarray(Image.open(source).convert("RGBA"), dtype=np.uint8)
     except (OSError, ValueError) as error:
         result = {
-            "schema_version": 1,
+            "schema_version": SOURCE_GATE_SCHEMA_VERSION,
             "ok": False,
             "status": "failed",
             "source": str(job["generated_output"]),
             "source_sha256": source_hash,
+            "contract_fingerprint": contract_fingerprint,
             "issues": [{"code": "source-decode-failed", "detail": str(error)}],
         }
         report_path.parent.mkdir(parents=True, exist_ok=True)
@@ -80,14 +105,40 @@ def validate_source_sheet(job: dict[str, Any], run_dir: Path) -> dict[str, Any]:
     expected_count = int(job["expected_count"])
     occupied: list[int] = []
     foreground_counts: list[int] = []
+    nine_slice_reports: list[dict[str, Any]] = []
+    scale_x = width / expected_width
+    scale_y = height / expected_height
     for slot in slots:
         box = slot["slot"]
-        crop = foreground[int(box["top"]):int(box["bottom"]), int(box["left"]):int(box["right"])]
+        left = max(0, min(width, int(round(float(box["left"]) * scale_x))))
+        right = max(left + 1, min(width, int(round(float(box["right"]) * scale_x))))
+        top = max(0, min(height, int(round(float(box["top"]) * scale_y))))
+        bottom = max(top + 1, min(height, int(round(float(box["bottom"]) * scale_y))))
+        crop = foreground[top:bottom, left:right]
         count = int(np.count_nonzero(crop))
         foreground_counts.append(count)
         minimum = max(16, int(crop.size * 0.002))
         if count >= minimum:
             occupied.append(int(slot["index"]))
+            if str(job.get("category")) in {"Panel", "Button"}:
+                slot_rgba = rgba[top:bottom, left:right].copy()
+                slot_rgba[:, :, 3] = np.where(crop, 255, 0).astype(np.uint8)
+                slot_rgba[:, :, :3][~crop] = 0
+                stretch = nine_slice_stretch_band_report(slot_rgba)
+                stretch["slot_index"] = int(slot["index"])
+                nine_slice_reports.append(stretch)
+                if not stretch.get("ok"):
+                    issues.append(
+                        {
+                            "code": (
+                                "panel-stretch-band-decoration"
+                                if str(job.get("category")) == "Panel"
+                                else "button-stretch-band-decoration"
+                            ),
+                            "slot_index": int(slot["index"]),
+                            "detail": "source sheet nine-slice stretch bands are not clean",
+                        }
+                    )
     expected_slots = list(range(1, expected_count + 1))
     if occupied != expected_slots:
         issues.append({"code": "source-slot-count-mismatch", "expected_slots": expected_slots, "occupied_slots": occupied})
@@ -100,17 +151,20 @@ def validate_source_sheet(job: dict[str, Any], run_dir: Path) -> dict[str, Any]:
             issues.append({"code": "status-green-reflection", "pixels": green_pixels})
 
     result = {
-        "schema_version": 1,
+        "schema_version": SOURCE_GATE_SCHEMA_VERSION,
         "ok": not issues,
         "status": "pass" if not issues else "failed",
         "source": str(job["generated_output"]),
         "source_sha256": source_hash,
+        "contract_fingerprint": contract_fingerprint,
         "checks": {
             "actual_size": [width, height],
             "expected_aspect": [expected_width, expected_height],
+            "slot_detection_scale": [scale_x, scale_y],
             "expected_count": expected_count,
             "occupied_slots": occupied,
             "slot_foreground_pixels": foreground_counts,
+            "nine_slice_stretch_bands": nine_slice_reports,
         },
         "issues": issues,
     }

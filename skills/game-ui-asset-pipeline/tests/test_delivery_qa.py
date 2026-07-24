@@ -240,6 +240,46 @@ class DeliveryQaTest(unittest.TestCase):
             issue = next(issue for issue in report["issues"] if issue["code"] == "button-stretch-band-decoration")
             self.assertIn("left", issue["failed_edges"])
 
+    def test_button_plain_beveled_material_gradient_passes(self) -> None:
+        with tempfile.TemporaryDirectory() as temporary_directory:
+            root = Path(temporary_directory)
+            filename = "02_Button_PlainGradient_Normal_001.png"
+            image = Image.new("RGBA", (320, 120), (0, 0, 0, 0))
+            draw = ImageDraw.Draw(image)
+            for y in range(20, 100):
+                blend = abs(60 - y) / 40.0
+                color = (
+                    int(165 + 18 * blend),
+                    int(205 + 16 * blend),
+                    int(230 + 12 * blend),
+                    255,
+                )
+                draw.line((20, y, 299, y), fill=color)
+            draw.rectangle((20, 20, 299, 99), outline=(240, 245, 250, 255), width=4)
+            image.save(root / filename)
+
+            report = VALIDATE.validate_pack(self.button_manifest(filename, 320, 120), root)
+
+            self.assertTrue(report["ok"], report)
+
+    def test_panel_with_empty_middle_profile_fails_without_crashing(self) -> None:
+        with tempfile.TemporaryDirectory() as temporary_directory:
+            root = Path(temporary_directory)
+            filename = "01_Panel_Gapped_Default_001.png"
+            image = Image.new("RGBA", (320, 180), (0, 0, 0, 0))
+            draw = ImageDraw.Draw(image)
+            draw.rectangle((20, 20, 299, 159), fill=(170, 210, 235, 255))
+            draw.rectangle((155, 0, 165, 179), fill=(0, 0, 0, 0))
+            image.save(root / filename)
+
+            report = VALIDATE.validate_pack(self.panel_manifest(filename, 320, 180), root)
+
+            self.assertFalse(report["ok"])
+            issue = next(issue for issue in report["issues"] if issue["code"] == "panel-stretch-band-decoration")
+            top = next(edge for edge in issue["edge_reports"] if edge["edge"] == "top")
+            self.assertGreater(top["gap_positions"], 0)
+            self.assertFalse(top["silhouette_ok"])
+
 
 if __name__ == "__main__":
     unittest.main()

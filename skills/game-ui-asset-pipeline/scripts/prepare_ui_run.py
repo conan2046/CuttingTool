@@ -16,7 +16,7 @@ from make_layout_guide import LayoutSpec, render_layout_guide, write_json
 
 
 CATEGORY_DEFAULTS: dict[str, dict[str, Any]] = {
-    "Panel": {"canvas": [2048, 2048], "grid": [2, 2], "target_size": None, "alignment": "center"},
+    "Panel": {"canvas": [1024, 1024], "grid": [1, 1], "target_size": [200, 200], "alignment": "center"},
     "Button": {"canvas": [2048, 2048], "grid": [3, 4], "target_size": None, "alignment": "center"},
     "Icon_Nav": {"canvas": [2048, 2048], "grid": [4, 4], "target_size": [128, 128], "alignment": "center"},
     "Icon_Status": {"canvas": [2048, 2048], "grid": [4, 4], "target_size": [128, 128], "alignment": "center"},
@@ -121,6 +121,13 @@ Nine-slice stretch-band contract:
 - Keep the central content region clean and stretchable
 - Never place a star, diamond, jewel, crest, lotus, badge, spike, notch, protrusion, directional motif, or thickness change at any edge midpoint
 - Do not enlarge corner decoration into a horizontal or vertical stretch band
+"""
+    if category == "Panel":
+        nine_slice_contract += """
+Panel reuse contract:
+- Generate one compact generic source panel for each distinct four-edge design
+- Do not create separate large, medium, narrow, row, list, dialog, or screen-size variants when their four edges are identical
+- The exported source panel is intended to fit within a 200x200 target canvas; all larger shapes are made with Unity nine-slice
 """
     status_isolation_contract = ""
     if category == "Icon_Status" and transparency_mode == "chroma-key" and chroma_key == "#00FF00":

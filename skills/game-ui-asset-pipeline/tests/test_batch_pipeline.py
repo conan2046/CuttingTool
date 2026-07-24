@@ -163,6 +163,120 @@ class BatchPipelineTest(unittest.TestCase):
         with self.assertRaises(ValueError):
             PREPARE.split_assets([{"semantic_name": "Oversized"}] * 4, 3)
 
+    def test_panel_defaults_to_one_compact_asset_per_frame_style(self) -> None:
+        with tempfile.TemporaryDirectory() as temporary_directory:
+            run_dir = Path(temporary_directory) / "run"
+            PREPARE.prepare_batch(
+                {
+                    "project_id": "panel-reuse",
+                    "categories": [
+                        {
+                            "category": "Panel",
+                            "assets": [
+                                {"semantic_name": "Main", "frame_style": "jade"},
+                                {"semantic_name": "Dialog", "frame_style": "jade"},
+                                {"semantic_name": "Dragon", "frame_style": "dragon"},
+                            ],
+                        }
+                    ],
+                },
+                run_dir,
+            )
+
+            request = json.loads((run_dir / "request.json").read_text(encoding="utf-8"))
+            panel = request["categories"][0]
+            self.assertEqual(panel["canvas"], [1024, 1024])
+            self.assertEqual(panel["grid"], [1, 1])
+            self.assertEqual(panel["target_size"], [200, 200])
+            self.assertEqual([asset["semantic_name"] for asset in panel["assets"]], ["Main", "Dragon"])
+            self.assertEqual(panel["reuse_aliases"][0]["semantic_name"], "Dialog")
+            jobs = json.loads((run_dir / "jobs.json").read_text(encoding="utf-8"))["jobs"]
+            self.assertEqual([job["expected_count"] for job in jobs], [1, 1])
+
+    def test_auto_chroma_uses_declared_palette_and_is_traceable(self) -> None:
+        with tempfile.TemporaryDirectory() as temporary_directory:
+            run_dir = Path(temporary_directory) / "run"
+            PREPARE.prepare_batch(
+                {
+                    "project_id": "palette-aware",
+                    "categories": [
+                        {
+                            "category": "Icon_Item",
+                            "subject_colors": ["green", "purple"],
+                            "assets": [{"semantic_name": "JadePurpleStone", "description": "绿色与紫色宝石"}],
+                        }
+                    ],
+                },
+                run_dir,
+            )
+
+            request = json.loads((run_dir / "request.json").read_text(encoding="utf-8"))
+            category = request["categories"][0]
+            self.assertEqual(category["chroma_key"], "#00FFFF")
+            self.assertEqual(category["chroma_key_selection"]["declared_conflicts"], ["green", "magenta"])
+            self.assertEqual(category["chroma_key_selection"]["mode"], "auto-declared-palette")
+            self.assertTrue((run_dir / "qa" / "request-preflight.json").is_file())
+            self.assertTrue((run_dir / "generated" / "current").is_dir())
+            self.assertTrue((run_dir / "reused-staging").is_dir())
+            self.assertTrue((run_dir / ".local" / "backups").is_dir())
+
+    def test_explicit_chroma_conflict_fails_before_generation(self) -> None:
+        with tempfile.TemporaryDirectory() as temporary_directory:
+            with self.assertRaisesRegex(ValueError, "conflicts with declared green"):
+                PREPARE.prepare_batch(
+                    {
+                        "project_id": "bad-palette",
+                        "categories": [
+                            {
+                                "category": "Icon_Status",
+                                "chroma_key": "#00FF00",
+                                "subject_uses_green": True,
+                                "assets": ["Poison"],
+                            }
+                        ],
+                    },
+                    Path(temporary_directory) / "run",
+                )
+
+    def test_unity_layout_schema_fails_during_request_preflight(self) -> None:
+        with tempfile.TemporaryDirectory() as temporary_directory:
+            root = Path(temporary_directory)
+            unity_project = root / "UnityProject"
+            unity_project.mkdir()
+            editor = root / "Unity.exe"
+            editor.write_bytes(b"")
+            with self.assertRaisesRegex(ValueError, "spacing must contain two numbers"):
+                PREPARE.prepare_batch(
+                    {
+                        "project_id": "invalid-layout",
+                        "categories": [{"category": "Icon_Item", "assets": ["Potion"]}],
+                        "unity_delivery": {
+                            "enabled": True,
+                            "layout_confirmed": True,
+                            "unity_project": str(unity_project),
+                            "unity_editor": str(editor),
+                            "layout": {
+                                "schema_version": 1,
+                                "screens": [
+                                    {
+                                        "id": "Bag",
+                                        "reference_size": [1920, 1080],
+                                        "elements": [
+                                            {
+                                                "id": "Row",
+                                                "kind": "HorizontalLayoutGroup",
+                                                "spacing": 12,
+                                                "size": [400, 80],
+                                            }
+                                        ],
+                                    }
+                                ],
+                            },
+                        },
+                    },
+                    root / "run",
+                )
+
 
 if __name__ == "__main__":
     unittest.main()

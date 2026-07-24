@@ -14,15 +14,17 @@
 - 单独美术资源只保留 Sprite，不生成资源 Prefab；导入时删除同项目旧的 `Assets/_Generated/GameUI/<project-id>/Prefabs/Assets`。
 - 安装嵌入包：`Packages/com.hongda.game-ui-asset-pipeline`。
 - Sprite 使用 Single、Alpha Is Transparency、无 Mipmap、Clamp、Bilinear、Uncompressed。默认 PPU 100；Panel/Button 按源图到全部布局目标的最小缩放比自动提高 PPU，确保 Border 的 Unity 单位尺寸不会挤压目标控件。
-- Panel/Button 可写九宫格；其他类别 Border 为零。
+- Panel 默认 Border 固定为 Unity 顺序 `[left,bottom,right,top] = [50,50,50,50]`；显式 `nine_slice_overrides` 优先。Button 继续自动推断九宫格，其他类别 Border 为零。
+- 同一 `frame_style` 的 Panel 只导入一个紧凑 Sprite（默认 `200×200`），所有 Screen 尺寸引用同一 `asset_id` 并使用 `Image.Type=Sliced`；不得为尺寸变体复制 Sprite。
 - 正式界面元素支持 `Image`、`Button`、`Text`（TMP）、`GridLayoutGroup`、`HorizontalLayoutGroup`、`VerticalLayoutGroup`、`ScrollView`、`ScrollViewport`、`PrefabInstance`。
 - `PrefabInstance` 通过 `prefab_screen_id` 引用同一 `screens[]` 中更早声明的 Screen Prefab；用于把固定区、可替换区组合成根界面，不复制子 Prefab 内容。
 - 根界面可声明 `toggle_groups`，每组至少两个 `Button → target` 绑定和一个 `default_target_id`；导入器生成 `GameUIViewSwitcher`，真实绑定 `Button.onClick` 并保证目标互斥激活。
+- `GameUIElementBinding` 仅是导入期辅助定位组件。所有布局、ScrollRect、PrefabInstance 和 Toggle 接线完成后，保存 Screen Prefab 前递归移除；`GameUIViewSwitcher` 属于实际交互组件，必须保留。
 - Button 可显式绑定 Hover/Pressed/Disabled SpriteSwap；无 Sprite Image 可使用 RGBA 颜色。
 - 每个 Screen 自动生成 Preview Scene 和由 Unity Camera 渲染的同尺寸 PNG，作为视觉验收证据。
 - 不自动生成业务事件、本地化文本、数据绑定、动画状态机或项目专属控制器。
 
-同一请求可以包含多个 Screen。资源生成仍按 Sheet/Matte 逐张串行完成；资源 QA 全部通过后，编排器读取顶层 `unity_delivery` 一次启动 Unity batchmode，导入共享 Sprite，并对 `screens[]` 逐项生成独立 Prefab、Preview Scene 和预览 PNG。某个 Screen 失败时整次 Unity 交付失败，不得把其他 Screen 的成功冒充整批完成。
+同一请求可以包含多个 Screen。独立 Production Sheet 可按自适应波次并发生成，Alpha Matte、来源侧车和重试保持串行；资源 QA 全部通过后，编排器读取顶层 `unity_delivery` 一次启动 Unity batchmode，导入共享 Sprite，并对 `screens[]` 逐项生成独立 Prefab、Preview Scene 和预览 PNG。某个 Screen 失败时整次 Unity 交付失败，不得把其他 Screen 的成功冒充整批完成。
 
 ## `unity-layout.json` schema v1
 
@@ -96,10 +98,10 @@
 - `color` 使用 `[r,g,b,a]`，每项为 `0..1`；没有 `asset_id` 的 Image 可作为纯色布局层。
 - Button 状态资源 ID 可省略；提供任一状态资源时使用 `SpriteSwap`，所有引用必须存在于正式 Manifest。
 - 规则排列必须使用 Layout Group 容器，不逐项写死坐标。Grid 使用 `cell_size`、二维 `spacing`、`constraint`、`constraint_count`、`start_axis`、`start_corner`；Horizontal/Vertical 使用一维 `spacing`、`child_control_size`、`child_force_expand`。三者都支持 Unity 顺序 `[left,right,top,bottom]` 的 `padding` 和 `child_alignment`。
-- Layout Group 子节点仍需稳定 `id`/BindingId，并通过 `parent_id` 指向先声明的容器；子节点顺序决定布局顺序。
+- Layout Group 子节点仍需稳定 `id`，并通过 `parent_id` 指向先声明的容器；子节点顺序决定布局顺序。ID 在导入期可映射为临时 BindingId，但最终 Prefab 不保留 `GameUIElementBinding`。
 - 内容数量可能增长且展示范围有限时必须使用 `ScrollView → ScrollViewport → Content`：ScrollView 配置 `viewport_id`、`content_id`、滚动轴和 `movement_type`；ScrollViewport 自动带 `RectMask2D`；Content 使用 Layout Group，并在增长轴配置 `ContentSizeFitter.PreferredSize`。超出 Viewport 的内容必须裁剪，不能泄漏到面板、按钮或相邻区域。
 - ScrollView 默认透明且不生成可见滚动条；需要滚动条美术时必须显式提供资源和布局。静态预览至少验证 Content 大于 Viewport 时末端内容被裁剪，Prefab 中 ScrollRect 引用有效。
-- 未提供覆写时，Panel/Button 使用 Alpha 与预乘 RGB 的结构变化推断 Border；低置信度禁止导入。Border 经 PPU 换算后的左右/上下固定区必须分别小于每个目标控件的宽/高，否则禁止导入。
+- 未提供覆写时，Panel 固定使用四边 `50`；源图宽或高不大于 `100px`、无法留下有效中心区时禁止导入。Button 使用 Alpha 与预乘 RGB 的结构变化推断 Border，低置信度禁止导入。Border 经 PPU 换算后的左右/上下固定区必须分别小于每个目标控件的宽/高，否则禁止导入。
 - Panel 的四角固定区可以保留独特装饰；水平拉伸带、垂直拉伸带和中心区不得包含星点、莲花、菱形、徽记等独特图案。不能用异常增大的 Border 把边中段装饰包进固定区来规避视觉问题。
 - Button、分页、列表和其他子控件必须位于所属 Panel 的安全区内，不得覆盖或越过 Panel 外框固定区；优先作为 Panel 子节点声明，并在渲染验收中检查四边安全距离。
 
@@ -113,7 +115,7 @@
   --layout <absolute-unity-layout.json>
 ```
 
-执行顺序：Python 预检与九宫格推断 → 安装嵌入包/复制 PNG → Unity batchmode 清理旧资源 Prefab → 配置 importer → 生成屏幕 Prefab → 生成 Preview Scene → Unity 渲染预览 PNG → 写报告。
+执行顺序：Python 预检与九宫格推断 → 安装嵌入包/复制 PNG → Unity batchmode 清理旧资源 Prefab → 配置 importer → 生成屏幕层级与交互接线 → 清理临时 `GameUIElementBinding` → 保存 Screen Prefab → 生成 Preview Scene → Unity 渲染预览 PNG → 写报告。
 
 通过自然语言一键编排时不需要手动调用上述命令；把同样的工程、Editor 和布局写入 `batch-request.json` 的 `unity_delivery`，编排器在资源 QA 通过后自动执行。只重跑 Unity 使用 `orchestrate_ui_delivery.py --run-dir <run-dir> --force-unity`。
 
@@ -132,7 +134,8 @@
 - 所有规则排列容器必须在 Screen Prefab 中具有对应 Layout Group 组件；检查约束、行列、间距、子节点数量和 Unity 渲染结果，不能只确认组件存在。
 - 所有可增长有限列表必须检查 `ScrollRect.content`、`ScrollRect.viewport`、滚动轴、`RectMask2D`、ContentSizeFitter、Content/Viewport 尺寸关系和裁剪渲染；只添加 GridLayoutGroup 不算通过。
 - 组合界面必须检查根 Prefab 中的子对象仍为 Prefab Instance；`GameUIViewSwitcher` 的按钮、目标和默认索引均非空，运行时点击后两个目标必须严格互斥。
-- Border 来源记录为 `auto-inferred`、`manual-override` 或 `not-applicable`；PPU 来源记录为 `layout-derived`、`manual-override` 或 `default`。不得把低置信或几何不适配结果写入 Unity。
+- 最终 Screen Prefab 的全部层级必须不存在 `GameUIElementBinding`；导入报告 `removed_helper_component_count` 应记录清理数量。`GameUIViewSwitcher`、Button、ScrollRect、Layout Group、TMP 等正式功能组件不得被误删。
+- Border 来源记录为 `panel-default-50`、`auto-inferred`、`manual-override` 或 `not-applicable`；PPU 来源记录为 `layout-derived`、`manual-override` 或 `default`。不得把低置信或几何不适配结果写入 Unity。
 - 对所有 Sliced Panel/Button 做实际多尺寸拉伸视觉检查：四角不变形、四边中段连续、内部无独特纹理拉长或重复、Panel 子控件不压住外框。自动 Border 通过不代表美术拉伸带一定可交付。
 
 回滚：

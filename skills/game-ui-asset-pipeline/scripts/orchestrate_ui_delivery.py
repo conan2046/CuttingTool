@@ -6,6 +6,8 @@ from __future__ import annotations
 import argparse
 import hashlib
 import json
+import math
+import os
 from datetime import datetime, timezone
 from pathlib import Path
 from typing import Any
@@ -131,10 +133,85 @@ def generation_state(jobs: list[dict[str, Any]], run_dir: Path) -> dict[str, Any
     }
 
 
+def normalized_generation_policy(request: dict[str, Any]) -> dict[str, Any]:
+    raw = dict(request.get("generation_policy", {}))
+    mode = str(raw.get("mode", "adaptive-parallel"))
+    default_limit = 3 if mode == "adaptive-parallel" else 1
+    max_concurrent = max(1, min(int(raw.get("max_concurrent_image_jobs", default_limit)), 3))
+    if mode == "sequential-inputs":
+        max_concurrent = 1
+    return {
+        "mode": mode,
+        "max_concurrent_image_jobs": max_concurrent,
+        "minimum_concurrent_image_jobs": 1,
+        "max_concurrent_high_risk_jobs": min(
+            int(raw.get("max_concurrent_high_risk_jobs", 2)), max_concurrent
+        ),
+        "high_risk_categories": list(
+            raw.get("high_risk_categories", ["Panel", "Button", "Icon_Status"])
+        ),
+        "dependent_inputs_serial": True,
+        "retry_inputs_serial": True,
+        "fallback_on": list(raw.get("fallback_on", ["rate-limit", "timeout", "disconnect"])),
+        "rerun_orchestrator_after_each_wave": True,
+    }
+
+
+def generation_runtime_state(
+    run_dir: Path,
+    policy: dict[str, Any],
+    event: str | None = None,
+) -> dict[str, Any]:
+    path = run_dir / "qa" / "generation-runtime.json"
+    maximum = int(policy["max_concurrent_image_jobs"])
+    minimum = int(policy.get("minimum_concurrent_image_jobs", 1))
+    if path.is_file():
+        state = read_json(path)
+    else:
+        state = {
+            "schema_version": 1,
+            "configured_concurrency": maximum,
+            "effective_concurrency": maximum,
+            "degradation_events": [],
+        }
+    state["configured_concurrency"] = maximum
+    effective = max(minimum, min(int(state.get("effective_concurrency", maximum)), maximum))
+    if event:
+        allowed = {"success", *policy.get("fallback_on", [])}
+        if event not in allowed:
+            raise ValueError(f"unsupported generation event: {event}")
+        history = list(state.get("degradation_events", []))
+        duplicate_consecutive_failure = bool(
+            history
+            and event in set(policy.get("fallback_on", []))
+            and history[-1].get("event") == event
+        )
+        before = effective
+        if event in set(policy.get("fallback_on", [])) and not duplicate_consecutive_failure:
+            effective = max(minimum, effective - 1)
+        history.append(
+            {
+                "event": event,
+                "before": before,
+                "after": effective,
+                "deduplicated": duplicate_consecutive_failure,
+                "recorded_at": datetime.now(timezone.utc).isoformat(),
+            }
+        )
+        state["degradation_events"] = history[-50:]
+    state["effective_concurrency"] = effective
+    state["degraded"] = effective < maximum
+    state["fallback_sequence"] = list(range(maximum, minimum - 1, -1))
+    state["updated_at"] = datetime.now(timezone.utc).isoformat()
+    write_json(path, state)
+    return state
+
+
 def build_generation_queue(
     jobs: list[dict[str, Any]],
     run_dir: Path,
     policy: dict[str, Any],
+    runtime: dict[str, Any] | None = None,
 ) -> dict[str, Any]:
     tasks: list[dict[str, Any]] = []
     for job_index, job in enumerate(jobs, start=1):
@@ -163,27 +240,83 @@ def build_generation_queue(
                     "prompt_file": prompt_file,
                     "input_images": list(item.get("input_images", [])),
                     "edit_source": item.get("edit_source"),
+                    "is_retry": pending_replacement,
+                    "high_risk": str(job["category"]) in set(policy.get("high_risk_categories", [])),
+                    "depends_on": (
+                        [str(job["generated_output"])]
+                        if str(item["kind"]) in {"alpha-matte", "native-alpha-provenance"}
+                        else []
+                    ),
                     "status": "complete" if item["exists"] and not pending_replacement else "pending",
                 }
             )
-    active_assigned = False
+    runtime = runtime or generation_runtime_state(run_dir, policy)
+    effective = int(runtime["effective_concurrency"])
+    pending = [task for task in tasks if task["status"] == "pending"]
+    retry_tasks = [task for task in pending if task["is_retry"]]
+    wave_kind = "complete"
+    selected: list[dict[str, Any]] = []
+    if retry_tasks:
+        wave_kind = "retry"
+        selected = retry_tasks[:1]
+    else:
+        production_tasks = [task for task in pending if task["kind"] == "production-sheet"]
+        if production_tasks:
+            wave_kind = "production"
+            production_tasks.sort(
+                key=lambda task: (
+                    int(next(
+                        (
+                            job.get("risk_priority", 10)
+                            for job in jobs
+                            if str(job["id"]) == task["job_id"]
+                        ),
+                        10,
+                    )),
+                    int(task["job_sequence"]),
+                )
+            )
+            risk_first = [task for task in production_tasks if task["high_risk"]]
+            if risk_first:
+                production_tasks = risk_first
+                wave_kind = "risk-production"
+            high_risk_limit = int(policy.get("max_concurrent_high_risk_jobs", 2))
+            high_risk_count = 0
+            for task in production_tasks:
+                if len(selected) >= effective:
+                    break
+                if task["high_risk"] and high_risk_count >= high_risk_limit:
+                    continue
+                selected.append(task)
+                if task["high_risk"]:
+                    high_risk_count += 1
+        elif pending:
+            wave_kind = "dependent"
+            eligible = [
+                task
+                for task in pending
+                if all((run_dir / dependency).is_file() for dependency in task["depends_on"])
+            ]
+            selected = eligible[:1]
+    selected_paths = {task["path"] for task in selected}
     for task in tasks:
-        if task["status"] == "complete":
-            continue
-        if not active_assigned:
-            task["status"] = "active"
-            active_assigned = True
-        else:
-            task["status"] = "blocked"
-    active = next((dict(task) for task in tasks if task["status"] == "active"), None)
+        if task["status"] == "pending":
+            task["status"] = "active" if task["path"] in selected_paths else "blocked"
+    active_tasks = [dict(task) for task in tasks if task["status"] == "active"]
+    active = active_tasks[0] if active_tasks else None
     return {
-        "schema_version": 1,
-        "mode": "sequential-inputs",
-        "max_concurrent_image_jobs": 1,
+        "schema_version": 2,
+        "mode": str(policy["mode"]),
+        "max_concurrent_image_jobs": int(policy["max_concurrent_image_jobs"]),
+        "effective_concurrency": effective,
+        "wave_kind": wave_kind,
         "policy": dict(policy),
+        "runtime": runtime,
         "task_count": len(tasks),
         "complete_count": sum(1 for task in tasks if task["status"] == "complete"),
         "pending_count": sum(1 for task in tasks if task["status"] in {"active", "blocked"}),
+        "active_count": len(active_tasks),
+        "active_tasks": active_tasks,
         "active_task": active,
         "tasks": tasks,
         "updated_at": datetime.now(timezone.utc).isoformat(),
@@ -193,26 +326,23 @@ def build_generation_queue(
 def write_generation_queue(run_dir: Path, queue: dict[str, Any]) -> None:
     write_json(run_dir / "qa" / "generation-queue.json", queue)
     lines = [
-        "# 逐张图片生成队列",
+        "# 自适应图片生成队列",
         "",
-        "- 模式：`sequential-inputs`",
-        "- 最大并发图片 Job：`1`",
+        f"- 模式：`{queue['mode']}`",
+        f"- 配置并发：`{queue['max_concurrent_image_jobs']}`",
+        f"- 当前有效并发：`{queue['effective_concurrency']}`",
+        f"- 当前波次：`{queue['wave_kind']}`",
         f"- 进度：{queue['complete_count']}/{queue['task_count']}",
     ]
-    active = queue.get("active_task")
-    if active:
-        lines.extend(
-            [
-                "",
-                "## 当前唯一任务",
-                "",
-                f"- Job：`{active['job_id']}`",
-                f"- 类型：`{active['kind']}`",
-                f"- 输出：`{active['path']}`",
-                f"- Prompt：`{active['prompt_file']}`" if active.get("prompt_file") else "- Prompt：来源侧车校验",
-                "- 完成当前文件后重新运行编排器，再激活下一项。",
-            ]
-        )
+    active_tasks = list(queue.get("active_tasks", []))
+    if active_tasks:
+        lines.extend(["", "## 当前波次", ""])
+        for active in active_tasks:
+            prompt = f"；Prompt：`{active['prompt_file']}`" if active.get("prompt_file") else ""
+            lines.append(
+                f"- `{active['job_id']}` / `{active['kind']}` → `{active['path']}`{prompt}"
+            )
+        lines.extend(["", "- 当前波次全部完成后重新运行编排器。"])
     else:
         lines.extend(["", "- 队列已完成。"])
     (run_dir / "qa" / "generation-queue.md").write_text("\n".join(lines) + "\n", encoding="utf-8")
@@ -223,21 +353,16 @@ def attach_generation_queue(
     jobs: list[dict[str, Any]],
     request: dict[str, Any],
     run_dir: Path,
+    runtime: dict[str, Any] | None = None,
 ) -> dict[str, Any]:
-    policy = dict(
-        request.get(
-            "generation_policy",
-            {
-                "mode": "sequential-inputs",
-                "max_concurrent_image_jobs": 1,
-                "rerun_orchestrator_after_each_input": True,
-            },
-        )
-    )
-    queue = build_generation_queue(jobs, run_dir, policy)
+    policy = normalized_generation_policy(request)
+    runtime = runtime or generation_runtime_state(run_dir, policy)
+    queue = build_generation_queue(jobs, run_dir, policy, runtime)
     write_generation_queue(run_dir, queue)
     generation["policy"] = policy
     generation["queue"] = "qa/generation-queue.json"
+    generation["runtime"] = runtime
+    generation["next_tasks"] = queue["active_tasks"]
     generation["next_task"] = queue["active_task"]
     return generation
 
@@ -265,25 +390,182 @@ def generation_budget_state(
     persisted = dict((jobs_payload or {}).get("generation_budget", {}))
     committed = max(0, int(persisted.get("extra_calls_committed", 0)))
     remaining = max(0, max_extra_calls - committed)
+    policy = normalized_generation_policy(request)
+    production_calls = len(jobs)
+    dependent_calls = max(0, initial_calls - production_calls)
+    production_waves = math.ceil(production_calls / int(policy["max_concurrent_image_jobs"])) if production_calls else 0
+    parallel_waves = production_waves + dependent_calls
     return {
         "initial_image_calls": initial_calls,
         "max_extra_calls": max_extra_calls,
         "extra_calls_committed": committed,
         "extra_calls_remaining": remaining,
+        "reserved_extra_calls": dict(raw.get("reserved_extra_calls", {})),
+        "global_fallback_calls": int(raw.get("global_fallback_calls", 1)),
+        "strategy": str(raw.get("strategy", "legacy-global")),
         "call_budget_range": [initial_calls, initial_calls + max_extra_calls],
         "estimated_minutes_per_call": [low, high],
         "estimated_minutes_without_retry": [round(initial_calls * low, 1), round(initial_calls * high, 1)],
         "estimated_minutes_with_budget": [round(initial_calls * low, 1), round((initial_calls + max_extra_calls) * high, 1)],
+        "estimated_parallel_waves": parallel_waves,
+        "estimated_parallel_minutes_without_retry": [round(parallel_waves * low, 1), round(parallel_waves * high, 1)],
+        "estimated_parallel_minutes_with_budget": [
+            round(parallel_waves * low, 1),
+            round((parallel_waves + max_extra_calls) * high, 1),
+        ],
     }
+
+
+def validate_run_directory_hygiene(
+    run_dir: Path,
+    jobs: list[dict[str, Any]],
+) -> dict[str, Any]:
+    """Keep active candidates, backups, reused assets, and formal output isolated."""
+    expected_generated = {
+        str(item["path"]).replace("\\", "/")
+        for job in jobs
+        for item in required_inputs(job, run_dir)
+    }
+    unexpected_generated: list[str] = []
+    generated_root = run_dir / "generated"
+    if generated_root.is_dir():
+        for path in sorted(generated_root.rglob("*")):
+            if not path.is_file():
+                continue
+            relative = path.relative_to(run_dir).as_posix()
+            if relative not in expected_generated:
+                unexpected_generated.append(relative)
+    final_root = run_dir / "final"
+    manifest_exists = (final_root / "manifest.json").is_file()
+    unexpected_final = [
+        path.relative_to(run_dir).as_posix()
+        for path in sorted(final_root.rglob("*.png"))
+        if path.is_file()
+    ] if final_root.is_dir() and not manifest_exists else []
+    issues: list[dict[str, Any]] = []
+    if unexpected_generated:
+        issues.append(
+            {
+                "severity": "fail",
+                "code": "generated-directory-contaminated",
+                "files": unexpected_generated,
+                "suggestion": "move backups to .local/backups and reused assets to reused-staging",
+            }
+        )
+    if unexpected_final:
+        issues.append(
+            {
+                "severity": "fail",
+                "code": "final-directory-contaminated-before-manifest",
+                "files": unexpected_final,
+                "suggestion": "move reused assets to reused-staging and merge them only after base QA",
+            }
+        )
+    report = {
+        "schema_version": 1,
+        "ok": not issues,
+        "expected_generated_files": sorted(expected_generated),
+        "issues": issues,
+        "directory_contract": {
+            "active_generation": "generated/current",
+            "backups": ".local/backups",
+            "reused_assets": "reused-staging",
+            "formal_outputs": "final",
+        },
+        "checked_at": datetime.now(timezone.utc).isoformat(),
+    }
+    write_json(run_dir / "qa" / "run-preflight.json", report)
+    return report
+
+
+def write_operation_heartbeat(run_dir: Path, operation: str, status: str) -> None:
+    write_json(
+        run_dir / "qa" / "operation-heartbeat.json",
+        {
+            "schema_version": 1,
+            "operation": operation,
+            "status": status,
+            "pid": os.getpid(),
+            "updated_at": datetime.now(timezone.utc).isoformat(),
+        },
+    )
+
+
+def write_pipeline_state(run_dir: Path, summary: dict[str, Any]) -> None:
+    """Persist the latest safe stage and hashes so a new task can resume safely."""
+    jobs_file = run_dir / "jobs.json"
+    jobs = list(read_json(jobs_file).get("jobs", [])) if jobs_file.is_file() else []
+    inputs: list[dict[str, Any]] = []
+    for job in jobs:
+        for item in required_inputs(job, run_dir):
+            path = run_dir / str(item["path"])
+            inputs.append(
+                {
+                    "job_id": str(job["id"]),
+                    "kind": str(item["kind"]),
+                    "path": str(item["path"]),
+                    "exists": path.is_file(),
+                    "sha256": file_sha256(path) if path.is_file() else None,
+                }
+            )
+    status = str(summary.get("status", "unknown"))
+    safe_stage = {
+        "awaiting-generation": "generation",
+        "awaiting-regeneration": "regeneration",
+        "ready-for-processing": "processing",
+        "assets-complete": "assets-complete",
+        "complete": "complete",
+        "unity-failed": "assets-complete",
+        "configuration-invalid": "preflight",
+        "failed": "qa-failed",
+    }.get(status, status)
+    path = run_dir / "qa" / "pipeline-state.json"
+    previous = read_json(path) if path.is_file() else {}
+    signature = hashlib.sha256(
+        json.dumps(
+            {
+                "status": status,
+                "inputs": [(item["path"], item["sha256"]) for item in inputs],
+            },
+            ensure_ascii=False,
+            sort_keys=True,
+        ).encode("utf-8")
+    ).hexdigest()
+    history = list(previous.get("history", []))
+    if not history or history[-1].get("signature") != signature:
+        history.append(
+            {
+                "status": status,
+                "safe_stage": safe_stage,
+                "signature": signature,
+                "recorded_at": datetime.now(timezone.utc).isoformat(),
+            }
+        )
+    write_json(
+        path,
+        {
+            "schema_version": 1,
+            "project_id": summary.get("project_id"),
+            "status": status,
+            "safe_stage": safe_stage,
+            "resume_from": safe_stage,
+            "input_count": len(inputs),
+            "ready_input_count": sum(1 for item in inputs if item["exists"]),
+            "inputs": inputs,
+            "history": history[-100:],
+            "updated_at": datetime.now(timezone.utc).isoformat(),
+        },
+    )
 
 
 def run_quick_source_gates(
     run_dir: Path,
     jobs: list[dict[str, Any]],
 ) -> dict[str, Any]:
-    reports = [validate_source_sheet(job, run_dir) for job in jobs]
+    checked_jobs = [job for job in jobs if (run_dir / str(job["generated_output"])).is_file()]
+    reports = [validate_source_sheet(job, run_dir) for job in checked_jobs]
     issues: list[dict[str, Any]] = []
-    for job, report in zip(jobs, reports):
+    for job, report in zip(checked_jobs, reports):
         for issue in report.get("issues", []):
             issues.append({**dict(issue), "severity": "fail", "job_id": str(job["id"])})
     summary = {
@@ -291,10 +573,12 @@ def run_quick_source_gates(
         "ok": not issues,
         "status": "pass" if not issues else "failed",
         "job_count": len(jobs),
+        "checked_job_count": len(checked_jobs),
+        "checked_job_ids": [str(job["id"]) for job in checked_jobs],
         "passed_job_count": sum(1 for report in reports if report.get("ok")),
         "failed_job_count": sum(1 for report in reports if not report.get("ok")),
         "issues": issues,
-        "reports": [f"qa/source-gates/{job['id']}.json" for job in jobs],
+        "reports": [f"qa/source-gates/{job['id']}.json" for job in checked_jobs],
         "updated_at": datetime.now(timezone.utc).isoformat(),
     }
     write_json(run_dir / "qa" / "source-gate-summary.json", summary)
@@ -375,6 +659,8 @@ def write_regeneration_plan(
 
     for job in jobs:
         job_id = str(job["id"])
+        if job_id not in result_by_job and not issues_by_job[job_id]:
+            continue
         fingerprint = candidate_fingerprint(job, run_dir)
         history = list(job.get("candidate_history", []))
         job_has_hard_blocker = any(
@@ -440,6 +726,8 @@ def write_regeneration_plan(
         retry_path.parent.mkdir(parents=True, exist_ok=True)
         retry_path.write_text(correction, encoding="utf-8")
         targets = retry_target_paths(job, target)
+        if str(issue.get("code", "")).startswith("source-") or issue.get("code") == "status-green-reflection":
+            targets = [str(job["generated_output"])]
         required_calls = sum(1 for path in targets if str(path).lower().endswith(".png"))
         if required_calls > extra_calls_remaining:
             retry_path.unlink(missing_ok=True)
@@ -654,14 +942,14 @@ def build_summary(
     ]
     unity = unity or unity_delivery_state(run_dir, request)
     if status == "awaiting-generation":
-        active = generation.get("next_task")
+        active_tasks = list(generation.get("next_tasks", []))
         next_actions = (
             [
-                f"只生成当前激活输入 {active['path']}，不要并行生成后续图片。",
-                "保存后立即再次运行编排器，由队列激活下一项。",
+                f"并发生成当前波次的 {len(active_tasks)} 个激活输入，不得越过队列启动 blocked 项。",
+                "当前波次全部保存后立即再次运行编排器。",
             ]
-            if active
-            else ["再次运行编排器刷新逐张生成队列。"]
+            if active_tasks
+            else ["再次运行编排器刷新自适应生成队列。"]
         )
     elif status == "awaiting-regeneration":
         next_actions = [
@@ -729,8 +1017,13 @@ def render_markdown(summary: dict[str, Any]) -> str:
             [
                 f"- 首轮生图调用：{budget['initial_image_calls']}",
                 f"- 全局额外调用预算：{budget['extra_calls_committed']}/{budget['max_extra_calls']}",
-                f"- 预计生图时长：{budget['estimated_minutes_with_budget'][0]}–{budget['estimated_minutes_with_budget'][1]} 分钟",
+                f"- 预计并发生图时长：{budget['estimated_parallel_minutes_with_budget'][0]}–{budget['estimated_parallel_minutes_with_budget'][1]} 分钟",
             ]
+        )
+    runtime = generation.get("runtime", {})
+    if runtime:
+        lines.append(
+            f"- 图片并发：{runtime['effective_concurrency']}/{runtime['configured_concurrency']}"
         )
     if results.get("quality_score") is not None:
         lines.append(
@@ -741,15 +1034,12 @@ def render_markdown(summary: dict[str, Any]) -> str:
     if summary["missing_inputs"]:
         lines.extend(["", "## 待生成文件", ""])
         lines.extend(f"- `{path}`" for path in summary["missing_inputs"])
-    active = generation.get("next_task")
-    if active:
+    active_tasks = list(generation.get("next_tasks", []))
+    if active_tasks:
+        lines.extend(["", "## 当前生成波次", ""])
         lines.extend(
-            [
-                "",
-                "## 当前唯一生成任务",
-                "",
-                f"- `{active['job_id']}` / `{active['kind']}` → `{active['path']}`",
-            ]
+            f"- `{active['job_id']}` / `{active['kind']}` → `{active['path']}`"
+            for active in active_tasks
         )
     retry = summary.get("retry") or {}
     if retry.get("items"):
@@ -784,6 +1074,7 @@ def write_delivery_summary(run_dir: Path, summary: dict[str, Any]) -> None:
     markdown_path = run_dir / "qa" / "delivery-summary.md"
     markdown_path.parent.mkdir(parents=True, exist_ok=True)
     markdown_path.write_text(render_markdown(summary), encoding="utf-8")
+    write_pipeline_state(run_dir, summary)
 
 
 def sync_project_catalog(run_dir: Path, request: dict[str, Any]) -> dict[str, Any] | None:
@@ -839,6 +1130,7 @@ def orchestrate(
     opaque_threshold: float = 96.0,
     adaptive_chroma: bool = True,
     force_unity: bool = False,
+    generation_event: str | None = None,
 ) -> dict[str, Any]:
     run_dir = run_dir.expanduser().resolve()
     request_file = run_dir / "request.json"
@@ -849,7 +1141,19 @@ def orchestrate(
     if not prepared:
         if request_path is None:
             raise FileNotFoundError("unprepared run requires --request")
-        prepare_batch(read_json(request_path), run_dir)
+        try:
+            prepare_batch(read_json(request_path), run_dir)
+        except (OSError, ValueError, KeyError, json.JSONDecodeError) as error:
+            write_json(
+                run_dir / "qa" / "request-preflight.json",
+                {
+                    "schema_version": 1,
+                    "ok": False,
+                    "error": str(error),
+                    "checked_at": datetime.now(timezone.utc).isoformat(),
+                },
+            )
+            raise
 
     request = read_json(request_file)
     jobs_payload = read_json(jobs_file)
@@ -863,12 +1167,25 @@ def orchestrate(
     jobs_payload["jobs"] = jobs
     jobs_payload["updated_at"] = datetime.now(timezone.utc).isoformat()
     write_json(jobs_file, jobs_payload)
-    generation = attach_generation_queue(generation, jobs, request, run_dir)
-
-    if generation["missing_input_count"]:
-        summary = build_summary(run_dir, request, generation, "awaiting-generation", existing_run_summary(run_dir))
+    policy = normalized_generation_policy(request)
+    runtime = generation_runtime_state(run_dir, policy, generation_event)
+    generation = attach_generation_queue(generation, jobs, request, run_dir, runtime)
+    hygiene = validate_run_directory_hygiene(run_dir, jobs)
+    if not hygiene["ok"]:
+        summary = build_summary(
+            run_dir,
+            request,
+            generation,
+            "configuration-invalid",
+            existing_run_summary(run_dir),
+        )
+        summary["preflight"] = hygiene
+        summary["next_actions"] = [
+            "把 generated 下的备份移到 .local/backups。",
+            "把提前合并的复用资源移到 reused-staging，基础 QA 通过后再合并。",
+        ]
         write_delivery_summary(run_dir, summary)
-        return {"ok": True, **summary}
+        return {"ok": False, **summary}
 
     if generation["pending_replacement_count"]:
         retry_plan_path = run_dir / "qa" / "regeneration-plan.json"
@@ -881,6 +1198,38 @@ def orchestrate(
             existing_run_summary(run_dir),
             retry_plan,
         )
+        write_delivery_summary(run_dir, summary)
+        return {"ok": True, **summary}
+
+    source_gate = run_quick_source_gates(run_dir, jobs)
+    if not source_gate["ok"]:
+        checked = set(source_gate["checked_job_ids"])
+        gate_qa = {
+            "jobs": [
+                {
+                    "id": str(job["id"]),
+                    "ok": not any(issue["job_id"] == str(job["id"]) for issue in source_gate["issues"]),
+                }
+                for job in jobs
+                if str(job["id"]) in checked
+            ],
+            "issues": source_gate["issues"],
+            "quality": {"jobs": []},
+        }
+        retry_plan = write_regeneration_plan(run_dir, request, read_json(jobs_file), gate_qa)
+        status = "awaiting-regeneration" if retry_plan["items"] else "failed"
+        refreshed_jobs = read_json(jobs_file)["jobs"]
+        generation = attach_generation_queue(
+            generation_state(refreshed_jobs, run_dir), refreshed_jobs, request, run_dir, runtime
+        )
+        summary = build_summary(
+            run_dir, request, generation, status, existing_run_summary(run_dir), retry_plan
+        )
+        write_delivery_summary(run_dir, summary)
+        return {"ok": status == "awaiting-regeneration", **summary}
+
+    if generation["missing_input_count"]:
+        summary = build_summary(run_dir, request, generation, "awaiting-generation", existing_run_summary(run_dir))
         write_delivery_summary(run_dir, summary)
         return {"ok": True, **summary}
 
@@ -904,35 +1253,30 @@ def orchestrate(
         write_delivery_summary(run_dir, summary)
         return {"ok": False, **summary}
 
-    source_gate = run_quick_source_gates(run_dir, jobs)
-    if not source_gate["ok"]:
-        gate_qa = {
-            "jobs": [
-                {
-                    "id": str(job["id"]),
-                    "ok": not any(issue["job_id"] == str(job["id"]) for issue in source_gate["issues"]),
-                }
-                for job in jobs
-            ],
-            "issues": source_gate["issues"],
-            "quality": {"jobs": []},
-        }
-        retry_plan = write_regeneration_plan(run_dir, request, read_json(jobs_file), gate_qa)
-        status = "awaiting-regeneration" if retry_plan["items"] else "failed"
-        refreshed_jobs = read_json(jobs_file)["jobs"]
-        generation = attach_generation_queue(
-            generation_state(refreshed_jobs, run_dir), refreshed_jobs, request, run_dir
-        )
-        summary = build_summary(run_dir, request, generation, status, prior_summary, retry_plan)
-        write_delivery_summary(run_dir, summary)
-        return {"ok": status == "awaiting-regeneration", **summary}
-
-    result = run_pipeline(
+    processing_summary = build_summary(
         run_dir,
-        transparent_threshold=transparent_threshold,
-        opaque_threshold=opaque_threshold,
-        adaptive_chroma=adaptive_chroma,
-        force=effective_force,
+        request,
+        generation,
+        "ready-for-processing",
+        prior_summary,
+    )
+    write_delivery_summary(run_dir, processing_summary)
+    write_operation_heartbeat(run_dir, "run-ui-pipeline", "running")
+    try:
+        result = run_pipeline(
+            run_dir,
+            transparent_threshold=transparent_threshold,
+            opaque_threshold=opaque_threshold,
+            adaptive_chroma=adaptive_chroma,
+            force=effective_force,
+        )
+    except Exception:
+        write_operation_heartbeat(run_dir, "run-ui-pipeline", "interrupted-or-failed")
+        raise
+    write_operation_heartbeat(
+        run_dir,
+        "run-ui-pipeline",
+        "complete" if result.get("ok") else "failed",
     )
     run_summary = existing_run_summary(run_dir)
     retry_plan = None
@@ -951,7 +1295,9 @@ def orchestrate(
         retry_plan = write_regeneration_plan(run_dir, request, read_json(jobs_file), qa_report)
         status = "awaiting-regeneration" if retry_plan["items"] else "failed"
     refreshed_jobs = read_json(jobs_file)["jobs"]
-    generation = attach_generation_queue(generation_state(refreshed_jobs, run_dir), refreshed_jobs, request, run_dir)
+    generation = attach_generation_queue(
+        generation_state(refreshed_jobs, run_dir), refreshed_jobs, request, run_dir, runtime
+    )
     if status == "assets-complete":
         return finalize_completed_assets(
             run_dir,
@@ -971,6 +1317,11 @@ def main() -> None:
     parser.add_argument("--request", type=Path, help="Batch request JSON; required only for a new run")
     parser.add_argument("--force-run", action="store_true", help="Rerun deterministic processing")
     parser.add_argument("--force-unity", action="store_true", help="Rerun Unity export without regenerating images")
+    parser.add_argument(
+        "--generation-event",
+        choices=["success", "rate-limit", "timeout", "disconnect"],
+        help="Record an image-generation wave result; failure events reduce concurrency by one",
+    )
     parser.add_argument("--transparent-threshold", type=float, default=12.0)
     parser.add_argument("--opaque-threshold", type=float, default=96.0)
     parser.add_argument("--fixed-chroma-thresholds", action="store_true")
@@ -985,6 +1336,7 @@ def main() -> None:
         opaque_threshold=args.opaque_threshold,
         adaptive_chroma=not args.fixed_chroma_thresholds,
         force_unity=args.force_unity,
+        generation_event=args.generation_event,
     )
     print(json.dumps(result, ensure_ascii=False))
     if not result["ok"]:

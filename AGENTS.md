@@ -42,7 +42,7 @@ V1 必须支持：
 - 保留从生成源图到最终文件的可追溯关系。
 - 同一请求包含多个分类时自动建立独立 Job；单分类超出容量时自动拆分多张 Sheet。
 - 在所有生成图就绪后，通过统一确定性 Runner 汇总正式 Manifest、QA 和运行摘要。
-- 用户一次提出多个界面时建立一个项目级请求；内部图片生成固定逐张串行，同一时刻只允许一个 Production Sheet、Alpha Matte 或来源侧车处于激活状态，不要求用户按图片重复提需求。
+- 用户一次提出多个界面时建立一个项目级请求；独立 Production Sheet 默认使用自适应并发，最大 3，同一波次 Panel/Button/Icon_Status 等高风险 Job 最多 2 个；Alpha Matte、来源侧车和所有重试保持独占串行，不要求用户按图片重复提需求。
 - 使用 Codex 将自然语言转换为批量请求，并通过统一编排器完成首次准备、缺图清单、断点续跑、Runner 调用和交付摘要。
 - 首次使用 Skill 且缺少项目名时先询问项目名；获得后由确定性脚本创建 `input/<project-id>/references/reference-notes.md`，重复初始化不得覆盖用户内容。
 - 新建参考图目录后必须告知绝对路径并暂停。用户确认放图后先运行自动检查，再逐图视觉检查；任一参考图不合格时要求替换并继续暂停，全部通过前禁止建立资源清单、请求 JSON 或调用图片生成。
@@ -54,7 +54,9 @@ V1 必须支持：
 - 在不引入桌面 GUI 的前提下，用批准后的 bbox 修正文件完成透明切割和正式 QA。
 - 正式 QA 通过后可导入 Unity 2022.3：配置 Sprite Single/Alpha/PPU/Pivot/Border，并基于显式布局生成 Image/Button 界面 Prefab；单独美术资源不生成 Prefab。
 - 顶层 `unity_delivery` 已确认时，最后一个图片输入和资源 QA 通过后必须自动继续 Unity；`screens[]` 中每个界面分别生成 Screen Prefab、Preview Scene 和渲染 PNG。Unity 失败只能用 Unity 专用续跑，不得重新生成已通过图片。
-- Panel/Button 自动推断九宫格 Border；只有高置信且中心区有效时写入，低置信必须失败并使用人工覆写。
+- Button 自动推断九宫格 Border；只有高置信且中心区有效时写入，低置信必须失败并使用人工覆写。
+- Panel 的 Unity 九宫格默认切割值固定为 `L/B/R/T = 50`（Unity 数组顺序 `[left,bottom,right,top]`）；显式 `nine_slice_overrides` 优先。Button 仍使用自动推断。Panel 源图必须大于 `100×100` 才能保留非空中心区。
+- Panel 按四边与四角设计键 `frame_style` 复用；同一 `frame_style` 只生成一个紧凑源资源，默认归一化到 `200×200`，不同界面尺寸由 Unity Sliced 九宫格实现。只有四边或四角设计确实不同才建立新 Panel，禁止为宽、高或长宽比变体重复生图。
 - 九宫格 Panel 的龙、莲花、菱形、徽记等独特装饰只能位于四角固定区；上/下/左/右边中段和中央内容区必须干净、连续、可重复拉伸。禁止通过扩大 Border 把边中段装饰纳入固定区来掩盖问题；应编辑或重生成源图。
 - Panel 内按钮、列表、页签等控件必须位于外框安全区，不能覆盖或越过固定边框；优先作为 Panel 子节点声明。验收必须检查四边安全距离和实际 Unity Sliced 渲染，自动 Border/PPU 通过不等于视觉通过。
 - Unity 导出统一使用 `Assets/_Project`：Sprite 放入 `Assets/_Project/UI/Sprites/<project-id>`，Screen Prefab 放入 `Assets/_Project/Prefabs/UI/Demo`，Preview Scene 放入 `Assets/_Project/Scenes/Demo`；生成预检、导入报告、日志和逐文件回滚清单。
@@ -90,11 +92,17 @@ V1 不包含：
 - 每次调用必须更新 `qa/delivery-summary.json` 与 `qa/delivery-summary.md`，汇总生成方式、Job/输入就绪度、结果数量、交付路径、人工处理项和下一步动作。
 - 完成态自动把正式 Manifest 合并到 `input/<project-id>/ui-asset-catalog.json`，后续界面复用键固定为 `category + semantic_name + state`，尺寸不参与命中。
 - 编排器不调用图片 API；Codex 仍使用内置 `imagegen` 按缺图清单完成视觉生成。
-- 缺图清单必须转成 `qa/generation-queue.json/md`；队列固定 `sequential-inputs`、`max_concurrent_image_jobs=1`，只生成当前激活项，保存后续跑再激活下一项。
+- 缺图清单必须转成 `qa/generation-queue.json/md`；默认 `adaptive-parallel`、`max_concurrent_image_jobs=3`。只生成当前 `active_tasks` 波次，不得越过队列启动 `blocked` 项；当前波次全部保存后续跑编排器。
+- 图片服务发生 `rate-limit`、`timeout` 或 `disconnect` 时，用 `--generation-event` 记录一次事件并持久降级 `3→2→1`；不得在同一故障上重复记事件。稳定完成不会自动升档，避免恢复抖动。
+- Production 队列必须先激活 Panel、Button、Icon_Status 风险波次；这些 Job 到达并通过快速源门禁前，普通图标保持 `blocked`。Panel/Button 源门禁必须提前执行九宫格四边中间 60% 检查。
+- 快速源门禁缓存必须绑定图片 SHA、Job 请求、Layout Guide、透明模式和门禁版本；任一契约变化都必须重新检查，禁止仅按图片哈希复用旧结论。
+- 自动色键必须使用 Codex 写入的主体颜色声明，从绿、品红、青色中选择不冲突色；显式色键与声明颜色冲突时在生图前失败，三色均冲突时拆分 Sheet 或使用已有 Alpha。
+- 新运行的当前候选统一写入 `generated/current/`；备份写入 `.local/backups/`，复用资源写入 `reused-staging/`，`final/` 只允许正式 Manifest 管理的输出。Runner 前发现目录污染必须写预检报告并阻断。
+- 每次编排必须更新 `qa/pipeline-state.json`，记录最近安全阶段、恢复入口和全部必需输入 SHA-256；长 Runner 同时更新 `qa/operation-heartbeat.json`，新任务按状态账本恢复而不是猜进度。
 - 背包、商店等内容界面必须先确认 `content_policy.item_icons`；`empty-slots` 或 `runtime-data` 时排除 `Icon_Item` Job，禁止先生成再弃用。
 - 每张 Production Sheet 就绪后先执行快速源门禁，检查解码、比例、槽位、触边及绿色色键状态图标反光；失败不得启动完整 Runner。
-- 顶层 `generation_budget.max_extra_calls` 默认 1，限制整个请求的额外图片模型调用；交付摘要必须显示首轮调用、总调用预算和预计时长。
-- “一次产出多张”表示用户只提出一次完整需求，内部仍逐张调用图片生成；禁止把多个完整界面合并到一张生产 Sheet，也禁止并行启动多个图片 Job。
+- 未显式设置 `generation_budget.max_extra_calls` 时，按 Panel、Button、Nav/Status/Item 色键风险组分别预留重试，再加 1 次全局兜底，最高 5；显式总额优先。交付摘要必须显示预算策略、首轮调用、总调用预算和预计时长。
+- “一次产出多张”表示用户只提出一次完整需求，由多个独立图片调用组成；允许当前 Production 波次最多并行 3 个调用，但禁止把多个完整界面合并到一张生产 Sheet，Matte、来源侧车和重试仍必须串行。
 - 可选 `unity_delivery` 包含已确认布局、Unity 工程和 Editor；资源完成后编排器自动导出全部 Screen。只重跑 Unity 使用 `--force-unity`。
 
 ### V0.13 QA 驱动纠错闭环
@@ -107,21 +115,24 @@ V1 不包含：
 - 计划内替代候选就绪后允许编排器自动覆盖失败运行；计划外覆盖已有正式 Manifest 仍要求显式 `--force-run`。
 - 顶层 `style_consistency` 默认启用；使用 Canonical 相似度与 Sheet 间相似度合成 `0–100` 分，写入 `qa/style-consistency.json`。默认 `<40 fail`、`<60 warning`，允许请求覆写但必须满足 `0 <= fail_below <= warning_below <= 100`。
 - 风格评分只做跨 Sheet 自动门禁，不能替代 Contact Sheet 人工语义检查；风格漂移失败必须定位到具体 Job，并进入同一单原因重生成闭环。
+- 单资产缩略后没有达到最低可见 Alpha 的像素时，必须报告带 `asset_id`、`job_id` 和文件路径的 `style-profile-empty-visible-pixels` hard fail；不得让风格评分异常中断整批 QA。
 - Panel/Button 生成 Prompt 必须逐项禁止上、下、左、右边中段装饰；正式 QA 必须同时检查四边中间 60% 的外轮廓连续性与内部纹理变化，输出 `nine_slice_stretch_bands`，并兼容保留 Panel 专用 `panel_stretch_bands`。Panel 或 Button 任一边超出容差分别报 `panel-stretch-band-decoration` 或 `button-stretch-band-decoration` 硬失败。
+- Panel/Button 四边中间 60% 存在空列或空行时，必须在边报告写入 `gap_positions` 并硬失败；不得因空轮廓数组触发未处理异常。
 
 ### P7/P8 Unity 交付链路
 
 - 当前支持 Unity `2022.3.x` 与 UGUI；其他 Unity 主版本必须先兼容性验证。
 - 默认把 Sprite 导入 `Assets/_Project/UI/Sprites/<project-id>`，把 Screen Prefab 导入 `Assets/_Project/Prefabs/UI/Demo`，把 Preview Scene 导入 `Assets/_Project/Scenes/Demo`，并安装嵌入包 `Packages/com.hongda.game-ui-asset-pipeline`；不得生成单资源 Prefab，不得改写任务范围外的用户手工 Prefab。
 - TextureImporter 固定为 Sprite Single、Alpha Is Transparency、无 Mipmap、Clamp、Bilinear、Uncompressed；默认 PPU 100，Panel/Button 按源图与全部布局目标的最小缩放比自动提高 PPU，也可显式覆写。Pivot、Border、PPU 来源均须可追溯。
-- Panel/Button 自动九宫格推断必须记录置信度和来源。低置信、中心区无效、覆写越界，或 Border 经 PPU 换算后不适配任一布局目标尺寸，必须在启动 Unity 前失败。
-- 最终界面 Prefab 只从 schema v1 显式布局生成；父元素必须先声明，元素正式支持 Image、Button、Text（TMP）、GridLayoutGroup、HorizontalLayoutGroup、VerticalLayoutGroup、ScrollView、ScrollViewport、PrefabInstance，并写入稳定 BindingId。标题、数值占位和按钮文案必须使用 Text 节点，不得只留透明 Image Mount。
+- Panel 默认 Border `50/50/50/50` 必须记录来源 `panel-default-50`；Button 自动推断必须记录置信度和来源。中心区无效、Button 低置信、覆写越界，或 Border 经 PPU 换算后不适配任一布局目标尺寸，必须在启动 Unity 前失败。
+- 最终界面 Prefab 只从 schema v1 显式布局生成；父元素必须先声明，元素正式支持 Image、Button、Text（TMP）、GridLayoutGroup、HorizontalLayoutGroup、VerticalLayoutGroup、ScrollView、ScrollViewport、PrefabInstance。稳定元素 ID 只用于布局解析和导入期接线；交互、滚动和组合关系配置完成后，保存 Screen Prefab 前必须移除全部 `GameUIElementBinding` 临时组件。标题、数值占位和按钮文案必须使用 Text 节点，不得只留透明 Image Mount。
 - 固定区与可替换区需要成为独立 Prefab 时，使用 `PrefabInstance.prefab_screen_id` 引用更早生成的 Screen；简单同屏互斥切换使用 `toggle_groups` 生成 `GameUIViewSwitcher` 并真实验证 `Button.onClick`。这不扩大为任意业务事件、数据源或导航控制器自动生成。
 - 装备位、页签、背包格、按钮排等规则排列必须使用 Layout Group 父容器统一控制单元尺寸、间距、行列、内边距和对齐；不得把同组子元素逐个写死坐标。验收必须同时检查 Prefab 组件、子节点数量与 Unity 渲染。
 - 背包、任务列表、商店列表、邮件列表等内容数量可能增长且展示范围有限的区域，优先使用 `ScrollView → Viewport(RectMask2D) → Content(LayoutGroup + ContentSizeFitter)`。Viewport 规定可见范围，超出内容必须隐藏并通过指定轴滚动；禁止只添加 Layout Group 后让子项越界。只有数量固定且确认不会溢出的纯装饰排列才允许不使用 Scroll View。
 - Scroll View 验收必须检查 ScrollRect 的 Content/Viewport 引用、滚动轴、MovementType、Viewport 的 RectMask2D、Content 的尺寸增长方式，以及 Content 大于 Viewport 时的实际裁剪渲染；组件名存在不等于验收通过。
 - 布局允许 RGBA 纯色 Image；Button 状态资源必须显式引用正式 Manifest，并配置 SpriteSwap，不得用 ColorTint 冒充已有四态资源。
 - 每个正式 Screen 必须生成 Preview Scene 与同目标尺寸 Unity 渲染 PNG；Prefab 结构正确但未完成视觉渲染检查，不得视为完整验收。
+- 最终 Screen Prefab 及其 Preview Scene 不得残留 `GameUIElementBinding`；必须保留 Unity 原生 UI 组件和实际交互所需的 `GameUIViewSwitcher`，不得以清理辅助脚本为由破坏按钮切换。
 - Unity 导出前必须确认项目、版本、Editor、导入根和回滚范围；失败不得报告完成。
 
 ### 桌面 GUI 路线优先级
@@ -352,7 +363,7 @@ GPT Image 2 不提供原生透明背景时，默认使用：
 
 | 类型 | 默认画布 | 默认布局 |
 |---|---:|---:|
-| Panel | `2048×2048` | `2×2` |
+| Panel | `1024×1024` | `1×1`，单体默认归一化 `200×200` |
 | Button | `2048×2048` | `3×4` |
 | Icon_Nav | `2048×2048` | `4×4` |
 | Icon_General | `2048×2048` | `4×4` |
@@ -548,9 +559,9 @@ output/<project-id>-<timestamp>/
 
 自然语言完整交付默认改用 `orchestrate_ui_delivery.py`。首次传入 `--request` 和 `--run-dir`，补图后仅传 `--run-dir`；脚本按 `unprepared → awaiting-generation → ready-for-processing → complete|failed` 状态机推进，并持续写交付摘要。`prepare_ui_batch.py` 与 `run_ui_pipeline.py` 保留为分步调试入口。
 
-原生 Alpha 分流还必须在任何正式输出前校验 `generated/<job-id>.provenance.json` 与源图哈希。原生源图只允许清理 `alpha=0` 的隐藏 RGB，不得改写可见 RGB/Alpha；生产画布缩放和单体归一化统一使用预乘 Alpha。内置 `imagegen` 实测返回 RGB 烘焙棋盘格，禁止用于 `native-alpha-required`。
+原生 Alpha 分流还必须在任何正式输出前校验 `generated/current/<job-id>.provenance.json` 与源图哈希。原生源图只允许清理 `alpha=0` 的隐藏 RGB，不得改写可见 RGB/Alpha；生产画布缩放和单体归一化统一使用预乘 Alpha。内置 `imagegen` 实测返回 RGB 烘焙棋盘格，禁止用于 `native-alpha-required`。
 
-Matte 分流在正式输出前校验 `generated/<job-id>.png` 与 `generated/<job-id>-alpha-matte.png`。Matte 至少包含 8 个 Alpha 等级和 32 个部分透明像素；灰度通道差异 P95 ≤ 24、边框 Alpha P95 ≤ 24、彩色背景边框色差 P95 ≤ 28、双图包围框 IoU ≥ 0.55、双向像素覆盖率 ≥ 0.65。通过后按已知黑背景合成方程恢复直通道 RGB，并对后续缩放使用预乘 Alpha。
+Matte 分流在正式输出前校验 `generated/current/<job-id>.png` 与 `generated/current/<job-id>-alpha-matte.png`。Matte 至少包含 8 个 Alpha 等级和 32 个部分透明像素；灰度通道差异 P95 ≤ 24、边框 Alpha P95 ≤ 24、彩色背景边框色差 P95 ≤ 28、双图包围框 IoU ≥ 0.55、双向像素覆盖率 ≥ 0.65。通过后按已知黑背景合成方程恢复直通道 RGB，并对后续缩放使用预乘 Alpha。
 
 `prepare_ui_run.py` 与 `prepare_ui_batch.py` 生成的 `jobs.json` 统一使用 schema v2。每个 Job 至少包含 `layout_json`、`layout_guide`、`generated_output` 和 `expected_count`；请求必须包含总 `expected_count`。单分类任务也必须能直接交给统一 Runner，不得保留只可分步调试的旧 Job schema。
 

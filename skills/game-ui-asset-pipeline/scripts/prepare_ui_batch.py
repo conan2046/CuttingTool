@@ -20,6 +20,24 @@ from prepare_ui_run import (
     parse_pair,
     slugify,
 )
+from prepare_unity_export import normalize_layout
+
+
+CHROMA_CANDIDATES = [
+    ("#00FF00", "green"),
+    ("#FF00FF", "magenta"),
+    ("#00FFFF", "cyan"),
+]
+COLOR_TERMS = {
+    "green": ("green", "emerald", "jade", "lime", "绿色", "翠绿", "翡翠", "青绿"),
+    "magenta": ("magenta", "fuchsia", "purple", "violet", "品红", "紫色", "紫红", "洋红"),
+    "cyan": ("cyan", "aqua", "turquoise", "青色", "蓝绿", "湖蓝"),
+}
+RISK_PRIORITY = {
+    "Panel": 0,
+    "Button": 1,
+    "Icon_Status": 2,
+}
 
 
 def read_json(path: Path) -> dict[str, Any]:
@@ -45,11 +63,13 @@ def copy_reference(source: Path, destination: Path) -> str:
     return destination.name
 
 
-def category_assets(category_spec: dict[str, Any]) -> list[dict[str, Any]]:
+def category_assets(category_spec: dict[str, Any], category: str) -> tuple[list[dict[str, Any]], list[dict[str, str]]]:
     raw_assets = category_spec.get("assets")
     if not isinstance(raw_assets, list) or not raw_assets:
         raise ValueError(f"category {category_spec.get('category')} requires a non-empty assets list")
     assets: list[dict[str, Any]] = []
+    panel_by_frame_style: dict[str, dict[str, Any]] = {}
+    panel_aliases: list[dict[str, str]] = []
     for index, raw in enumerate(raw_assets, start=1):
         if isinstance(raw, str):
             asset = {"semantic_name": raw, "state": "Default", "description": ""}
@@ -59,13 +79,31 @@ def category_assets(category_spec: dict[str, Any]) -> list[dict[str, Any]]:
                 "state": str(raw.get("state", "Default")).strip() or "Default",
                 "description": str(raw.get("description", "")).strip(),
             }
+            if category == "Panel":
+                asset["frame_style"] = str(raw.get("frame_style", "default")).strip() or "default"
         else:
             raise ValueError("each asset must be a semantic-name string or object")
         if not asset["semantic_name"]:
             raise ValueError("asset semantic_name cannot be empty")
-        asset["category_index"] = index
+        if category == "Panel":
+            asset.setdefault("frame_style", "default")
+            frame_key = str(asset["frame_style"]).casefold()
+            existing = panel_by_frame_style.get(frame_key)
+            if existing is not None:
+                panel_aliases.append(
+                    {
+                        "semantic_name": asset["semantic_name"],
+                        "state": asset["state"],
+                        "frame_style": str(asset["frame_style"]),
+                        "reuse_semantic_name": str(existing["semantic_name"]),
+                        "reuse_state": str(existing["state"]),
+                    }
+                )
+                continue
+            panel_by_frame_style[frame_key] = asset
+        asset["category_index"] = len(assets) + 1
         assets.append(asset)
-    return assets
+    return assets, panel_aliases
 
 
 def split_assets(assets: list[dict[str, Any]], capacity: int) -> list[list[dict[str, Any]]]:
@@ -86,6 +124,83 @@ def split_assets(assets: list[dict[str, Any]], capacity: int) -> list[list[dict[
     if current:
         sheets.append(current)
     return sheets
+
+
+def declared_subject_colors(
+    category_spec: dict[str, Any],
+    assets: list[dict[str, Any]],
+    style_notes: str,
+) -> set[str]:
+    """Resolve deterministic color conflicts declared by Codex in the request."""
+    conflicts: set[str] = set()
+    for color in ("green", "magenta", "cyan"):
+        if bool(category_spec.get(f"subject_uses_{color}", False)):
+            conflicts.add(color)
+    raw_colors = category_spec.get("subject_colors", [])
+    if isinstance(raw_colors, str):
+        raw_colors = [raw_colors]
+    if not isinstance(raw_colors, list):
+        raise ValueError("subject_colors must be a string or list")
+    text = " ".join(
+        [
+            style_notes,
+            *(str(value) for value in raw_colors),
+            *(str(asset.get("description", "")) for asset in assets),
+        ]
+    ).casefold()
+    for color, terms in COLOR_TERMS.items():
+        if any(term.casefold() in text for term in terms):
+            conflicts.add(color)
+    return conflicts
+
+
+def select_chroma_key(
+    category_spec: dict[str, Any],
+    assets: list[dict[str, Any]],
+    style_notes: str,
+) -> tuple[str, dict[str, Any]]:
+    requested = str(category_spec.get("chroma_key", "auto")).upper()
+    conflicts = declared_subject_colors(category_spec, assets, style_notes)
+    if requested != "AUTO":
+        selected = normalize_chroma_key(requested, bool(category_spec.get("subject_uses_green", False)))
+        selected_color = next((name for value, name in CHROMA_CANDIDATES if value == selected), None)
+        if selected_color in conflicts:
+            raise ValueError(
+                f"explicit chroma key {selected} conflicts with declared {selected_color} subject colors"
+            )
+        return selected, {
+            "mode": "explicit",
+            "selected": selected,
+            "declared_conflicts": sorted(conflicts),
+        }
+    for value, color in CHROMA_CANDIDATES:
+        if color not in conflicts:
+            return value, {
+                "mode": "auto-declared-palette",
+                "selected": value,
+                "declared_conflicts": sorted(conflicts),
+            }
+    raise ValueError(
+        "all supported chroma keys conflict with declared subject colors; split the category or provide existing Alpha"
+    )
+
+
+def default_generation_budget(categories: list[dict[str, Any]]) -> dict[str, Any]:
+    names = {str(category.get("category", "")) for category in categories}
+    reserves: dict[str, int] = {}
+    for category in ("Panel", "Button"):
+        if category in names:
+            reserves[category] = 1
+    if names & {"Icon_Nav", "Icon_Status", "Icon_Item"}:
+        reserves["chroma-risk-icons"] = 1
+    global_fallback_calls = 1
+    suggested = min(5, sum(reserves.values()) + global_fallback_calls)
+    return {
+        "max_extra_calls": suggested,
+        "reserved_extra_calls": reserves,
+        "global_fallback_calls": global_fallback_calls,
+        "strategy": "risk-reserved",
+    }
 
 
 def normalize_unity_delivery(spec: dict[str, Any], run_dir: Path) -> dict[str, Any]:
@@ -118,6 +233,7 @@ def normalize_unity_delivery(spec: dict[str, Any], run_dir: Path) -> dict[str, A
         raise ValueError("enabled unity_delivery requires layout as an object or JSON file path")
     if layout_payload.get("schema_version") != 1:
         raise ValueError("unity_delivery layout schema_version must be 1")
+    normalize_layout(layout_payload)
     screens = layout_payload.get("screens")
     if not isinstance(screens, list) or not screens:
         raise ValueError("unity_delivery layout requires at least one screen")
@@ -143,6 +259,32 @@ def normalize_unity_delivery(spec: dict[str, Any], run_dir: Path) -> dict[str, A
     }
 
 
+def normalize_generation_policy(spec: dict[str, Any]) -> dict[str, Any]:
+    raw = spec.get("generation_policy", {})
+    if not isinstance(raw, dict):
+        raise ValueError("generation_policy must be an object")
+    mode = str(raw.get("mode", "adaptive-parallel"))
+    if mode not in {"adaptive-parallel", "sequential-inputs"}:
+        raise ValueError("generation_policy.mode must be adaptive-parallel or sequential-inputs")
+    default_limit = 3 if mode == "adaptive-parallel" else 1
+    max_concurrent = int(raw.get("max_concurrent_image_jobs", default_limit))
+    if max_concurrent < 1 or max_concurrent > 3:
+        raise ValueError("generation_policy.max_concurrent_image_jobs must be between 1 and 3")
+    if mode == "sequential-inputs" and max_concurrent != 1:
+        raise ValueError("sequential-inputs requires max_concurrent_image_jobs=1")
+    return {
+        "mode": mode,
+        "max_concurrent_image_jobs": max_concurrent,
+        "minimum_concurrent_image_jobs": 1,
+        "max_concurrent_high_risk_jobs": min(2, max_concurrent),
+        "high_risk_categories": ["Panel", "Button", "Icon_Status"],
+        "dependent_inputs_serial": True,
+        "retry_inputs_serial": True,
+        "fallback_on": ["rate-limit", "timeout", "disconnect"],
+        "rerun_orchestrator_after_each_wave": True,
+    }
+
+
 def prepare_batch(spec: dict[str, Any], run_dir: Path, force: bool = False) -> Path:
     project_id = slugify(str(spec.get("project_id", "game-ui")))
     categories = spec.get("categories")
@@ -156,7 +298,8 @@ def prepare_batch(spec: dict[str, Any], run_dir: Path, force: bool = False) -> P
     raw_budget = spec.get("generation_budget", {})
     if not isinstance(raw_budget, dict):
         raise ValueError("generation_budget must be an object")
-    max_extra_calls = int(raw_budget.get("max_extra_calls", 1))
+    budget_defaults = default_generation_budget(categories)
+    max_extra_calls = int(raw_budget.get("max_extra_calls", budget_defaults["max_extra_calls"]))
     minutes_per_call = raw_budget.get("estimated_minutes_per_call", [5, 8])
     if max_extra_calls < 0 or max_extra_calls > 5:
         raise ValueError("generation_budget.max_extra_calls must be between 0 and 5")
@@ -170,6 +313,9 @@ def prepare_batch(spec: dict[str, Any], run_dir: Path, force: bool = False) -> P
     generation_budget = {
         "max_extra_calls": max_extra_calls,
         "estimated_minutes_per_call": [float(minutes_per_call[0]), float(minutes_per_call[1])],
+        "reserved_extra_calls": dict(budget_defaults["reserved_extra_calls"]),
+        "global_fallback_calls": int(budget_defaults["global_fallback_calls"]),
+        "strategy": "explicit-total" if "max_extra_calls" in raw_budget else str(budget_defaults["strategy"]),
     }
     style_consistency = dict(spec.get("style_consistency", {}))
     style_consistency = {
@@ -187,28 +333,18 @@ def prepare_batch(spec: dict[str, Any], run_dir: Path, force: bool = False) -> P
         "references/layout-guides",
         "requests",
         "prompts",
-        "generated",
+        "generated/current",
         "extracted",
         "normalized",
         "final",
+        "reused-staging",
         "qa",
         "unity",
+        ".local/backups",
     ):
         (run_dir / relative).mkdir(parents=True, exist_ok=True)
 
-    generation_policy = {
-        "mode": "sequential-inputs",
-        "max_concurrent_image_jobs": 1,
-        "rerun_orchestrator_after_each_input": True,
-    }
-    requested_policy = spec.get("generation_policy")
-    if requested_policy is not None:
-        if not isinstance(requested_policy, dict):
-            raise ValueError("generation_policy must be an object")
-        requested_limit = int(requested_policy.get("max_concurrent_image_jobs", 1))
-        requested_mode = str(requested_policy.get("mode", "sequential-inputs"))
-        if requested_limit != 1 or requested_mode != "sequential-inputs":
-            raise ValueError("image generation is fixed to sequential-inputs with max_concurrent_image_jobs=1")
+    generation_policy = normalize_generation_policy(spec)
 
     references: list[dict[str, str]] = []
     generation_method = str(spec.get("generation_method", "built-in-imagegen"))
@@ -238,7 +374,7 @@ def prepare_batch(spec: dict[str, Any], run_dir: Path, force: bool = False) -> P
             raise ValueError(f"duplicate category block: {category}")
         seen_categories.add(category)
         defaults = CATEGORY_DEFAULTS[category]
-        assets = category_assets(category_spec)
+        assets, panel_aliases = category_assets(category_spec, category)
         canvas = pair(category_spec.get("canvas"), defaults["canvas"], "canvas")
         grid = pair(category_spec.get("grid"), defaults["grid"], "grid")
         target_default = defaults["target_size"]
@@ -251,9 +387,15 @@ def prepare_batch(spec: dict[str, Any], run_dir: Path, force: bool = False) -> P
             raise ValueError(f"unsupported transparency_mode: {transparency_mode}")
         if transparency_mode == "native-alpha-required" and generation_method == "built-in-imagegen":
             raise ValueError("built-in-imagegen cannot prove native alpha; select an explicit native-alpha generation method")
-        chroma_key = None if transparency_mode in {"native-alpha-required", "model-matte-derived"} else normalize_chroma_key(
-            str(category_spec.get("chroma_key", "auto")), bool(category_spec.get("subject_uses_green", False))
-        )
+        if transparency_mode in {"native-alpha-required", "model-matte-derived"}:
+            chroma_key = None
+            chroma_key_selection = {"mode": "not-applicable", "selected": None, "declared_conflicts": []}
+        else:
+            chroma_key, chroma_key_selection = select_chroma_key(
+                category_spec,
+                assets,
+                str(spec.get("style_notes", "")),
+            )
         category_request = {
             "category": category,
             "canvas": canvas,
@@ -262,12 +404,15 @@ def prepare_batch(spec: dict[str, Any], run_dir: Path, force: bool = False) -> P
             "alignment": str(category_spec.get("alignment", defaults["alignment"])),
             "padding": int(category_spec.get("padding", 8)),
             "chroma_key": chroma_key,
+            "chroma_key_selection": chroma_key_selection,
             "transparency_mode": transparency_mode,
             "generation_method": generation_method,
             "allow_attached_glow": bool(category_spec.get("allow_attached_glow", False)),
             "fragment_policy": category_spec.get("fragment_policy"),
             "assets": assets,
         }
+        if panel_aliases:
+            category_request["reuse_aliases"] = panel_aliases
         if category_request["fragment_policy"] is None:
             del category_request["fragment_policy"]
         normalized_categories.append(category_request)
@@ -332,6 +477,7 @@ def prepare_batch(spec: dict[str, Any], run_dir: Path, force: bool = False) -> P
                     "category": category,
                     "sheet_number": sheet_number,
                     "generation_sequence": len(jobs) + 1,
+                    "risk_priority": RISK_PRIORITY.get(category, 10),
                     "status": "awaiting-generation",
                     "expected_count": len(chunk),
                     "request_file": f"requests/{job_id}.json",
@@ -342,11 +488,11 @@ def prepare_batch(spec: dict[str, Any], run_dir: Path, force: bool = False) -> P
                     "layout_json": f"references/layout-guides/{job_id}.json",
                     "input_images": references
                     + [{"path": f"references/layout-guides/{job_id}.png", "role": "layout-guide-only"}],
-                    "generated_output": f"generated/{job_id}.png",
-                    "alpha_matte_output": f"generated/{job_id}-alpha-matte.png"
+                    "generated_output": f"generated/current/{job_id}.png",
+                    "alpha_matte_output": f"generated/current/{job_id}-alpha-matte.png"
                     if transparency_mode == "model-matte-derived" else None,
                     "transparency_mode": transparency_mode,
-                    "provenance_file": f"generated/{job_id}.provenance.json"
+                    "provenance_file": f"generated/current/{job_id}.provenance.json"
                     if transparency_mode == "native-alpha-required" else None,
                     "final_directory": f"final/{category}",
                 }
@@ -379,6 +525,37 @@ def prepare_batch(spec: dict[str, Any], run_dir: Path, force: bool = False) -> P
             "created_at": created_at,
             "generation_policy": generation_policy,
             "jobs": jobs,
+        },
+    )
+    write_json(
+        run_dir / "qa" / "request-preflight.json",
+        {
+            "schema_version": 1,
+            "ok": True,
+            "project_id": project_id,
+            "job_count": len(jobs),
+            "expected_count": sum(len(item["assets"]) for item in normalized_categories),
+            "generation_policy": generation_policy,
+            "generation_budget": generation_budget,
+            "categories": [
+                {
+                    "category": item["category"],
+                    "asset_count": len(item["assets"]),
+                    "canvas": item["canvas"],
+                    "grid": item["grid"],
+                    "transparency_mode": item["transparency_mode"],
+                    "chroma_key_selection": item["chroma_key_selection"],
+                }
+                for item in normalized_categories
+            ],
+            "unity_delivery": unity_delivery,
+            "directory_contract": {
+                "active_generation": "generated/current",
+                "backups": ".local/backups",
+                "reused_assets": "reused-staging",
+                "formal_outputs": "final",
+            },
+            "checked_at": created_at,
         },
     )
     return run_dir

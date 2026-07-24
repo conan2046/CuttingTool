@@ -91,6 +91,11 @@ class UnityExportTest(unittest.TestCase):
             self.assertGreaterEqual(value, 4)
             self.assertLess(value, 58)
 
+    def test_panel_default_border_is_50_and_requires_a_center(self) -> None:
+        self.assertEqual(UNITY_EXPORT.default_panel_border(200, 200), [50, 50, 50, 50])
+        with self.assertRaisesRegex(ValueError, "leaves no stretchable center"):
+            UNITY_EXPORT.default_panel_border(100, 200)
+
     def test_derives_ppu_from_smallest_layout_scale(self) -> None:
         ppu, scale = UNITY_EXPORT.derive_pixels_per_unit(
             (971, 412),
@@ -189,7 +194,8 @@ class UnityExportTest(unittest.TestCase):
             self.assertEqual(result["screen_count"], 1)
             self.assertTrue((unity_project / "Packages" / "com.hongda.game-ui-asset-pipeline" / "package.json").is_file())
             plan = json.loads((run_dir / "unity" / "unity-import-plan.json").read_text(encoding="utf-8"))
-            self.assertEqual(plan["sprites"][0]["border_origin"], "auto-inferred")
+            self.assertEqual(plan["sprites"][0]["border"], [50, 50, 50, 50])
+            self.assertEqual(plan["sprites"][0]["border_origin"], "panel-default-50")
             self.assertEqual(plan["sprites"][0]["pixels_per_unit_origin"], "layout-derived")
             self.assertEqual(plan["sprites"][0]["pixels_per_unit"], 100.0)
             self.assertEqual(
@@ -217,6 +223,74 @@ class UnityExportTest(unittest.TestCase):
             self.assertTrue((demo_prefabs / "Keep.prefab").is_file())
             self.assertFalse((demo_scenes / "main-screen-Preview.unity").exists())
             self.assertTrue((unity_project / "Packages" / "com.hongda.game-ui-asset-pipeline").is_dir())
+
+    def test_importer_strips_transient_bindings_before_saving_screen_prefab(self) -> None:
+        importer = (
+            SKILL_DIR
+            / "assets"
+            / "unity-package"
+            / "Editor"
+            / "GameUIBatchImporter.cs"
+        ).read_text(encoding="utf-8")
+
+        configure_index = importer.index(
+            "ConfigureToggleGroups(screen.toggle_groups, objects, root, issues);"
+        )
+        strip_index = importer.index(
+            "removedHelperComponentCount += StripTransientBindingComponents(root);"
+        )
+        save_index = importer.index("PrefabUtility.SaveAsPrefabAsset(root, path, out var success);")
+        self.assertLess(configure_index, strip_index)
+        self.assertLess(strip_index, save_index)
+        self.assertIn(
+            "root.GetComponentsInChildren<GameUIElementBinding>(true)",
+            importer,
+        )
+        self.assertIn("UnityEngine.Object.DestroyImmediate(binding);", importer)
+        self.assertIn("removed_helper_component_count", importer)
+
+    def test_preview_uses_deterministic_one_to_one_canvas_scale(self) -> None:
+        importer = (
+            SKILL_DIR
+            / "assets"
+            / "unity-package"
+            / "Editor"
+            / "GameUIBatchImporter.cs"
+        ).read_text(encoding="utf-8")
+
+        self.assertIn(
+            "scaler.uiScaleMode = CanvasScaler.ScaleMode.ConstantPixelSize;",
+            importer,
+        )
+        self.assertIn("scaler.scaleFactor = 1f;", importer)
+        self.assertIn("canvas.renderMode = RenderMode.WorldSpace;", importer)
+        self.assertIn("camera.orthographicSize = previewSize.y * 0.5f;", importer)
+        self.assertIn("canvasRect.sizeDelta = previewSize;", importer)
+        self.assertNotIn(
+            "scaler.uiScaleMode = CanvasScaler.ScaleMode.ScaleWithScreenSize;",
+            importer,
+        )
+        self.assertIn("const int capturePassCount = 4;", importer)
+        self.assertIn("texture.SetPixels32(compositePixels);", importer)
+        self.assertIn("ForcePreviewContentReady(instance);", importer)
+        self.assertIn("graphic.gameObject.AddComponent<Canvas>()", importer)
+        self.assertIn("ReleasePreviewCanvases(workItem.preview_canvases);", importer)
+        self.assertIn("SchedulePreviewCompletion(", importer)
+        self.assertIn("EditorApplication.update += completeAfterUpdates;", importer)
+        self.assertIn("var remainingUpdates = 4;", importer)
+        self.assertIn("remainingUpdates = 20;", importer)
+        self.assertIn("image.sprite.texture.GetNativeTexturePtr()", importer)
+        self.assertIn("LayoutRebuilder.ForceRebuildLayoutImmediate(rootRect);", importer)
+        self.assertIn("FlushPreviewRenderState(camera, width, height);", importer)
+        self.assertIn(
+            "EditorSceneManager.NewScene(NewSceneSetup.EmptyScene, NewSceneMode.Single);",
+            importer,
+        )
+
+    def test_unity_command_allows_delayed_editor_updates(self) -> None:
+        exporter = (SKILL_DIR / "scripts" / "export_unity_ui.py").read_text(encoding="utf-8")
+        self.assertIn('"-batchmode"', exporter)
+        self.assertNotIn('"-quit"', exporter)
 
     def test_prepares_two_screen_prefabs_sharing_one_sprite(self) -> None:
         with tempfile.TemporaryDirectory() as temporary_directory:
@@ -379,7 +453,7 @@ class UnityExportTest(unittest.TestCase):
         importer = (SKILL_DIR / "assets" / "unity-package" / "Editor" / "GameUIBatchImporter.cs").read_text(
             encoding="utf-8"
         )
-        self.assertIn("CreatePreviewScenes(plan, issues, out var previewImageCount)", importer)
+        self.assertIn("SchedulePreviewScenes(plan, issues", importer)
         self.assertIn("Selectable.Transition.SpriteSwap", importer)
         self.assertIn("asset_prefab_count = 0", importer)
         self.assertNotIn("CreateAssetPrefabs(plan", importer)

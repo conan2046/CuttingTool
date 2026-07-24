@@ -76,8 +76,8 @@ class ProjectIntakeAndReuseTest(unittest.TestCase):
 
             result = INTAKE.compile_intake(project_dir, self.analysis(canonical))
 
-            self.assertEqual(result["generate_count"], 3)
-            self.assertEqual(result["reuse_count"], 1)
+            self.assertEqual(result["generate_count"], 2)
+            self.assertEqual(result["reuse_count"], 2)
             notes_text = notes.read_text(encoding="utf-8")
             self.assertIn("用户保留说明", notes_text)
             self.assertIn("Codex 根据参考图和用户确认自动维护", notes_text)
@@ -88,7 +88,14 @@ class ProjectIntakeAndReuseTest(unittest.TestCase):
             self.assertTrue(close_rows[1]["reuse_asset_id"].startswith("pending:"))
             request = json.loads((project_dir / "batch-request.json").read_text(encoding="utf-8"))
             generated = [asset for category in request["categories"] for asset in category["assets"]]
-            self.assertEqual(len(generated), 3)
+            self.assertEqual(len(generated), 2)
+            panels = [
+                asset
+                for category in request["categories"]
+                if category["category"] == "Panel"
+                for asset in category["assets"]
+            ]
+            self.assertEqual([asset["semantic_name"] for asset in panels], ["MainBag"])
 
     def test_later_screen_reuses_project_catalog_ignoring_size(self) -> None:
         with tempfile.TemporaryDirectory() as temporary_directory:
@@ -117,12 +124,34 @@ class ProjectIntakeAndReuseTest(unittest.TestCase):
 
             result = INTAKE.compile_intake(project_dir, analysis)
 
-            self.assertEqual(result["generate_count"], 2)
-            self.assertEqual(result["reuse_count"], 1)
+            self.assertEqual(result["generate_count"], 1)
+            self.assertEqual(result["reuse_count"], 2)
             inventory = json.loads((project_dir / "ui-resource-inventory.json").read_text(encoding="utf-8"))
             reused = next(item for item in inventory["assets"] if item["action"] == "reuse")
             self.assertEqual(reused["reuse_asset_id"], "05_Icon_General_Close_Default_001")
             self.assertEqual(reused["screen_size"], [1600, 900])
+
+    def test_generates_new_panel_only_for_distinct_frame_style(self) -> None:
+        with tempfile.TemporaryDirectory() as temporary_directory:
+            project_dir = Path(temporary_directory)
+            canonical = project_dir / "references" / "canonical-style.png"
+            canonical.parent.mkdir(parents=True)
+            canonical.write_bytes(b"fixture")
+            analysis = self.analysis(canonical)
+            analysis["screens"][0]["assets"][0]["frame_style"] = "jade-corners"
+            analysis["screens"][1]["assets"][1]["frame_style"] = "dragon-corners"
+
+            result = INTAKE.compile_intake(project_dir, analysis)
+
+            self.assertEqual(result["generate_count"], 3)
+            request = json.loads((project_dir / "batch-request.json").read_text(encoding="utf-8"))
+            panels = [
+                asset
+                for category in request["categories"]
+                if category["category"] == "Panel"
+                for asset in category["assets"]
+            ]
+            self.assertEqual([asset["frame_style"] for asset in panels], ["jade-corners", "dragon-corners"])
 
     def test_empty_slot_content_policy_excludes_item_icon_generation(self) -> None:
         with tempfile.TemporaryDirectory() as temporary_directory:
@@ -138,7 +167,7 @@ class ProjectIntakeAndReuseTest(unittest.TestCase):
 
             result = INTAKE.compile_intake(project_dir, analysis)
 
-            self.assertEqual(result["generate_count"], 3)
+            self.assertEqual(result["generate_count"], 2)
             inventory = json.loads((project_dir / "ui-resource-inventory.json").read_text(encoding="utf-8"))
             excluded = next(item for item in inventory["assets"] if item["semantic_name"] == "SamplePotion")
             self.assertEqual(excluded["action"], "exclude")
@@ -186,8 +215,9 @@ class ProjectIntakeAndReuseTest(unittest.TestCase):
             INTAKE.compile_intake(project_dir, analysis)
 
             request = json.loads((project_dir / "batch-request.json").read_text(encoding="utf-8"))
-            self.assertEqual(request["generation_policy"]["mode"], "sequential-inputs")
-            self.assertEqual(request["generation_policy"]["max_concurrent_image_jobs"], 1)
+            self.assertEqual(request["generation_policy"]["mode"], "adaptive-parallel")
+            self.assertEqual(request["generation_policy"]["max_concurrent_image_jobs"], 3)
+            self.assertEqual(request["generation_policy"]["max_concurrent_high_risk_jobs"], 2)
             unity = request["unity_delivery"]
             self.assertTrue(unity["enabled"])
             self.assertTrue(unity["layout_confirmed"])

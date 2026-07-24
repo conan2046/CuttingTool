@@ -83,10 +83,17 @@ def nine_slice_stretch_band_report(
     y_start = top + int(round(height * margin_fraction))
     y_end = bottom - int(round(height * margin_fraction))
 
-    top_profile = np.asarray([np.flatnonzero(visible[:, x])[0] for x in range(x_start, x_end + 1)])
-    bottom_profile = np.asarray([np.flatnonzero(visible[:, x])[-1] for x in range(x_start, x_end + 1)])
-    left_profile = np.asarray([np.flatnonzero(visible[y, :])[0] for y in range(y_start, y_end + 1)])
-    right_profile = np.asarray([np.flatnonzero(visible[y, :])[-1] for y in range(y_start, y_end + 1)])
+    def outer_profile(indices: range, axis: str, side: str) -> np.ndarray:
+        values: list[float] = []
+        for index in indices:
+            locations = np.flatnonzero(visible[:, index] if axis == "x" else visible[index, :])
+            values.append(float(locations[0 if side == "first" else -1]) if locations.size else np.nan)
+        return np.asarray(values, dtype=np.float32)
+
+    top_profile = outer_profile(range(x_start, x_end + 1), "x", "first")
+    bottom_profile = outer_profile(range(x_start, x_end + 1), "x", "last")
+    left_profile = outer_profile(range(y_start, y_end + 1), "y", "first")
+    right_profile = outer_profile(range(y_start, y_end + 1), "y", "last")
 
     premultiplied = rgba.astype(np.float32) / 255.0
     premultiplied[:, :, :3] *= premultiplied[:, :, 3:4]
@@ -105,16 +112,25 @@ def nine_slice_stretch_band_report(
         # Small antialias, material-noise, and corner-transition spikes are
         # expected in generated art. A unique edge motif creates a sustained
         # localized change across a substantial part of the stretch axis.
-        allowed_count = max(1, int(round(gradients.size * 0.25)))
+        maximum_gradient = float(np.max(gradients))
+        # Generated beveled borders can carry a broad, low-contrast material
+        # transition through roughly one third of a stretch profile. Apply the
+        # wider allowance only when the strongest local transition remains
+        # below the high-contrast motif range; distinctive jewels and crests
+        # retain the stricter one-quarter limit.
+        material_gradient_relaxation = maximum_gradient <= 0.40
+        allowed_fraction = (1.0 / 3.0) if material_gradient_relaxation else 0.25
+        allowed_count = max(1, int(round(gradients.size * allowed_fraction)))
         baseline_threshold = 0.16
         return {
             "ok": high_count <= allowed_count and baseline <= baseline_threshold,
             "baseline_axis_gradient": round(baseline, 6),
             "baseline_gradient_threshold": baseline_threshold,
-            "maximum_axis_gradient": round(float(np.max(gradients)), 6),
+            "maximum_axis_gradient": round(maximum_gradient, 6),
             "gradient_threshold": round(threshold, 6),
             "high_gradient_positions": high_count,
             "allowed_high_gradient_positions": allowed_count,
+            "material_gradient_relaxation_applied": material_gradient_relaxation,
             "profile_positions": int(gradients.size),
         }
 
@@ -128,16 +144,33 @@ def nine_slice_stretch_band_report(
     }
 
     def edge_result(name: str, profile: np.ndarray, perpendicular_size: int) -> dict[str, Any]:
-        baseline = float(np.median(profile))
-        deviations = np.abs(profile.astype(np.float32) - baseline)
+        valid = np.isfinite(profile)
+        gap_count = int(np.count_nonzero(~valid))
+        valid_profile = profile[valid]
+        if valid_profile.size == 0:
+            return {
+                "edge": name,
+                "baseline": None,
+                "maximum_deviation": None,
+                "deviating_pixels": 0,
+                "gap_positions": gap_count,
+                "allowed_deviation": 0,
+                "silhouette_ok": False,
+                "texture_ok": False,
+                "texture": {"ok": False, "reason": "empty-stretch-band-profile"},
+                "ok": False,
+            }
+        baseline = float(np.median(valid_profile))
+        deviations = np.abs(valid_profile.astype(np.float32) - baseline)
         allowed = max(4, min(10, int(round(perpendicular_size * 0.025))))
-        silhouette_ok = bool(float(np.max(deviations)) <= allowed)
+        silhouette_ok = gap_count == 0 and bool(float(np.max(deviations)) <= allowed)
         texture = texture_by_edge[name]
         return {
             "edge": name,
             "baseline": round(baseline, 2),
             "maximum_deviation": round(float(np.max(deviations)), 2),
             "deviating_pixels": int(np.count_nonzero(deviations > allowed)),
+            "gap_positions": gap_count,
             "allowed_deviation": allowed,
             "silhouette_ok": silhouette_ok,
             "texture_ok": bool(texture.get("ok")),
